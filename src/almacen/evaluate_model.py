@@ -18,7 +18,7 @@ def main():
     y_pred = df["is_anomaly_detected"]
 
     # =========================
-    # CALCULO DE METRICAS DE DESEMPEÑO
+    # CALCULO DE METRICAS DE DESEMPENYO
     # =========================
     precision = precision_score(y_true, y_pred)
     recall = recall_score(y_true, y_pred)
@@ -68,7 +68,7 @@ def main():
     # GUARDAR METRICAS EN TXT
     # =========================
     with open(params["metrics_path"], "w") as f:
-        f.write("===== Metricas de desempeño =====\n")
+        f.write("===== Metricas de desempeNYo =====\n")
         f.write(f"Precision: {precision:.4f}\nRecall: {recall:.4f}\nF1-score: {f1:.4f}\nAccuracy: {accuracy:.4f}\nMCC: {mcc:.4f}\n\n")
         f.write(f"Numero de anomalias reales: {n_real}\nNumero de anomalias detectadas: {n_detected}\n")
         f.write(f"Numero correctamente detectadas: {n_correct}\nFalsos positivos: {false_positives}\nFalsos negativos: {false_negatives}\n")
@@ -87,18 +87,18 @@ def main():
     # Scores completos
     df.to_csv("../results/metrics/scores_complete.csv", index=False)
 
-    # Solo anomalías detectadas
+    # Solo anomalIas detectadas
     df[df["is_anomaly_detected"]==1].to_csv("../results/metrics/anomalies_detected.csv", index=False)
 
-    # Comparación real vs detectadas
+    # Comparaci On real vs detectadas
     if "is_anomaly_real" in df.columns:
         df[["is_anomaly_real","is_anomaly_detected", target_col]].to_csv("../results/metrics/real_vs_detected.csv", index=False)
 
-    # Anomalías detectadas con índice y valor para análisis temporal
+    # AnomalIas detectadas con Indice y valor para análisis temporal
     anomalies_time = df[df["is_anomaly_detected"]==1][[target_col]]
     anomalies_time.to_csv("../results/metrics/anomalies_time.csv", index=True)
 
-    # CSV resumen de métricas
+    # CSV resumen de mEtricas
     metrics_dict = {**score_stats, **col_stats,
                     "precision": precision, "recall": recall, "f1": f1, "accuracy": accuracy, "mcc": mcc,
                     "n_real": n_real, "n_detected": n_detected, "n_correct": n_correct,
@@ -114,7 +114,7 @@ def main():
         for k,v in params.items():
             f.write(f"{k}: {v}\n")
 
-    print("Paso 5 completado: Métricas evaluadas y CSVs auxiliares generados ✅")
+    print("Paso 5 completado: MEtricas evaluadas y CSVs auxiliares generados ✅")
 
 if __name__ == "__main__":
     main()

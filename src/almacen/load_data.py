@@ -19,7 +19,7 @@ def main():
 
     print(f"Dataset original guardado en {params['output_path_intermediate']} ✅")
 
-    # === ELIMINAR FILAS CON VALORES VACÍOS ===
+    # === ELIMINAR FILAS CON VALORES VACIOS ===
     n_filas_original = len(df)
     df_clean = df.dropna()
     n_filas_eliminadas = n_filas_original - len(df_clean)
@@ -27,7 +27,7 @@ def main():
     # Guardar dataset limpio
     df_clean.to_csv(params["output_path_null"], index=False)
     print(f"Dataset limpio guardado en {params['output_path_null']} ✅")
-    print(f"Filas eliminadas por contener valores vacíos: {n_filas_eliminadas}")
+    print(f"Filas eliminadas por contener valores vacIos: {n_filas_eliminadas}")
 
     # === GUARDAR PARAMETROS USADOS ===
     os.makedirs("../results", exist_ok=True)

@@ -1,64 +1,85 @@
 # FILE: main.py
-# THIS IS THE MAIN SCRIPT THAT ORCHESTRATES THE ENTIRE PROCESS BY CALLING ALL OTHER MODULES IN SEQUENCE.
+# MAIN SCRIPT: ORCHESTRATES PROCESS BY RUNNING ALL MODULES IN SEQUENCE
 
 import sys
 import os
 
-# ENSURE WE'RE IN THE SRC DIRECTORY AND FILES EXIST
-required_files = ['data_preparation.py', 'preliminary_analysis.py', 'isolation_forest_global.py', 'continuity_analysis.py', 'clustering.py', 'isolation_forest_per_cluster.py']
+required_files = ['a_data_preparation.py', 'b_preliminary_analysis.py', 'c_isolation_forest_global.py', 'd_continuity_analysis.py', 'e_clustering.py', 'f_isolation_forest_per_cluster.py', 'g_visualize_anomalies.py', 'g_visualize_anomalies.py']
 missing_files = [f for f in required_files if not os.path.exists(f)]
 if missing_files:
-    print(f"ERROR: MISSING FILES: {missing_files}")
+    print(f"❌ {missing_files}")
     sys.exit(1)
 
-# RUN EACH MODULE IN ORDER USING EXEC WITH EXPLICIT UTF-8 ENCODING; ADDED PRINTS FOR DEBUGGING
-print("RUNNING DATA_PREPARATION...")
+print("[ 🌱 a_data_preparation ]")
 try:
-    exec(open('data_preparation.py', encoding='utf-8').read())
-    print("DATA_PREPARATION COMPLETED.")
+    exec(open('a_data_preparation.py', encoding='utf-8').read())
+    print("✅")
 except Exception as e:
-    print(f"ERROR IN DATA_PREPARATION: {e}")
+    print(f"❌: {e}")
+    print(f"\n")
     sys.exit(1)
 
-print("RUNNING PRELIMINARY_ANALYSIS...")
+print("[ 📊 b_preliminary_analysis ]")
 try:
-    exec(open('preliminary_analysis.py', encoding='utf-8').read())
-    print("PRELIMINARY_ANALYSIS COMPLETED.")
+    exec(open('b_preliminary_analysis.py', encoding='utf-8').read())
+    print("✅")
 except Exception as e:
-    print(f"ERROR IN PRELIMINARY_ANALYSIS: {e}")
+    print(f"❌: {e}")
+    print(f"\n")
     sys.exit(1)
 
-print("RUNNING ISOLATION_FOREST_GLOBAL...")
+print("[ 🌐 c_isolation_forest_global ]")
 try:
-    exec(open('isolation_forest_global.py', encoding='utf-8').read())
-    print("ISOLATION_FOREST_GLOBAL COMPLETED.")
+    exec(open('c_isolation_forest_global.py', encoding='utf-8').read())
+    print("✅")
 except Exception as e:
-    print(f"ERROR IN ISOLATION_FOREST_GLOBAL: {e}")
+    print(f"❌: {e}")
+    print(f"\n")
     sys.exit(1)
 
-print("RUNNING CONTINUITY_ANALYSIS...")
+print("[ ⏳ d_continuity_analysis ]")
 try:
-    exec(open('continuity_analysis.py', encoding='utf-8').read())
-    print("CONTINUITY_ANALYSIS COMPLETED.")
+    exec(open('d_continuity_analysis.py', encoding='utf-8').read())
+    print("✅")
 except Exception as e:
-    print(f"ERROR IN CONTINUITY_ANALYSIS: {e}")
+    print(f"❌: {e}")
+    print(f"\n")
     sys.exit(1)
 
-print("RUNNING CLUSTERING...")
+print("[ 🧩 e_clustering ]")
 try:
-    exec(open('clustering.py', encoding='utf-8').read())
-    print("CLUSTERING COMPLETED.")
+    exec(open('e_clustering.py', encoding='utf-8').read())
+    print("✅")
 except Exception as e:
-    print(f"ERROR IN CLUSTERING: {e}")
+    print(f"❌: {e}")
+    print(f"\n")
     sys.exit(1)
 
-print("RUNNING ISOLATION_FOREST_PER_CLUSTER...")
+print("[ 🔍 f_isolation_forest_per_cluster ]")
 try:
-    exec(open('isolation_forest_per_cluster.py', encoding='utf-8').read())
-    print("ISOLATION_FOREST_PER_CLUSTER COMPLETED.")
+    exec(open('f_isolation_forest_per_cluster.py', encoding='utf-8').read())
+    print("✅")
 except Exception as e:
-    print(f"ERROR IN ISOLATION_FOREST_PER_CLUSTER: {e}")
+    print(f"❌: {e}")
+    print(f"\n")
     sys.exit(1)
 
-# FINAL MESSAGE AFTER FULL PROCESS
-print("PROCESO EXTENDIDO COMPLETADO: DATASET ANALIZADO CON CARACTERIZACIÓN DE ANOMALÍAS. TODOS LOS RESULTADOS GUARDADOS EN '../results/'.")
+print("[ 🎨 g_visualize_anomalies ]")
+try:
+    exec(open('g_visualize_anomalies.py', encoding='utf-8').read())
+    print("✅")
+except Exception as e:
+    print(f"❌: {e}")
+    print(f"\n")
+    sys.exit(1)
+
+print("[ 📈 h_anomaly_metrics ]")
+try:
+    exec(open('h_anomaly_metrics.py', encoding='utf-8').read())
+    print("✅")
+except Exception as e:
+    print(f"❌ h_anomaly_metrics: {e}")
+    print(f"\n")
+    sys.exit(1)
+
+print("[ 🎉 PROCESO COMPLETADO ]")

@@ -17,7 +17,7 @@ data = df[[params["target_col"]]].values
 # ESCALADO OPCIONAL DE LOS DATOS
 # =========================
 # Si se indica en JSON que se quiere escalar, usamos StandardScaler
-# para normalizar los datos (media 0, desviación típica 1)
+# para normalizar los datos (media 0, desviaci On tIpica 1)
 if params.get("scaler") == "StandardScaler":
     scaler = StandardScaler()
     data_scaled = scaler.fit_transform(data)
@@ -29,9 +29,9 @@ else:
 # PARÁMETROS DEL MODELO ISOLATION FOREST
 # =========================
 # n_estimators: número de árboles en el bosque (por defecto 100)
-# max_samples: número de muestras por árbol (por defecto 'auto'=mismo tamaño del dataset)
-# contamination: proporción esperada de anomalías (por defecto 0.05)
-# max_features: número máximo de características usadas por árbol (por defecto 1.0 = todas)
+# max_samples: número de muestras por árbol (por defecto 'auto'=mismo tamaNYo del dataset)
+# contamination: proporci On esperada de anomalIas (por defecto 0.05)
+# max_features: número máximo de caracterIsticas usadas por árbol (por defecto 1.0 = todas)
 # bootstrap: si se muestrean con reemplazo (por defecto False)
 # random_state: semilla para reproducibilidad (por defecto 42)
 clf_params = {
@@ -51,10 +51,10 @@ clf = IsolationForest(**clf_params)
 clf.fit(data_scaled)
 
 # =========================
-# OBTENCIÓN DE SCORES Y PREDICCIONES
+# OBTENCI ON DE SCORES Y PREDICCIONES
 # =========================
-# scores: puntuación de anomalía (valores negativos => más anómalo)
-# predictions: -1 = anómalo, 1 = normal
+# scores: puntuaci On de anomalIa (valores negativos => más an Omalo)
+# predictions: -1 = an Omalo, 1 = normal
 scores = clf.decision_function(data_scaled)
 predictions = clf.predict(data_scaled)
 

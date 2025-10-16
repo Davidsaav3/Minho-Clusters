@@ -24,39 +24,39 @@ if params.get("use_existing_anomalies", False):
     if "is_anomaly_real" not in df.columns:
         df["is_anomaly_real"] = 0
 
-    # Obtenemos los índices de las filas que ya están marcadas como anomalías
+    # Obtenemos los Indices de las filas que ya están marcadas como anomalIas
     anomaly_indices = df.index[df["is_anomaly_real"] == 1].tolist()
 
 else:
     # ❌ GENERAR ANOMALIAS SINTETICAS
     n_samples = len(df)  # Número total de filas del dataset
-    n_anomalies = int(n_samples * params["anomaly_fraction"])  # Número de anomalías a introducir
+    n_anomalies = int(n_samples * params["anomaly_fraction"])  # Número de anomalIas a introducir
 
-    # Seleccionamos índices aleatorios sin reemplazo
+    # Seleccionamos Indices aleatorios sin reemplazo
     anomaly_indices = np.random.choice(df.index, size=n_anomalies, replace=False)
 
-    # Inicializamos columna de anomalías reales
+    # Inicializamos columna de anomalIas reales
     df["is_anomaly_real"] = 0
 
-    # Introducir anomalías
+    # Introducir anomalIas
     for idx in anomaly_indices:
         if np.issubdtype(df[params["target_col"]].dtype, np.number):
-            # Para columnas numéricas, multiplicar por un factor aleatorio grande
+            # Para columnas numEricas, multiplicar por un factor aleatorio grande
             df.at[idx, params["target_col"]] *= np.random.uniform(5, 10)
         else:
-            # Para columnas no numéricas, añadir un sufijo para marcar la anomalía
+            # Para columnas no numEricas, aNYadir un sufijo para marcar la anomalIa
             df.at[idx, params["target_col"]] = str(df.at[idx, params["target_col"]]) + "_anom"
 
-        # Marcar la fila como anomalía real
+        # Marcar la fila como anomalIa real
         df.at[idx, "is_anomaly_real"] = 1
 
 # =========================
 # GUARDAR RESULTADOS
 # =========================
-# Guardar CSV con las anomalías procesadas
+# Guardar CSV con las anomalIas procesadas
 df.to_csv(params["output_path"], index=False)
 
-# Guardar índices de anomalías en archivo separado
+# Guardar Indices de anomalIas en archivo separado
 np.savetxt(params["anomaly_indices_path"], anomaly_indices, fmt="%d")
 
 # Guardar parámetros usados
@@ -65,4 +65,4 @@ with open("../results/parameters.txt", "a") as f:
     for k, v in params.items():
         f.write(f"{k}: {v}\n")
 
-print("Paso 2 completado: Anomalías procesadas y guardadas ✅")
+print("Paso 2 completado: AnomalIas procesadas y guardadas ✅")

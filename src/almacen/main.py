@@ -16,8 +16,8 @@ def main():
     # === PASO 5: EVALUAR MODELO Y GUARDAR METRICAS ===
     os.system("python evaluate_model.py")
     
-    # === PASO 6: CLUSTERING DE ANOMALIAS ===
-    os.system("python clustering_anomalies.py")
+    # === PASO 6: e_clustering DE ANOMALIAS ===
+    os.system("python e_clustering_anomalies.py")
 
     # === FIN DEL FLUJO ===
     print("Flujo completo ejecutado ✅")

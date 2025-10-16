@@ -28,26 +28,26 @@ def main():
     accuracy = accuracy_score(y_true, y_pred)
 
     # =========================
-    # 1️⃣ Serie temporal de anomalías
+    # 1️⃣ Serie temporal de anomalIas
     # =========================
     plt.figure(figsize=(14,6))
     # Serie principal
     plt.plot(df[target_col], alpha=params["alpha"], label="Serie")
-    # Anomalías reales
+    # AnomalIas reales
     plt.scatter(df.index[df["is_anomaly_real"]==1], 
                 df[target_col][df["is_anomaly_real"]==1],
                 color=params["colors_anomaly_real"], 
                 marker=params["marker_anomaly_real"], 
                 label="Anomalias reales")
-    # Anomalías detectadas
+    # AnomalIas detectadas
     plt.scatter(df.index[df["is_anomaly_detected"]==1], 
                 df[target_col][df["is_anomaly_detected"]==1],
                 color=params["colors_anomaly_detected"], 
                 marker=params["marker_anomaly_detected"], 
                 label="Anomalias detectadas", 
                 facecolors="none")
-    plt.title(f"Serie temporal de '{target_col}' con anomalías")
-    plt.xlabel("Índice")
+    plt.title(f"Serie temporal de '{target_col}' con anomalIas")
+    plt.xlabel("Indice")
     plt.ylabel(target_col)
     plt.legend()
     plt.grid(True)

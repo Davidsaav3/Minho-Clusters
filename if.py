@@ -11,7 +11,7 @@ import time
 from matplotlib.colors import Normalize
 
 # ==========================
-# === 0. CONFIGURACIÓN GENERAL ===
+# === 0. CONFIGURACI ON GENERAL ===
 # ==========================
 features_to_plot = ["nivel_plaxiquet"]   # Columnas a graficar, None = todas
 features_to_save = ["nivel_plaxiquet"]   # Columnas a guardar en CSV, None = todas
@@ -54,19 +54,19 @@ def load_and_preprocess(csv_path, rolling_window=5, modo_rapido=True):
             try:
                 df[col] = pd.to_datetime(df[col])
                 df[col] = df[col].astype(np.int64) // 10**9
-                print(f"🗓️ Columna convertida a numérica: {col}")
+                print(f"🗓️ Columna convertida a numErica: {col}")
             except Exception as e:
                 print(f"⚠️ No se pudo convertir {col}: {e}")
     
-    # Convertir columnas categóricas a códigos numéricos
+    # Convertir columnas categ Oricas a c Odigos numEricos
     for col in df.select_dtypes(include=['object']):
         df[col] = pd.Categorical(df[col]).codes
-        print(f"🏷️ Columna categórica codificada: {col}")
+        print(f"🏷️ Columna categ Orica codificada: {col}")
 
-    # Filtrar columnas numéricas
+    # Filtrar columnas numEricas
     df_num = df.select_dtypes(include=[np.number]).dropna()
     excluded = set(df.columns) - set(df_num.columns)
-    print(f"✅ Columnas numéricas seleccionadas: {len(df_num.columns)}")
+    print(f"✅ Columnas numEricas seleccionadas: {len(df_num.columns)}")
     if excluded:
         print(f"⚠️ Columnas aún excluidas: {excluded}")
 
@@ -102,7 +102,7 @@ def load_and_preprocess(csv_path, rolling_window=5, modo_rapido=True):
     return df_num, df_features
 
 # ==========================
-# === 3. GENERAR ANOMALÍAS SINTÉTICAS ===
+# === 3. GENERAR ANOMALIAS SINTETICAS ===
 # ==========================
 def introduce_synthetic_anomalies(df_original, columns, anomaly_fraction=0.01, factor=2.0, seed=None):
     df_anom = df_original.reset_index(drop=True).copy()  # Reset indices
@@ -114,7 +114,7 @@ def introduce_synthetic_anomalies(df_original, columns, anomaly_fraction=0.01, f
     for col in columns:
         if col in df_anom.columns:
             df_anom.loc[anomaly_idx, col] = df_anom.loc[anomaly_idx, col] * factor
-    print(f"✅ Se han introducido {n_anomalies} anomalías en columnas: {columns}")
+    print(f"✅ Se han introducido {n_anomalies} anomalIas en columnas: {columns}")
     return df_anom, anomaly_idx
 
 # ==========================
@@ -139,7 +139,7 @@ def auto_adjust_params(scaled_data):
     return n_estimators, max_samples, max_features, contamination
 
 # ==========================
-# === 6. ENTRENAMIENTO Y PREDICCIÓN ===
+# === 6. ENTRENAMIENTO Y PREDICCI ON ===
 # ==========================
 def train_iforest(scaled_data, n_estimators, max_samples, max_features, contamination, bootstrap=True, random_state=42):
     start_time = time.time()
@@ -186,7 +186,7 @@ def save_results(results_df, timestamp, params_dict):
     print(f"✅ Parámetros guardados en {params_path}")
 
 # ==========================
-# === 9. GRAFICOS DE ANOMALÍAS ===
+# === 9. GRAFICOS DE ANOMALIAS ===
 # ==========================
 def plot_anomalies(df_original, results_df, features_to_plot, timestamp, show_plots=True):
     plot_features = df_original.columns if features_to_plot is None else features_to_plot
@@ -198,11 +198,11 @@ def plot_anomalies(df_original, results_df, features_to_plot, timestamp, show_pl
             results_df.index[results_df["Anomalia"]==1],
             df_original.loc[results_df["Anomalia"]==1, feature],
             color=plt.cm.Reds(norm(results_df.loc[results_df["Anomalia"]==1,"Score_norm"])),
-            label="Anomalía",
+            label="AnomalIa",
             s=50
         )
-        plt.title(f"Detección de anomalías - {feature}", fontsize=14)
-        plt.xlabel("Índice de muestra")
+        plt.title(f"Detecci On de anomalIas - {feature}", fontsize=14)
+        plt.xlabel("Indice de muestra")
         plt.ylabel(feature)
         plt.legend()
         plt.grid(True, alpha=0.3)
@@ -216,14 +216,14 @@ def plot_anomalies(df_original, results_df, features_to_plot, timestamp, show_pl
             plt.close()
 
 # ==========================
-# === 10. EJECUCIÓN PRINCIPAL ===
+# === 10. EJECUCI ON PRINCIPAL ===
 # ==========================
 start_total = time.time()
 
 # 10.1 Cargar y preprocesar
 df_original, df_features = load_and_preprocess("../../data/dataset.csv", rolling_window, modo_rapido)
 
-# 10.2 Introducir anomalías sintéticas
+# 10.2 Introducir anomalIas sintEticas
 columns_to_alter = ["nivel_plaxiquet"]
 df_original, synthetic_anomaly_indices = introduce_synthetic_anomalies(df_original, columns_to_alter, anomaly_fraction=0.02, factor=3.0, seed=42)
 
@@ -267,11 +267,11 @@ save_results(results_df, timestamp, params_dict)
 n_anom = results_df["Anomalia"].sum()
 n_total = len(results_df)
 end_total = time.time()
-print(f"\n📊 Resumen de anomalías:")
+print(f"\n📊 Resumen de anomalIas:")
 print(f" - Total registros: {n_total}")
-print(f" - Anomalías detectadas: {n_anom} ({n_anom/n_total:.2%})")
-print(f" - Umbral de decisión IF: {iso_forest.offset_:.4f}")
-print(f" - Tiempo total ejecución: {end_total - start_total:.2f} s (entrenamiento: {train_time:.2f} s)")
+print(f" - AnomalIas detectadas: {n_anom} ({n_anom/n_total:.2%})")
+print(f" - Umbral de decisi On IF: {iso_forest.offset_:.4f}")
+print(f" - Tiempo total ejecuci On: {end_total - start_total:.2f} s (entrenamiento: {train_time:.2f} s)")
 
-# 10.9 Graficar anomalías
+# 10.9 Graficar anomalIas
 plot_anomalies(df_original, results_df, features_to_plot, timestamp, show_plots)

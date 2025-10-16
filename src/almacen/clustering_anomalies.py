@@ -3,7 +3,7 @@ import numpy as np
 import os
 import json
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from sklearn.cluster import KMeans, DBSCAN, Agglomerativee_clustering
 import matplotlib.pyplot as plt
 from sklearn.metrics import silhouette_score
 
@@ -12,10 +12,9 @@ with open("parameters_config.json") as f:
     config = json.load(f)
 
 params_if = config["isolation_forest_model"]
-params_clustering = config.get("clustering", {"enabled": False})
+params_e_clustering = config.get("e_clustering", {"enabled": False})
 
-if not params_clustering.get("enabled", False):
-    print("Clustering deshabilitado en JSON. Saliendo...")
+if not params_e_clustering.get("enabled", False):
     exit()
 
 df = pd.read_csv(params_if["output_path"])
@@ -29,10 +28,10 @@ if params_if.get("scaler")=="StandardScaler":
 else:
     data_scaled = data
 
-# CLUSTERING POR ALGORITMOS
-for algo_params in params_clustering["algorithms"]:
+# e_clustering POR ALGORITMOS
+for algo_params in params_e_clustering["algorithms"]:
     name = algo_params["name"]
-    print(f"Ejecutando clustering: {name}")
+    print(f"Ejecutando e_clustering: {name}")
 
     if name=="KMeans":
         model = KMeans(n_clusters=algo_params.get("n_clusters",5), random_state=algo_params.get("random_state",42))
@@ -41,7 +40,7 @@ for algo_params in params_clustering["algorithms"]:
         model = DBSCAN(eps=algo_params.get("eps",0.5), min_samples=algo_params.get("min_samples",5))
         labels = model.fit_predict(data_scaled)
     elif name=="Agglomerative":
-        model = AgglomerativeClustering(n_clusters=algo_params.get("n_clusters",5), linkage=algo_params.get("linkage","ward"))
+        model = Agglomerativee_clustering(n_clusters=algo_params.get("n_clusters",5), linkage=algo_params.get("linkage","ward"))
         labels = model.fit_predict(data_scaled)
     else:
         raise NotImplementedError(f"Algoritmo {name} no implementado")
@@ -58,9 +57,9 @@ for algo_params in params_clustering["algorithms"]:
         cluster_data = anomalies[anomalies[f"cluster_{name}"]==cluster_id]
         plt.scatter(cluster_data.index, cluster_data[params_if["target_col"]],
                     label=f"Cluster {cluster_id}", alpha=0.7)
-    plt.xlabel("Índice")
+    plt.xlabel("Indice")
     plt.ylabel(params_if["target_col"])
-    plt.title(f"Clustering de anomalías ({name})")
+    plt.title(f"e_clustering de anomalIas ({name})")
     plt.legend()
     plt.tight_layout()
     plt.savefig(algo_params["output_plot"])
@@ -73,4 +72,4 @@ for algo_params in params_clustering["algorithms"]:
     except:
         print(f"Silhouette score no calculable para {name}")
 
-print("Clustering completado ✅")
+print("e_clustering completado ✅")
