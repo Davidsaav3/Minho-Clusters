@@ -48,9 +48,14 @@ cat_cols = df.select_dtypes(include=['object']).columns.tolist()
 cat_cols = [c for c in cat_cols if c not in fecha_cols]
 
 # ONE-HOT ENCODING DE COLUMNAS CATEGÓRICAS
-df = pd.get_dummies(df, columns=cat_cols, drop_first=True)
+for col in cat_cols:
+    if col in df.columns:
+        dummies = pd.get_dummies(df[col], prefix=col, drop_first=True)
+        # REEMPLAZAR ESPACIOS POR GUIONES EN LOS NOMBRES DE COLUMNAS NUEVAS
+        dummies.columns = [c.replace(" ", "-") for c in dummies.columns]
+        df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
 columns_changes['one_hot'] = cat_cols
-print(f"[ INFO ] One-Hot Encoding aplicado")
+print(f"[ INFO ] One-Hot Encoding aplicado (columnas con '-' en lugar de espacios)")
 
 # CONVERTIR COLUMNAS NUMÉRICAS A FLOAT Y RELLENAR NAN CON MEDIANA
 num_cols = df.select_dtypes(include=['int64', 'float64']).columns

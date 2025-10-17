@@ -54,29 +54,20 @@ results = {
     'clusters': {}
 }
 
-# AGRUPACIONES DE CLUSTERS
-cluster_groups = {
-    "cluster-temporal": ["cluster-temporal_Date_and_Time", "cluster-temporal_Calendar"],
-    "cluster-ubicacion": [
-        "cluster-ubicacion_Pozo", "cluster-ubicacion_Falconera", "cluster-ubicacion_Ull_Pueblo",
-        "cluster-ubicacion_Playa", "cluster-ubicacion_Beniopa", "cluster-ubicacion_Llombart",
-        "cluster-ubicacion_Sanjuan"
-    ],
-    "cluster-medida": [
-        "cluster-medida_Calidad_Agua", "cluster-medida_Hidraulica", "cluster-medida_Operacional"
-    ],
-    "cluster-ambientales": [
-        "cluster-ambientales_Climatologia", "cluster-ambientales_Season_and_Calendar"
-    ],
-    "cluster-eficiencia": [
-        "cluster-eficiencia_Consumo_Electrico", "cluster-eficiencia_Funcionamiento_y_Rendimiento",
-        "cluster-eficiencia_Estado_del_Pozo"
-    ],
-    "cluster-combinado": [
-        "cluster-combinado_Temporal_y_Flujo", "cluster-combinado_Calidad_y_Ubicacion",
-        "cluster-combinado_Operacional_y_Clima"
-    ]
-}
+# CARGAR DEFINICIÓN DE CLUSTERS DESDE JSON
+json_path = 'clusters.json'
+with open(json_path, 'r', encoding='utf-8') as f:
+    clusters_json = json.load(f)
+print(f"[ INFO ] Clusters cargados desde '{json_path}'")
+
+# CONSTRUIR GRUPOS DE ARCHIVOS AUTOMÁTICAMENTE
+cluster_groups = {}
+for cluster_name, subparts in clusters_json.items():
+    group_key = f"cluster_{cluster_name}"
+    cluster_groups[group_key] = []
+    for sub_name in subparts.keys():
+        file_name = f"cluster_{cluster_name}_{sub_name}"
+        cluster_groups[group_key].append(file_name)
 
 # EVALUAR CLUSTERS
 for grupo, subclusters in cluster_groups.items():
@@ -118,7 +109,7 @@ for grupo, subclusters in cluster_groups.items():
 
 # GUARDAR RESULTADOS EN JSON
 os.makedirs('../../results', exist_ok=True)
-with open('../../results/06_results.json', 'w') as f:
-    json.dump(results, f, indent=4)
+with open('../../results/06_results.json', 'w', encoding='utf-8') as f:
+    json.dump(results, f, indent=4, ensure_ascii=False)
 
 print("[ GUARDADO ] Resultados de IF global y clusters en '../../results/06_results.json'")

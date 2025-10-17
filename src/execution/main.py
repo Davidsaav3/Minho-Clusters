@@ -1,5 +1,28 @@
-import subprocess  # EJECUTA OTROS SCRIPTS
-import sys          # USA EL INTÉRPRETE DE PYTHON
+import subprocess
+import sys
+import logging
+import os
+
+# CREAR CARPETA DE RESULTADOS
+os.makedirs('../../results/execution', exist_ok=True)
+
+# CONFIGURAR LOG PARA SOBRESCRIBIR
+logging.basicConfig(
+    filename='../../results/execution/log.txt',  # Archivo de log
+    filemode='w',           # SOBRESCRIBIR cada ejecución
+    level=logging.INFO,
+    format='%(message)s',   # SIN fecha ni nivel
+    encoding='utf-8'        # Para acentos y ñ
+)
+
+# FUNCIÓN AUXILIAR PARA LOG + PANTALLA
+def log_print(msg, level='info'):
+    if level == 'info':
+        logging.info(msg)  # Se guarda en log.txt
+        print(msg)         # Se imprime en pantalla
+    elif level == 'error':
+        logging.error(msg)
+        print(msg)
 
 # LISTA DE SCRIPTS
 scripts = [
@@ -11,17 +34,35 @@ scripts = [
     '06_metrics.py'
 ]
 
-# INICIO PIPELINE
-print("[ INICIO ] PIPELINE DE ANOMALÍAS")
+log_print("[ INICIO ]")
 
-# EJECUCIÓN SECUENCIAL
 for s in scripts:
-    print(f"\n[ EJECUTANDO ] {s}")
+    log_print(f"\n[ EJECUTANDO ] {s}\n")
     try:
-        subprocess.run([sys.executable, f'{s}'], check=True)  # EJECUTA SCRIPT
-    except subprocess.CalledProcessError as e:
-        print(f"[ ERROR ] {s}: {e}")  # MUESTRA ERROR
-        continue
+        # EJECUTAR SCRIPT Y CAPTURAR SALIDA EN TIEMPO REAL
+        process = subprocess.Popen(
+            [sys.executable, s],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
+        )
 
-# FIN PIPELINE
-print("\n[ FIN ] PIPELINE COMPLETO")
+        # LEER SALIDA LÍNEA POR LÍNEA
+        for line in process.stdout:
+            line = line.rstrip()
+            log_print(line)
+
+        for line in process.stderr:
+            line = line.rstrip()
+            log_print(line, level='error')
+
+        process.wait()
+        if process.returncode != 0:
+            log_print(f"[ ERROR ] {s} terminó con código {process.returncode}", level='error')
+
+    except Exception as e:
+        log_print(f"[ EXCEPCIÓN ] {s}: {e}", level='error')
+
+log_print("\n[ FIN ]")

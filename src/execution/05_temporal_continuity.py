@@ -23,7 +23,7 @@ def secuencia_info(series):
     return count_seq, max_len
 
 # ARCHIVOS A PROCESAR
-files = glob.glob('../../results/execution/cluster-*.csv')
+files = glob.glob('../../results/execution/cluster_*.csv')
 
 # PROCESAR CADA ARCHIVO
 for file_path in files:
