@@ -75,18 +75,6 @@ except Exception as e:
         traceback.print_exc()
         raise
 
-# RENOMBRAR COLUMNA CON BOM SI EXISTE
-if 'ï»¿datetime' in dataset.columns:
-    dataset.rename(columns={'ï»¿datetime': datetime_col}, inplace=True)
-    log_message("-> RENOMBRADA 'ï»¿DATETIME' A 'DATETIME'.")
-
-# CONVERTIR COLUMNA DATETIME
-if datetime_col in dataset.columns:
-    dataset[datetime_col] = pd.to_datetime(dataset[datetime_col], errors='coerce')
-    log_message("-> CONVERSI ON DE DATETIME COMPLETADA.")
-else:
-    log_message(f"[ADVERTENCIA]: COLUMNA '{datetime_col}' NO ENCONTRADA.")
-
 # VERIFICAR NULOS
 log_message("-> DATASET SIN NULOS." if dataset.isnull().sum().sum() == 0 else "[ADVERTENCIA]: DATASET CON NULOS.")
 

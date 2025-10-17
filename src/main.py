@@ -12,7 +12,7 @@ if missing_files:
 
 print("[ 🌱 a_data_preparation ]")
 try:
-    exec(open('a_data_preparation.py', encoding='utf-8').read())
+    #exec(open('a_data_preparation.py', encoding='utf-8').read())
     print("✅")
 except Exception as e:
     print(f"❌: {e}")

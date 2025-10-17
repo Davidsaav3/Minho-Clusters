@@ -116,12 +116,12 @@ for i, (cluster_name, cluster_data) in enumerate(clusters):
     
     try:
         X_cluster = cluster_data[feature_cols]
-        log_message(f"-> X_CLUSTER TAMANYO: {X_cluster.shape}", print_to_console=False)
+        #log_message(f"-> X_CLUSTER TAMANYO: {X_cluster.shape}", print_to_console=False)
         
         # APLICAR ISOLATION FOREST
         cluster_if = IsolationForest(contamination=contamination, random_state=random_state)
         cluster_labels = cluster_if.fit_predict(X_cluster)
-        log_message(f"-> CLUSTER {cluster_name}: ANOMALIAS DETECTADAS: {np.sum(cluster_labels == -1)}", print_to_console=False)
+        #log_message(f"-> CLUSTER {cluster_name}: ANOMALIAS DETECTADAS: {np.sum(cluster_labels == -1)}", print_to_console=False)
         
         # GUARDAR INDICES DE ANOMALIAS
         anomaly_indices = cluster_data.index[cluster_labels == -1].tolist()
@@ -131,7 +131,7 @@ for i, (cluster_name, cluster_data) in enumerate(clusters):
         global_anoms = cluster_data[cluster_data['global_anomaly'] == -1].index.tolist()
         coincident = set(anomaly_indices) & set(global_anoms)
         coincident_anomalies.extend(list(coincident))
-        log_message(f"-> ANOMALIAS COINCIDENTES EN {cluster_name}: {len(coincident)}", print_to_console=False)
+        #log_message(f"-> ANOMALIAS COINCIDENTES EN {cluster_name}: {len(coincident)}")
     except Exception as e:
         log_message(f"[ERROR]: ERROR EN CLUSTER {cluster_name}: {e}")
         log_message("-> TRACEBACK COMPLETO:")
