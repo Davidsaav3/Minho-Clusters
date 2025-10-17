@@ -1,18 +1,15 @@
-# src/02_cluster_manual.py
-import pandas as pd
-import os
+import pandas as pd  # MANEJO DE DATAFRAMES
+import os            # RUTAS Y DIRECTORIOS
 
-# =========================
-# Cargar dataset
-# =========================
-df = pd.read_csv('../../results/preparation/05_seleccion.csv')
+# CARGAR DATASET
+df = pd.read_csv('../../results/preparation/05_variance.csv')
+print("[ INFO ] Dataset cargado")
 
-# Crear carpeta de resultados si no existe
-os.makedirs('../results', exist_ok=True)
+# CREAR CARPETA DE RESULTADOS
+os.makedirs('../../results', exist_ok=True)
+print("[ INFO ] Carpeta '../../results' creada si no existía")
 
-# =========================
-# Definición de clusters y subparticiones
-# =========================
+# DEFINICIÓN DE CLUSTERS Y SUBPARTICIONES
 clusters = {
     'temporal': {
         'Date_and_Time': ['datetime','date','time','year','month','day','hour','minute','weekday','day_of_year','week_of_year'],
@@ -61,17 +58,16 @@ clusters = {
     }
 }
 
-# =========================
-# Guardar archivos por subpartición
-# =========================
+# GUARDAR ARCHIVOS POR SUBPARTICIÓN
 for cluster_name, subparts in clusters.items():
     for sub_name, cols in subparts.items():
-        # Filtrar columnas existentes en df
+        # FILTRAR COLUMNAS EXISTENTES
         cols_to_save = [c for c in cols if c in df.columns]
-        # Añadir columna cluster_manual si existe
         if 'cluster_manual' in df.columns:
-            cols_to_save.append('cluster_manual')
+            cols_to_save.append('cluster_manual')  # MANTENER COLUMNA MANUAL
         cluster_df = df[cols_to_save]
+        
+        # GUARDAR CSV
         out_file = f"../../results/execution/cluster-{cluster_name}_{sub_name}.csv"
         cluster_df.to_csv(out_file, index=False)
-        print(f"Archivo guardado: {out_file}")
+        print(f"[ GUARDADO ] {out_file}")

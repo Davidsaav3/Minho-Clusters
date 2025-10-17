@@ -1,23 +1,25 @@
-# main.py
-import subprocess
-import sys
+# IMPORTS
+import subprocess  # EJECUTAR OTROS SCRIPTS
+import sys          # RUTA DE EJECUTABLE PYTHON
 
-# Lista de scripts en orden
+# LISTA DE SCRIPTS EN ORDEN
 scripts = [
-    '01_exploracion.py',
-    '02_tratamiento_nulos.py',
-    '03_codificacion.py',
-    '04_escalado.py',
-    '05_seleccion.py',
+    '01_metrics.py',
+    '02_nulls.py',
+    '03_codification.py',
+    '04_scale.py',
+    '05_variance.py',
 ]
 
+# EJECUTAR PIPELINE
 for script in scripts:
-    print(f"\n=== EJECUTANDO {script} ===")
+    print(f"\n[ EJECUTANDO ] {script}")
     result = subprocess.run([sys.executable, script], capture_output=True, text=True)
     
-    print(result.stdout)
-    if result.stderr:
-        print("ERRORES DETECTADOS:")
+    print(result.stdout)  # MOSTRAR SALIDA
+    if result.stderr:     # MOSTRAR ERRORES
+        print("[ ERRORES DETECTADOS ]")
         print(result.stderr)
         break
-print("\nPipeline completo. Todos los archivos intermedios generados.")
+
+print("\n[ FIN ] PIPELINE COMPLETO")

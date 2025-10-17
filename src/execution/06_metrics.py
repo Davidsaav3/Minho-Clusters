@@ -1,14 +1,11 @@
-# src/06_comparacion_if.py
-import pandas as pd
-import glob
-import os
+import pandas as pd  # MANEJO DE DATAFRAMES
+import glob          # BUSCAR ARCHIVOS
+import os            # RUTAS Y DIRECTORIOS
+import json          # GUARDAR RESULTADOS EN JSON
 
-# =========================
-# Funciones auxiliares
-# =========================
-
+# FUNCIONES AUXILIARES
 def secuencia_info(series):
-    """Cuenta secuencias consecutivas de 1s y devuelve la cantidad y longitud máxima."""
+    """CUENTA SECUENCIAS DE 1s: TOTAL Y LONGITUD MÁXIMA"""
     in_seq = False
     count_seq = 0
     max_len = 0
@@ -26,42 +23,38 @@ def secuencia_info(series):
             max_len = current_len
     return count_seq, max_len
 
-
-# =========================
-# Cargar archivos
-# =========================
-
+# CARGAR ARCHIVOS
 results_path = '../../results/execution'
 files = glob.glob(os.path.join(results_path, '*.csv'))
 
-# Buscar IF global
+# BUSCAR IF GLOBAL
 global_files = [f for f in files if 'if_global' in os.path.basename(f)]
 if not global_files:
-    raise FileNotFoundError("No se encontró ningún archivo que contenga 'if_global' en ../results/")
+    raise FileNotFoundError("[ ERROR ] No se encontró archivo 'if_global'")
 global_file = global_files[0]
 df_global = pd.read_csv(global_file)
 
-# Detectar columna de anomalías en IF global
+# DETECTAR COLUMNA DE ANOMALÍAS
 if 'anomaly_global' in df_global.columns:
     anomaly_global_col = 'anomaly_global'
 elif 'anomaly' in df_global.columns:
     anomaly_global_col = 'anomaly'
 else:
-    raise ValueError("No se encuentra columna de anomalías en IF global")
+    raise ValueError("[ ERROR ] No hay columna de anomalías en IF global")
 
-# =========================
 # IF GLOBAL
-# =========================
 total_global = df_global[anomaly_global_col].sum()
 seq_count, seq_max = secuencia_info(df_global[anomaly_global_col])
-print("=== IF GLOBAL ===")
-print(f"Anomalías detectadas: {total_global}")
-print(f"Secuencias de anomalías: {seq_count}, Longitud máxima: {seq_max}")
-print('-'*50)
+results = {
+    'if_global': {
+        'total_anomalies': int(total_global),
+        'sequence_count': int(seq_count),
+        'max_sequence': int(seq_max)
+    },
+    'clusters': {}
+}
 
-# =========================
-# Definir agrupaciones de clusters
-# =========================
+# AGRUPACIONES DE CLUSTERS
 cluster_groups = {
     "cluster-temporal": ["cluster-temporal_Date_and_Time", "cluster-temporal_Calendar"],
     "cluster-ubicacion": [
@@ -85,32 +78,28 @@ cluster_groups = {
     ]
 }
 
-# =========================
-# Evaluar y mostrar resultados agrupados
-# =========================
+# EVALUAR CLUSTERS
 for grupo, subclusters in cluster_groups.items():
-    print(f"\n=== {grupo.upper()} ===")
+    results['clusters'][grupo] = {}
     for sub in subclusters:
         file_path = os.path.join(results_path, f"{sub}.csv")
         if not os.path.exists(file_path):
-            print(f"  [!] No se encontró archivo: {sub}.csv")
+            results['clusters'][grupo][sub] = {'error': 'archivo no encontrado'}
             continue
 
         df_cluster = pd.read_csv(file_path)
 
-        # Detectar columna de anomalías
         if 'anomaly' in df_cluster.columns:
             anomaly_col = 'anomaly'
         elif 'anomaly_global' in df_cluster.columns:
             anomaly_col = 'anomaly_global'
         else:
-            print(f"  [!] No se encuentra columna de anomalías en {sub}")
+            results['clusters'][grupo][sub] = {'error': 'columna de anomalías no encontrada'}
             continue
 
         total_cluster = df_cluster[anomaly_col].sum()
         seq_count, seq_max = secuencia_info(df_cluster[anomaly_col])
 
-        # Coincidencias con IF global
         merged = pd.merge(
             df_global[[anomaly_global_col]].rename(columns={anomaly_global_col:'global_anomaly'}),
             df_cluster[[anomaly_col]].rename(columns={anomaly_col:'cluster_anomaly'}),
@@ -119,11 +108,17 @@ for grupo, subclusters in cluster_groups.items():
         coincidencias = ((merged['global_anomaly']==1) & (merged['cluster_anomaly']==1)).sum()
         porcentaje = 100 * coincidencias / total_cluster if total_cluster > 0 else 0
 
-        print(f"  {sub}:")
-        print(f"    Anomalías detectadas: {total_cluster}")
-        print(f"    Secuencias de anomalías: {seq_count}, Longitud máxima: {seq_max}")
-        print(f"    Coinciden con IF global: {coincidencias} ({porcentaje:.2f}%)")
-        print("    " + "-"*40)
+        results['clusters'][grupo][sub] = {
+            'total_anomalies': int(total_cluster),
+            'sequence_count': int(seq_count),
+            'max_sequence': int(seq_max),
+            'coincidences_with_global': int(coincidencias),
+            'coincidence_percent': round(porcentaje,2)
+        }
 
-print("\n=== PIPELINE COMPLETO ===")
-print("Todos los resultados intermedios y finales están en '../results/'")
+# GUARDAR RESULTADOS EN JSON
+os.makedirs('../../results', exist_ok=True)
+with open('../../results/06_results.json', 'w') as f:
+    json.dump(results, f, indent=4)
+
+print("[ GUARDADO ] Resultados de IF global y clusters en '../../results/06_results.json'")
