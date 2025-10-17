@@ -6,7 +6,7 @@ import os
 os.makedirs('../results', exist_ok=True)
 
 # Archivos a procesar: IF global + IF por clusters
-files = glob.glob('../results/cluster-*.csv')
+files = glob.glob('../../results/execution/cluster-*.csv')
 
 for file_path in files:
     print(f"\nProcesando archivo: {file_path}")

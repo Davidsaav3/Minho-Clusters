@@ -1,4 +1,4 @@
-# src/01_if_global.py
+# src/if_global.py
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 import os
@@ -11,7 +11,7 @@ os.makedirs('../results', exist_ok=True)
 # =========================
 # Cargar dataset codificado
 # =========================
-df = pd.read_csv('../results/05_seleccion.csv')
+df = pd.read_csv('../../results/preparation/05_seleccion.csv')
 
 # =========================
 # Configuración de Isolation Forest
@@ -61,5 +61,5 @@ print(f"Porcentaje de anomalías: {num_anomalies/df.shape[0]*100:.2f}%")
 # =========================
 # Guardar resultados
 # =========================
-df.to_csv('../results/01_if_global.csv', index=False)
-print("IF global aplicado y guardado en '../results/01_if_global.csv'")
+df.to_csv('../../results/execution/if_global.csv', index=False)
+print("IF global aplicado y guardado en '../../results/execution/if_global.csv'")

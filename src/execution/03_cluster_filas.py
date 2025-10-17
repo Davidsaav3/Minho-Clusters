@@ -9,7 +9,7 @@ import os
 os.makedirs('../results', exist_ok=True)
 
 # Archivos a procesar: IF global + todos los cluster_*.csv
-files = glob.glob('../results/cluster-*.csv')
+files = glob.glob('../../results/execution/cluster-*.csv')
 
 for file_path in files:
     print(f"\n=== Procesando {file_path} ===")

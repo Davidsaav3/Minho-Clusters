@@ -5,7 +5,7 @@ import os
 # =========================
 # Cargar dataset
 # =========================
-df = pd.read_csv('../results/05_seleccion.csv')
+df = pd.read_csv('../../results/preparation/05_seleccion.csv')
 
 # Crear carpeta de resultados si no existe
 os.makedirs('../results', exist_ok=True)
@@ -41,7 +41,7 @@ clusters = {
                         'intensidad_falconera_1','intensidad_falconera_2','intensidad_falconera_3',
                         'factor_potencia_falconera','tension_variador_pozo_falconera','frecuencia_pozo_falconera']
     },
-    'fambientales': {
+    'ambientales': {
         'Climatologia': ['aemet_temperatura_media','aemet_precipitaciones','aemet_temperatura_minima','aemet_maxima_temperatura',
                          'aemet_direccion_media_viento','aemet_velocidad_media_viento','aemet_racha_maxima','aemet_humedad_media',
                          'openweather_temperatura_media','openweather_punto_rocio','openweather_temperatura_minima','openweather_temperatura_maxima',
@@ -72,6 +72,6 @@ for cluster_name, subparts in clusters.items():
         if 'cluster_manual' in df.columns:
             cols_to_save.append('cluster_manual')
         cluster_df = df[cols_to_save]
-        out_file = f"../results/cluster-{cluster_name}_{sub_name}.csv"
+        out_file = f"../../results/execution/cluster-{cluster_name}_{sub_name}.csv"
         cluster_df.to_csv(out_file, index=False)
         print(f"Archivo guardado: {out_file}")

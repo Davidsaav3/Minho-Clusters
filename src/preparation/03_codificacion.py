@@ -2,7 +2,7 @@
 import pandas as pd
 
 # Cargar dataset procesado en paso anterior
-df = pd.read_csv('../results/02_tratamiento_nulos.csv')
+df = pd.read_csv('../../results/preparation/02_tratamiento_nulos.csv')
 
 # Columnas de fecha/hora que NO se deben codificar
 fecha_cols = [
@@ -47,5 +47,5 @@ for col in num_cols:
         df[col] = df[col].fillna(df[col].median())
 
 # Guardar dataset codificado listo para escalado
-df.to_csv('../results/03_codificacion.csv', index=False)
-print("Dataset codificado guardado en '../results/03_codificacion.csv'")
+df.to_csv('../../results/preparation/03_codificacion.csv', index=False)
+print("Dataset codificado guardado en '../../results/preparation/03_codificacion.csv'")
