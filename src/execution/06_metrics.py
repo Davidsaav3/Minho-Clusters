@@ -4,7 +4,7 @@ import os            # MANEJO DE RUTAS Y CREACIÓN DE CARPETAS
 import json          # GUARDAR RESULTADOS EN JSON
 
 # PARÁMETROS CONFIGURABLES
-RESULTS_FOLDER = '../../results'                       # CARPETA PRINCIPAL DE RESULTADOS
+RESULTS_FOLDER = '../../results/execution'                       # CARPETA PRINCIPAL DE RESULTADOS
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
 GLOBAL_FILE_PATTERN = 'if_global'                     # PATRÓN PARA IDENTIFICAR IF GLOBAL
 CLUSTERS_JSON = 'clusters.json'                       # ARCHIVO JSON CON DEFINICIÓN DE CLUSTERS
@@ -26,10 +26,10 @@ if not global_files:
 df_global = pd.read_csv(global_files[0])  # CARGAR CSV GLOBAL
 
 # DETECTAR COLUMNAS IMPORTANTES
-if 'anomaly_global' in df_global.columns:
-    anomaly_global_col = 'anomaly_global'  # COLUMNA DE ANOMALÍAS GLOBALES
+if 'anomaly' in df_global.columns:
+    anomaly_col = 'anomaly'  # COLUMNA DE ANOMALÍAS GLOBALES
 elif 'anomaly' in df_global.columns:
-    anomaly_global_col = 'anomaly'
+    anomaly_col = 'anomaly'
 else:
     raise ValueError("[ ERROR ] No se encontró columna de anomalías en IF global")
 
@@ -39,7 +39,7 @@ else:
     raise ValueError("[ ERROR ] No existe columna 'sequence' en IF global")
 
 # RESUMEN IF GLOBAL
-total_global = df_global[anomaly_global_col].sum()  # CALCULAR TOTAL DE ANOMALÍAS GLOBALES
+total_global = df_global[anomaly_col].sum()  # CALCULAR TOTAL DE ANOMALÍAS GLOBALES
 max_sequence_global = df_global[sequence_col].max() # CALCULAR LONGITUD MÁXIMA DE SECUENCIA
 results = {'if_global': {'total_anomalies': int(total_global),
                          'max_sequence': int(max_sequence_global)},
@@ -71,8 +71,8 @@ for grupo, subclusters in cluster_groups.items():
         # DETECTAR COLUMNA DE ANOMALÍAS
         if 'anomaly' in df_cluster.columns:
             anomaly_col = 'anomaly'
-        elif 'anomaly_global' in df_cluster.columns:
-            anomaly_col = 'anomaly_global'
+        elif 'anomaly' in df_cluster.columns:
+            anomaly_col = 'anomaly'
         else:
             results['clusters'][grupo][sub] = {'error': 'columna de anomalías no encontrada'}
             continue
@@ -88,7 +88,7 @@ for grupo, subclusters in cluster_groups.items():
 
         # CALCULAR COINCIDENCIAS CON IF GLOBAL
         merged = pd.merge(
-            df_global[[anomaly_global_col]].rename(columns={anomaly_global_col:'global_anomaly'}),
+            df_global[[anomaly_col]].rename(columns={anomaly_col:'global_anomaly'}),
             df_cluster[[anomaly_col]].rename(columns={anomaly_col:'cluster_anomaly'}),
             left_index=True, right_index=True
         )
@@ -108,3 +108,16 @@ with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=4, ensure_ascii=False)  # GUARDAR RESULTADOS FINALES EN JSON
 if SHOW_INFO:
     print(f"[ GUARDADO ] Resultados de IF global y clusters en '{OUTPUT_JSON}'")
+
+# PRECISI ON: 0.5081
+# RECALL: 0.4829
+# F1-SCORE: 0.4952
+# EXACTITUD: 0.9482
+# MCC: 0.4681
+# ANOMALIAS REALES: 3289
+# ANOMALIAS DETECTADAS: 7018
+# DETECCIONES CORRECTAS: 3566
+# FALSOS POSITIVOS: 3452
+# FALSOS NEGATIVOS: 3818
+# RATIO DE DETECCI ON: 0.4829
+# RATIO DE FALSOS POSITIVOS: 0.3297

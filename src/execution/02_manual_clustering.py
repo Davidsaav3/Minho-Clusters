@@ -5,7 +5,7 @@ import json          # PARA LEER EL JSON
 # PARÁMETROS CONFIGURABLES
 RESULTS_FOLDER = '../../results'                       # CARPETA PRINCIPAL DE RESULTADOS
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
-INPUT_CSV = '../../results/preparation/05_variance.csv'       # DATASET DE ENTRADA
+INPUT_CSV = '../../results/preparation/00_contaminated.csv'       # DATASET DE ENTRADA
 CLUSTERS_JSON = 'clusters.json'                      # ARCHIVO JSON CON DEFINICIÓN DE CLUSTERS
 MANUAL_COLUMN = 'cluster_manual'                     # NOMBRE DE LA COLUMNA MANUAL (SI EXISTE)
 SHOW_INFO = True                                     # MOSTRAR INFO EN PANTALLA

@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd # reusmen de clusters con stats de cada uno: cluster,count,cluster_size
 from sklearn.ensemble import IsolationForest  # DETECCIÓN DE ANOMALÍAS
 import glob
 import os

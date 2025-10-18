@@ -1,11 +1,11 @@
-import pandas as pd
+import pandas as pd # de mas anomalo a menos las columnas 
 from sklearn.ensemble import IsolationForest  # DETECCIÓN ANOMALÍAS
 import os
 
 # PARÁMETROS CONFIGURABLES
 RESULTS_FOLDER = '../../results'                        # CARPETA PRINCIPAL DE RESULTADOS
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
-INPUT_CSV = '../../results/preparation/05_variance.csv'       # DATASET DE ENTRADA
+INPUT_CSV = '../../results/preparation/00_contaminated.csv'       # DATASET DE ENTRADA
 OUTPUT_CSV = os.path.join(EXECUTION_FOLDER, 'if_global.csv')  # CSV DE SALIDA
 
 N_ESTIMATORS = 100                                     # NÚMERO DE ÁRBOLES
@@ -42,11 +42,11 @@ clf = IsolationForest(
 )
 
 # APLICAR ISOLATION FOREST
-df['anomaly_global'] = clf.fit_predict(df)
-df['anomaly_global'] = df['anomaly_global'].map({1: 0, -1: 1})  # 1=ANOMALÍA, 0=NORMAL
+df['anomaly'] = clf.fit_predict(df)
+df['anomaly'] = df['anomaly'].map({1: 0, -1: 1})  # 1=ANOMALÍA, 0=NORMAL
 
 # CONTAR ANOMALÍAS Y NORMALES
-num_anomalies = df['anomaly_global'].sum()           # TOTAL ANOMALÍAS DETECTADAS
+num_anomalies = df['anomaly'].sum()           # TOTAL ANOMALÍAS DETECTADAS
 num_normals = df.shape[0] - num_anomalies           # TOTAL REGISTROS NORMALES
 if SHOW_INFO:
     print(f"[ INFO ] Registros totales: {df.shape[0]}")

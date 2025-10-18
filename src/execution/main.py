@@ -8,13 +8,15 @@ RESULTS_FOLDER = '../../results/execution'  # CARPETA DONDE SE GUARDAN RESULTADO
 LOG_FILE = os.path.join(RESULTS_FOLDER, 'log.txt')  # ARCHIVO DE LOG
 LOG_LEVEL = logging.INFO                           # NIVEL DE LOG: DEBUG, INFO, WARNING, ERROR
 LOG_OVERWRITE = True                               # TRUE = SOBRESCRIBIR LOG CADA EJECUCIÓN
-SCRIPTS = [                                        # LISTA DE SCRIPTS A EJECUTAR EN ORDEN
+SCRIPTS = [   
+    '00_ contaminate.py',                                     # LISTA DE SCRIPTS A EJECUTAR EN ORDEN
     '01_if.py',
     '02_manual_clustering.py',
     '03_automatic_clustering.py',
     '04_if_clusters.py',
     '05_temporal_continuity.py',
-    '06_metrics.py'
+    '06_metrics.py',
+    '07_visualize.py'
 ]
 SHOW_OUTPUT = True  # TRUE = IMPRIMIR SALIDA EN PANTALLA
 

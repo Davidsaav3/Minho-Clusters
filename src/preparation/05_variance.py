@@ -5,7 +5,7 @@ import json
 
 # CONFIGURACIÓN
 INPUT_CSV = '../../results/preparation/04_scale.csv'        # DATASET DE ENTRADA
-OUTPUT_CSV = '../../results/preparation/05_variance.csv'    # DATASET FINAL
+OUTPUT_CSV = '../../results/preparation/00_contaminated.csv'    # DATASET FINAL
 OUTPUT_JSON = '../../results/preparation/05_aux.json'       # COLUMNAS EXCLUIDAS
 VAR_THRESHOLD = 0.01            # UMBRAL DE VARIANZA (ELIMINA COLUMNAS CON VAR < UMBRAL)
 DROP_CONSTANT_COLUMNS = True     # ELIMINA COLUMNAS CON VAR = 0

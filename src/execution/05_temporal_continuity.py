@@ -1,4 +1,4 @@
-import pandas as pd  # MANEJO DE DATAFRAMES
+import pandas as pd  # MANEJO DE DATAFRAMES (top de mas repetidas a menos resumen)
 import glob          # BUSCAR ARCHIVOS POR PATRÓN
 import os            # MANEJO DE RUTAS Y CREACIÓN DE CARPETAS
 
@@ -7,8 +7,8 @@ RESULTS_FOLDER = '../../results'                      # CARPETA PRINCIPAL DE RES
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
 IF_GLOBAL_FILE = os.path.join(EXECUTION_FOLDER, 'if_global.csv')  # ARCHIVO IF GLOBAL
 CLUSTER_PATTERN = 'cluster_*.csv'                    # PATRÓN PARA ARCHIVOS DE CLUSTER
-ANOMALY_GLOBAL_COLS = ['anomaly_global', 'anomaly']  # COLUMNAS DE ANOMALÍAS GLOBALES POSIBLES
-ANOMALY_CLUSTER_COLS = ['anomaly', 'anomaly_global'] # COLUMNAS DE ANOMALÍAS DE CLUSTER POSIBLES
+ANOMALY_COLS = ['anomaly', 'anomaly']  # COLUMNAS DE ANOMALÍAS GLOBALES POSIBLES
+ANOMALY_CLUSTER_COLS = ['anomaly', 'anomaly'] # COLUMNAS DE ANOMALÍAS DE CLUSTER POSIBLES
 SHOW_INFO = True                                     # TRUE = MOSTRAR INFO EN PANTALLA
 
 # CREAR CARPETAS NECESARIAS
@@ -46,7 +46,7 @@ if os.path.exists(IF_GLOBAL_FILE):
     df_global = pd.read_csv(IF_GLOBAL_FILE)                       # CARGAR CSV GLOBAL
     
     # DETECTAR COLUMNA DE ANOMALÍAS
-    anomaly_col = next((c for c in ANOMALY_GLOBAL_COLS if c in df_global.columns), None)
+    anomaly_col = next((c for c in ANOMALY_COLS if c in df_global.columns), None)
     if anomaly_col:
         total_seq, max_seq = add_sequence_column(df_global, anomaly_col)  # CALCULAR SECUENCIAS
         df_global.to_csv(IF_GLOBAL_FILE, index=False)                     # GUARDAR CSV MODIFICADO
