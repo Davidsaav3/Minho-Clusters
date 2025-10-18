@@ -1,77 +1,84 @@
 import subprocess  # EJECUTAR OTROS SCRIPTS DESDE PYTHON
-import sys          # PARA USAR EL INTERPRETE ACTUAL
+import sys          # USAR EL INTERPRETE ACTUAL DE PYTHON
 import logging      # REGISTRAR MENSAJES EN ARCHIVO
-import os           # CREAR CARPETAS
+import os           # CREAR CARPETAS Y MANEJAR RUTAS
 
 # PARÁMETROS CONFIGURABLES
-RESULTS_FOLDER = '../../results/execution'  # CARPETA DONDE SE GUARDAN RESULTADOS Y LOGS
-LOG_FILE = os.path.join(RESULTS_FOLDER, 'log.txt')  # ARCHIVO DE LOG
-LOG_LEVEL = logging.INFO                           # NIVEL DE LOG: DEBUG, INFO, WARNING, ERROR
-LOG_OVERWRITE = True                               # TRUE = SOBRESCRIBIR LOG CADA EJECUCIÓN
+RESULTS_FOLDER = '../../results/execution'            # CARPETA DONDE SE GUARDAN RESULTADOS Y LOGS
+LOG_FILE = os.path.join(RESULTS_FOLDER, 'log.txt')   # ARCHIVO DE LOG
+LOG_LEVEL = logging.INFO                              # NIVEL DE LOG: DEBUG, INFO, WARNING, ERROR
+LOG_OVERWRITE = True                                  # TRUE = SOBRESCRIBIR LOG CADA EJECUCIÓN
+
+# LISTA DE SCRIPTS A EJECUTAR EN ORDEN
 SCRIPTS = [   
-    '00_ contaminate.py',                                     # LISTA DE SCRIPTS A EJECUTAR EN ORDEN
-    '01_if.py',
-    '02_manual_clustering.py',
-    '03_automatic_clustering.py',
-    '04_if_clusters.py',
-    '05_temporal_continuity.py',
-    '06_metrics.py',
-    '07_visualize.py'
+    '00_ contaminate.py',           # SCRIPT 0: CONTAMINAR DATASET
+    '01_if.py',                      # SCRIPT 1: DETECCIÓN GLOBAL DE ANOMALÍAS
+    '02_manual_clustering.py',       # SCRIPT 2: CLUSTERING MANUAL
+    '03_automatic_clustering.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
+    '04_if_clusters.py',             # SCRIPT 4: DETECCIÓN DE ANOMALÍAS POR CLUSTER
+    '05_temporal_continuity.py',    # SCRIPT 5: SECUENCIAS TEMPORALES
+    '06_metrics.py',                 # SCRIPT 6: CÁLCULO DE MÉTRICAS
+    '07_visualize.py'                # SCRIPT 7: VISUALIZACIÓN DE RESULTADOS
 ]
-SHOW_OUTPUT = True  # TRUE = IMPRIMIR SALIDA EN PANTALLA
+
+SHOW_OUTPUT = True  # TRUE = IMPRIMIR SALIDA DE LOS SCRIPTS EN PANTALLA
 
 # CREAR CARPETA DE RESULTADOS
 os.makedirs(RESULTS_FOLDER, exist_ok=True)  # CREAR CARPETA SI NO EXISTE
 
 # CONFIGURAR LOG
 logging.basicConfig(
-    filename=LOG_FILE,
-    filemode='w' if LOG_OVERWRITE else 'a',  # SOBRESCRIBIR O ADJUNTAR
-    level=LOG_LEVEL,
-    format='%(message)s',  # SIN FECHA NI NIVEL
-    encoding='utf-8'
+    filename=LOG_FILE,                     # ARCHIVO DE SALIDA DEL LOG
+    filemode='w' if LOG_OVERWRITE else 'a',  # 'w' = SOBRESCRIBIR, 'a' = ADJUNTAR
+    level=LOG_LEVEL,                       # NIVEL DE MENSAJES A REGISTRAR
+    format='%(message)s',                  # SOLO MENSAJE, SIN FECHA NI NIVEL
+    encoding='utf-8'                        # CODIFICACIÓN UTF-8
 )
 
 # FUNCIÓN AUXILIAR PARA LOG + PANTALLA
 def log_print(msg, level='info'):
-    """REGISTRAR MENSAJE EN LOG Y OPCIONALMENTE IMPRIMIR EN PANTALLA"""
+    """
+    REGISTRAR MENSAJE EN LOG Y OPCIONALMENTE IMPRIMIR EN PANTALLA
+    level: 'info' O 'error'
+    """
     if level == 'info':
-        logging.info(msg)
+        logging.info(msg)              # GUARDAR MENSAJE EN LOG
         if SHOW_OUTPUT:
-            print(msg)
+            print(msg)                 # IMPRIMIR MENSAJE EN CONSOLA
     elif level == 'error':
-        logging.error(msg)
+        logging.error(msg)             # GUARDAR MENSAJE DE ERROR EN LOG
         if SHOW_OUTPUT:
-            print(msg)
+            print(msg)                 # IMPRIMIR ERROR EN CONSOLA
 
-# EJECUTAR SCRIPTS
-log_print("[ INICIO ]")  # MARCAR INICIO
+# EJECUTAR SCRIPTS EN ORDEN
+log_print("[ INICIO ]")  # MARCAR INICIO DE LA EJECUCIÓN
 
 for script in SCRIPTS:
-    log_print(f"\n[ EJECUTANDO ] {script}\n")
+    log_print(f"\n[ EJECUTANDO ] {script}\n")  # INFORMAR SCRIPT ACTUAL
     try:
+        # LANZAR SCRIPT CON EL INTERPRETE ACTUAL
         process = subprocess.Popen(
-            [sys.executable, script],  # USAR INTERPRETE ACTUAL
-            stdout=subprocess.PIPE,    # CAPTURAR SALIDA
+            [sys.executable, script],  # USAR PYTHON ACTUAL
+            stdout=subprocess.PIPE,    # CAPTURAR SALIDA ESTÁNDAR
             stderr=subprocess.PIPE,    # CAPTURAR ERRORES
-            text=True,
-            bufsize=1,
-            universal_newlines=True
+            text=True,                 # SALIDA COMO TEXTO
+            bufsize=1,                 # BUFFER DE LINEA POR LINEA
+            universal_newlines=True    # COMPATIBILIDAD PYTHON 2/3
         )
 
-        # LEER SALIDA LÍNEA POR LÍNEA
+        # LEER SALIDA ESTÁNDAR LÍNEA POR LÍNEA
         for line in process.stdout:
-            log_print(line.rstrip())
+            log_print(line.rstrip())    # LIMPIAR SALIDA Y LOGUEAR
 
         # LEER ERRORES LÍNEA POR LÍNEA
         for line in process.stderr:
-            log_print(line.rstrip(), level='error')
+            log_print(line.rstrip(), level='error')  # LOGUEAR ERRORES
 
-        process.wait()  # ESPERAR FIN DEL PROCESO
+        process.wait()  # ESPERAR QUE EL SCRIPT TERMINE
         if process.returncode != 0:
-            log_print(f"[ ERROR ] {script} terminó con código {process.returncode}", level='error')
+            log_print(f"[ ERROR ] {script} TERMINÓ CON CÓDIGO {process.returncode}", level='error')
 
     except Exception as e:
-        log_print(f"[ EXCEPCIÓN ] {script}: {e}", level='error')
+        log_print(f"[ EXCEPCIÓN ] {script}: {e}", level='error')  # CAPTURAR EXCEPCIONES
 
-log_print("\n[ FIN ]")  # MARCAR FIN DEL PROCESO
+log_print("\n[ FIN ]")  # MARCAR FIN DE LA EJECUCIÓN

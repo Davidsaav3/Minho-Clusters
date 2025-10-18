@@ -1,123 +1,127 @@
-import pandas as pd  # MANEJO DE DATAFRAMES
-import glob          # BUSCAR ARCHIVOS POR PATRÓN
-import os            # MANEJO DE RUTAS Y CREACIÓN DE CARPETAS
-import json          # GUARDAR RESULTADOS EN JSON
+import pandas as pd                                # IMPORTAR PANDAS PARA MANEJO DE DATAFRAMES
+import glob                                        # IMPORTAR GLOB PARA LISTAR ARCHIVOS CON PATRONES
+import os                                          # IMPORTAR OS PARA MANEJO DE RUTAS Y CARPETAS
+import json                                        # IMPORTAR JSON PARA CARGAR DEFINICIÓN DE CLUSTERS
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, matthews_corrcoef  # MÉTRICAS DE RENDIMIENTO
 
-# PARÁMETROS CONFIGURABLES
-RESULTS_FOLDER = '../../results/execution'                       # CARPETA PRINCIPAL DE RESULTADOS
-EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
-GLOBAL_FILE_PATTERN = 'if_global'                     # PATRÓN PARA IDENTIFICAR IF GLOBAL
-CLUSTERS_JSON = 'clusters.json'                       # ARCHIVO JSON CON DEFINICIÓN DE CLUSTERS
-OUTPUT_JSON = os.path.join(RESULTS_FOLDER, '06_results.json') # JSON FINAL DE RESULTADOS
-SHOW_INFO = True                                      # MOSTRAR INFORMACIÓN EN PANTALLA
+# PARÁMETROS
+RESULTS_FOLDER = '../../results/execution'       # CARPETA DE RESULTADOS
+EXECUTION_FOLDER = '../../results/execution'     # CARPETA DE EJECUCIÓN
+GLOBAL_FILE_PATTERN = 'if_global'                # PATRÓN PARA ARCHIVO IF GLOBAL
+CLUSTERS_JSON = 'clusters.json'                  # ARCHIVO JSON CON DEFINICIÓN DE CLUSTERS
+OUTPUT_CSV = os.path.join(RESULTS_FOLDER, '06_results.csv')  # CSV FINAL CON RESULTADOS
+SHOW_INFO = True                                 # MOSTRAR INFORMACIÓN EN CONSOLA
 
-# CREAR CARPETAS NECESARIAS
-os.makedirs(RESULTS_FOLDER, exist_ok=True)            # CREAR CARPETA PRINCIPAL SI NO EXISTE
-os.makedirs(EXECUTION_FOLDER, exist_ok=True)         # CREAR CARPETA DE EJECUCIÓN SI NO EXISTE
+# ORDEN DE COLUMNAS PARA CSV FINAL
+columns_order = [
+    'file', 'anomalies_real', 'anomalies_detected', 'detections_correct', 'false_positives', 'false_negatives',
+    'total_sequences', 'max_sequence', 'precision', 'recall', 'f1_score', 'accuracy', 'mcc',
+    'ratio_detection', 'ratio_fp', 'perc_global_anomalies_detected', 'perc_cluster_vs_global', 'total_coincidences'
+]
+
+# CREAR CARPETAS SI NO EXISTEN
+os.makedirs(RESULTS_FOLDER, exist_ok=True)
+os.makedirs(EXECUTION_FOLDER, exist_ok=True)
 if SHOW_INFO:
     print(f"[ INFO ] Carpetas creadas si no existían")
 
 # CARGAR IF GLOBAL
-files = glob.glob(os.path.join(EXECUTION_FOLDER, '*.csv'))  # LISTAR TODOS LOS CSV
-global_files = [f for f in files if GLOBAL_FILE_PATTERN in os.path.basename(f)]  # FILTRAR IF GLOBAL
+files = glob.glob(os.path.join(EXECUTION_FOLDER, '*.csv'))           # LISTAR TODOS LOS CSV EN EJECUCIÓN
+global_files = [f for f in files if GLOBAL_FILE_PATTERN in os.path.basename(f)]  # FILTRAR EL CSV GLOBAL
 if not global_files:
     raise FileNotFoundError(f"[ ERROR ] No se encontró archivo con patrón '{GLOBAL_FILE_PATTERN}'")
 
-df_global = pd.read_csv(global_files[0])  # CARGAR CSV GLOBAL
-
-# DETECTAR COLUMNAS IMPORTANTES
-if 'anomaly' in df_global.columns:
-    anomaly_col = 'anomaly'  # COLUMNA DE ANOMALÍAS GLOBALES
-elif 'anomaly' in df_global.columns:
-    anomaly_col = 'anomaly'
-else:
-    raise ValueError("[ ERROR ] No se encontró columna de anomalías en IF global")
-
-if 'sequence' in df_global.columns:
-    sequence_col = 'sequence'  # COLUMNA DE SECUENCIA
-else:
+df_global = pd.read_csv(global_files[0])                             # LEER CSV GLOBAL
+if 'anomaly' not in df_global.columns:
+    raise ValueError("[ ERROR ] No se encontró columna 'anomaly' en IF global")
+if 'sequence' not in df_global.columns:
     raise ValueError("[ ERROR ] No existe columna 'sequence' en IF global")
 
-# RESUMEN IF GLOBAL
-total_global = df_global[anomaly_col].sum()  # CALCULAR TOTAL DE ANOMALÍAS GLOBALES
-max_sequence_global = df_global[sequence_col].max() # CALCULAR LONGITUD MÁXIMA DE SECUENCIA
-results = {'if_global': {'total_anomalies': int(total_global),
-                         'max_sequence': int(max_sequence_global)},
-           'clusters': {}}
+# DEFINIR VARIABLES GLOBALES
+y_true_global = df_global['anomaly']                                  # ANOMALÍAS REALES GLOBALES
+total_global = int(y_true_global.sum())                               # TOTAL DE ANOMALÍAS
+max_sequence_global = int(df_global['sequence'].max())                # LONGITUD MÁXIMA DE SECUENCIA
+y_pred_global = y_true_global                                         # IF GLOBAL SE CONSIDERA PREDICCIÓN PERFECTA
+
+# CALCULAR TP, FP, FN GLOBALES
+tp_global = ((y_true_global==1) & (y_pred_global==1)).sum()           # VERDADEROS POSITIVOS
+fp_global = ((y_true_global==0) & (y_pred_global==1)).sum()           # FALSOS POSITIVOS
+fn_global = ((y_true_global==1) & (y_pred_global==0)).sum()           # FALSOS NEGATIVOS
+
+# CREAR FILA DE RESULTADOS DEL IF GLOBAL
+csv_rows = [{
+    'file': 'if_global',                                               # NOMBRE DEL ARCHIVO
+    'anomalies_real': int(y_true_global.sum()),                         # ANOMALÍAS REALES
+    'anomalies_detected': int(y_pred_global.sum()),                     # ANOMALÍAS DETECTADAS
+    'detections_correct': int(tp_global),                               # DETECCIONES CORRECTAS
+    'false_positives': int(fp_global),                                  # FALSOS POSITIVOS
+    'false_negatives': int(fn_global),                                  # FALSOS NEGATIVOS
+    'total_sequences': total_global,                                     # TOTAL DE SECUENCIAS
+    'max_sequence': max_sequence_global,                                 # LONGITUD MÁXIMA DE SECUENCIA
+    'precision': round(precision_score(y_true_global, y_pred_global, zero_division=0),4),  # PRECISIÓN
+    'recall': round(recall_score(y_true_global, y_pred_global, zero_division=0),4),       # RECALL
+    'f1_score': round(f1_score(y_true_global, y_pred_global, zero_division=0),4),         # F1 SCORE
+    'accuracy': round(accuracy_score(y_true_global, y_pred_global),4),                     # ACCURACY
+    'mcc': round(matthews_corrcoef(y_true_global, y_pred_global),4),                      # MCC
+    'ratio_detection': round(recall_score(y_true_global, y_pred_global, zero_division=0),4),  # RATIO DE DETECCIÓN
+    'ratio_fp': round(fp_global / len(y_true_global),4) if len(y_true_global)>0 else 0,  # RATIO FALSOS POSITIVOS
+    'perc_global_anomalies_detected': 100.0,                                    # PORCENTAJE GLOBAL DETECTADO
+    'perc_cluster_vs_global': 100.0,                                           # % CLUSTER VS GLOBAL
+    'total_coincidences': tp_global                                              # COINCIDENCIAS TOTALES
+}]
 
 # CARGAR DEFINICIÓN DE CLUSTERS
 with open(CLUSTERS_JSON, 'r', encoding='utf-8') as f:
-    clusters_json = json.load(f)  # CARGAR CONFIGURACIÓN DE CLUSTERS DESDE JSON
+    clusters_json = json.load(f)
 if SHOW_INFO:
     print(f"[ INFO ] Clusters cargados desde '{CLUSTERS_JSON}'")
 
-# CONSTRUIR GRUPOS DE ARCHIVOS POR CLUSTER
-cluster_groups = {}
-for cluster_name, subparts in clusters_json.items():
-    group_key = f"cluster_{cluster_name}"  # NOMBRE DEL GRUPO
-    cluster_groups[group_key] = [f"cluster_{cluster_name}_{sub_name}" for sub_name in subparts.keys()]  # ARCHIVOS POR SUBCLUSTER
-
-# EVALUAR CADA CLUSTER
-for grupo, subclusters in cluster_groups.items():
-    results['clusters'][grupo] = {}
-    for sub in subclusters:
-        file_path = os.path.join(EXECUTION_FOLDER, f"{sub}.csv")  # RUTA DEL CSV
-        if not os.path.exists(file_path):
-            results['clusters'][grupo][sub] = {'error': 'archivo no encontrado'}  # MARCAR ERROR SI NO EXISTE
+# PROCESAR CADA SUBCLUSTER
+for cluster_name, subclusters in clusters_json.items():                   # ITERAR SOBRE CLUSTERS
+    for sub_name in subclusters.keys():                                    # ITERAR SOBRE SUBCLUSTERS
+        file_path = os.path.join(EXECUTION_FOLDER, f"cluster_{cluster_name}_{sub_name}.csv")
+        if not os.path.exists(file_path):                                   # SI NO EXISTE ARCHIVO
+            csv_rows.append({'file': f"{cluster_name}_{sub_name}", 'error': 'archivo no encontrado'})
             continue
 
-        df_cluster = pd.read_csv(file_path)  # CARGAR CSV DEL CLUSTER
-
-        # DETECTAR COLUMNA DE ANOMALÍAS
-        if 'anomaly' in df_cluster.columns:
-            anomaly_col = 'anomaly'
-        elif 'anomaly' in df_cluster.columns:
-            anomaly_col = 'anomaly'
-        else:
-            results['clusters'][grupo][sub] = {'error': 'columna de anomalías no encontrada'}
+        df_sub = pd.read_csv(file_path)                                     # LEER CSV DE SUBCLUSTER
+        if 'anomaly' not in df_sub.columns or 'sequence' not in df_sub.columns:  # VALIDAR COLUMNAS
+            csv_rows.append({'file': f"{cluster_name}_{sub_name}", 'error': 'columna anomaly o sequence no encontrada'})
             continue
 
-        # VERIFICAR QUE EXISTE LA COLUMNA 'SEQUENCE'
-        if 'sequence' not in df_cluster.columns:
-            results['clusters'][grupo][sub] = {'error': 'columna sequence no encontrada'}
-            continue
+        y_pred = df_sub['anomaly']                                          # PREDICCIONES DEL SUBCLUSTER
+        tp = ((y_true_global==1) & (y_pred==1)).sum()                       # TP CON RESPECTO GLOBAL
+        fp = ((y_true_global==0) & (y_pred==1)).sum()                       # FP CON RESPECTO GLOBAL
+        fn = ((y_true_global==1) & (y_pred==0)).sum()                       # FN CON RESPECTO GLOBAL
+        total_cluster_anomalies = int(y_pred.sum())                          # TOTAL DE ANOMALÍAS DEL CLUSTER
 
-        # CALCULAR TOTAL DE ANOMALÍAS Y MÁXIMA SECUENCIA DEL CLUSTER
-        total_cluster = df_cluster[anomaly_col].sum()
-        max_sequence_cluster = df_cluster['sequence'].max()
+        perc_global_anomalies_detected = round(tp / total_global * 100,2) if total_global>0 else 0   # % ANOMALÍAS GLOBALES DETECTADAS
+        perc_cluster_vs_global = round(tp / total_cluster_anomalies * 100,2) if total_cluster_anomalies>0 else 0  # % CLUSTER VS GLOBAL
 
-        # CALCULAR COINCIDENCIAS CON IF GLOBAL
-        merged = pd.merge(
-            df_global[[anomaly_col]].rename(columns={anomaly_col:'global_anomaly'}),
-            df_cluster[[anomaly_col]].rename(columns={anomaly_col:'cluster_anomaly'}),
-            left_index=True, right_index=True
-        )
-        coincidencias = ((merged['global_anomaly']==1) & (merged['cluster_anomaly']==1)).sum()
-        porcentaje = 100 * coincidencias / total_cluster if total_cluster > 0 else 0
+        # AÑADIR FILA AL CSV FINAL
+        csv_rows.append({
+            'file': f"{cluster_name}_{sub_name}",
+            'anomalies_real': int(y_true_global.sum()),
+            'anomalies_detected': total_cluster_anomalies,
+            'detections_correct': int(tp),
+            'false_positives': int(fp),
+            'false_negatives': int(fn),
+            'total_sequences': int(df_sub['sequence'].sum()),
+            'max_sequence': int(df_sub['sequence'].max()),
+            'precision': round(precision_score(y_true_global, y_pred, zero_division=0),4),
+            'recall': round(recall_score(y_true_global, y_pred, zero_division=0),4),
+            'f1_score': round(f1_score(y_true_global, y_pred, zero_division=0),4),
+            'accuracy': round(accuracy_score(y_true_global, y_pred),4),
+            'mcc': round(matthews_corrcoef(y_true_global, y_pred),4),
+            'ratio_detection': round(recall_score(y_true_global, y_pred, zero_division=0),4),
+            'ratio_fp': round(fp / len(y_true_global),4) if len(y_true_global)>0 else 0,
+            'perc_global_anomalies_detected': perc_global_anomalies_detected,
+            'perc_cluster_vs_global': perc_cluster_vs_global,
+            'total_coincidences': int(tp)
+        })
 
-        # GUARDAR RESULTADOS DEL CLUSTER
-        results['clusters'][grupo][sub] = {
-            'total_anomalies': int(total_cluster),
-            'max_sequence': int(max_sequence_cluster),
-            'coincidences_with_global': int(coincidencias),
-            'coincidence_percent': round(porcentaje, 2)
-        }
-
-# GUARDAR RESULTADOS EN JSON
-with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
-    json.dump(results, f, indent=4, ensure_ascii=False)  # GUARDAR RESULTADOS FINALES EN JSON
+# CREAR DATAFRAME FINAL Y GUARDAR CSV
+df_csv = pd.DataFrame(csv_rows)[columns_order]                              # CONSTRUIR DATAFRAME FINAL
+df_csv.to_csv(OUTPUT_CSV, index=False)                                       # GUARDAR CSV
 if SHOW_INFO:
-    print(f"[ GUARDADO ] Resultados de IF global y clusters en '{OUTPUT_JSON}'")
-
-# PRECISI ON: 0.5081
-# RECALL: 0.4829
-# F1-SCORE: 0.4952
-# EXACTITUD: 0.9482
-# MCC: 0.4681
-# ANOMALIAS REALES: 3289
-# ANOMALIAS DETECTADAS: 7018
-# DETECCIONES CORRECTAS: 3566
-# FALSOS POSITIVOS: 3452
-# FALSOS NEGATIVOS: 3818
-# RATIO DE DETECCI ON: 0.4829
-# RATIO DE FALSOS POSITIVOS: 0.3297
+    print(f"[ GUARDADO ] CSV resumen de métricas en '{OUTPUT_CSV}'")

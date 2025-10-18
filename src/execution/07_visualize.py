@@ -1,143 +1,183 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 import seaborn as sns
+import os
+import glob
 
-# PARÁMETROS CONFIGURABLES
-INPUT_CSV = '../../results/execution/if_global.csv'   # DATASET DE ENTRADA (CON 'anomaly' Y 'is_anomaly')
-RESULTS_FOLDER = '../../results/execution'           # CARPETA DE SALIDA PARA GRÁFICAS
-FEATURE_TO_PLOT = 'presion_salida_falconera'                  # VARIABLE PRINCIPAL A REPRESENTAR
-SHOW_ONLY_ANOMALIES = False                           # TRUE = SOLO PUNTOS ANÓMALOS
-SAVE_FIGURES = True                                  # TRUE = GUARDAR FIGURAS COMO PNG
-SHOW_FIGURES = False                                 # TRUE = MOSTRAR EN PANTALLA
-STYLE = 'whitegrid'                                  # ESTILO SEABORN ('darkgrid', 'whitegrid', etc.)
+# ================================
+# CONFIGURATION
+# ================================
+IF_GLOBAL_CSV = '../../results/execution/if_global.csv'
+IF_01_CSV = '../../results/execution/01_if.csv'
+CLUSTER_FILES_PATH = '../../results/execution/cluster_*.csv'
+RESULTS_SUMMARY_CSV = '../../results/execution/06_results.csv'
+RESULTS_FOLDER = '../../results/execution/plots'
+FEATURE_TO_PLOT = 'nivel_plaxiquet'
+SAVE_FIGURES = True
+SHOW_FIGURES = False
+STYLE = 'whitegrid'
 
-# CREAR CARPETA DE RESULTADOS
 os.makedirs(RESULTS_FOLDER, exist_ok=True)
 print(f"[ INFO ] CARPETA '{RESULTS_FOLDER}' CREADA SI NO EXISTÍA")
 
-# CARGAR DATASET
-df = pd.read_csv(INPUT_CSV)
-print(f"[ INFO ] DATASET CARGADO: {df.shape[0]} FILAS, {df.shape[1]} COLUMNAS")
-
-# ASEGURAR COLUMNAS NECESARIAS
-required_cols = ['anomaly', 'is_anomaly']
-for col in required_cols:
-    if col not in df.columns:
-        raise ValueError(f"[ ERROR ] FALTA LA COLUMNA REQUERIDA '{col}' EN EL DATASET")
-
-if FEATURE_TO_PLOT not in df.columns:
-    raise ValueError(f"[ ERROR ] LA COLUMNA '{FEATURE_TO_PLOT}' NO ESTÁ EN EL DATASET")
-
-# CONVERTIR COLUMNAS A ENTERO PARA SEABORN
-df['anomaly'] = df['anomaly'].astype(int)
-df['is_anomaly'] = df['is_anomaly'].astype(int)
-
-# FILTRAR SOLO ANOMALÍAS SI ES NECESARIO
-if SHOW_ONLY_ANOMALIES:
-    df = df[(df['anomaly'] == 1) | (df['is_anomaly'] == 1)]
-    print(f"[ INFO ] MOSTRANDO SOLO ANÓMALOS ({df.shape[0]} FILAS)")
-
-# CONFIGURAR ESTILO DE GRÁFICAS
 sns.set_style(STYLE)
-plt.rcParams['figure.figsize'] = (10, 6)
+plt.rcParams['figure.figsize'] = (12,6)
 
-# GRAFICA 1: ANOMALÍAS DETECTADAS VS REALES
+# ================================
+# 1-11. Original IF and Cluster Plots
+# ================================
+
+# --- LOAD MAIN DATA ---
+df_if = pd.read_csv(IF_GLOBAL_CSV)
+df_if['anomaly'] = df_if['anomaly'].astype(int)
+df_if['is_anomaly'] = df_if['is_anomaly'].astype(int)
+df_if['sequence'] = df_if['sequence'].astype(int)
+if 'cluster' not in df_if.columns:
+    df_if['cluster'] = 0
+
+df_if_sorted = df_if.sort_values(['cluster', 'datetime'])
+
+# 1. Anomalies vs Real (Scatter)
+plt.figure(figsize=(18,6))
+sns.scatterplot(data=df_if, x='datetime', y=FEATURE_TO_PLOT, hue='anomaly',
+                palette={0:'gray',1:'red'}, alpha=0.7)
+plt.title(f"Anomalies Detected vs Real: {FEATURE_TO_PLOT.upper()}")
+plt.xlabel("Datetime")
+plt.ylabel(FEATURE_TO_PLOT.upper())
+plt.xticks(rotation=45)
+plt.legend(title='Anomaly', labels=['Normal','Detected'])
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/01_anomalies_vs_real.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# 2. Correlation Heatmap
+numeric_cols = df_if.select_dtypes(include=['float64','int64']).columns
+plt.figure(figsize=(30,18))
+sns.heatmap(df_if[numeric_cols].corr(), annot=True, fmt=".2f", cmap='coolwarm',
+            cbar=True, annot_kws={"size":3}, linewidths=0.3, linecolor='white')
+plt.title("Correlation Matrix - All Numeric Features", fontsize=14)
+plt.xticks(rotation=45, ha='right', fontsize=4)
+plt.yticks(rotation=0, fontsize=4)
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/02_correlation_matrix.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# 3. Histogram of Anomaly Scores
 plt.figure()
+sns.histplot(df_if['anomaly_score'], bins=50, kde=True, color='blue')
+plt.title("Distribution of Anomaly Scores")
+plt.xlabel("Anomaly Score")
+plt.ylabel("Frequency")
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/03_anomaly_score_distribution.png", dpi=300)
+plt.close()
+
+# 4. Anomaly Sequence Lengths over Time
+df_if_01 = pd.read_csv(IF_01_CSV)
+if 'cluster' not in df_if_01.columns:
+    df_if_01['cluster'] = 0
+df_sequences = df_if_01[df_if_01['sequence'] > 0]
+
+plt.figure(figsize=(18,6))
+sns.scatterplot(data=df_sequences, x='datetime', y='sequence', hue='cluster',
+                palette='tab10', size='sequence', sizes=(20,200), alpha=0.7)
+plt.title("Temporal Distribution of Repeated Anomalies (Sequence Length)")
+plt.xlabel("Datetime")
+plt.ylabel("Anomaly Sequence Length")
+plt.xticks(rotation=45)
+plt.legend(title='Cluster', bbox_to_anchor=(1.05,1), loc='upper left')
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/04_anomaly_sequence_over_time.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# --- LOAD CLUSTER FILES ---
+cluster_files = glob.glob(CLUSTER_FILES_PATH)
+dfs_clusters = []
+
+for file in cluster_files:
+    if not file.endswith('_if.csv'):
+        dfc = pd.read_csv(file)
+        if 'datetime' not in dfc.columns and 'timestamp' in dfc.columns:
+            dfc['datetime'] = dfc['timestamp']
+        if 'cluster' not in dfc.columns:
+            dfc['cluster'] = 0
+        dfs_clusters.append(dfc)
+
+df_all_clusters = pd.concat(dfs_clusters, ignore_index=True)
+
+# 5. Histogram anomaly_score per cluster
+plt.figure(figsize=(12,6))
 sns.scatterplot(
-    data=df,
-    x=range(len(df)),
-    y=FEATURE_TO_PLOT,
-    hue='anomaly',
-    palette={0: 'gray', 1: 'red'},
-    alpha=0.7
+    data=df_all_clusters,
+    x='sequence',
+    y='anomaly_score',
+    hue='cluster',
+    palette='tab10',
+    alpha=0.6,
+    size='sequence',
+    sizes=(20,200),
+    legend=False  # Desactiva la leyenda automática
 )
-plt.title(f"ANOMALÍAS DETECTADAS VS REALES EN {FEATURE_TO_PLOT.upper()}")
-plt.xlabel("ÍNDICE")
-plt.ylabel(FEATURE_TO_PLOT.upper())
-plt.legend(title='ANOMALÍA', labels=['NORMAL', 'DETECTADA COMO ANOMALÍA'])
+plt.title("Anomaly Score vs Sequence Length by Cluster")
+plt.xlabel("Sequence Length")
+plt.ylabel("Anomaly Score")
 if SAVE_FIGURES:
-    plt.savefig(f"{RESULTS_FOLDER}/01_anomaly_vs_real_{FEATURE_TO_PLOT}.png", dpi=300)
-print("[ INFO ] Gráfico 1 generado y guardado")
-if SHOW_FIGURES:
-    plt.show()
+    plt.savefig(f"{RESULTS_FOLDER}/06_sequence_vs_score_by_cluster.png", dpi=300, bbox_inches='tight')
 plt.close()
 
-# GRAFICA 2: DISTRIBUCIÓN DE LA VARIABLE
-plt.figure()
-sns.histplot(
-    data=df,
-    x=FEATURE_TO_PLOT,
-    hue='anomaly',
-    bins=50,
-    kde=True,
-    palette={0: 'skyblue', 1: 'red'}
-)
-plt.title(f"DISTRIBUCIÓN DE {FEATURE_TO_PLOT.upper()} (ANOMALÍAS VS NORMALES)")
-plt.xlabel(FEATURE_TO_PLOT.upper())
-plt.ylabel("FRECUENCIA")
-if SAVE_FIGURES:
-    plt.savefig(f"{RESULTS_FOLDER}/02_distribution_{FEATURE_TO_PLOT}.png", dpi=300)
-print("[ INFO ] Gráfico 2 generado y guardado")
-if SHOW_FIGURES:
-    plt.show()
+# 6. Scatter sequence vs anomaly_score by cluster
+plt.figure(figsize=(12,6))
+sns.scatterplot(data=df_all_clusters, x='sequence', y='anomaly_score', hue='cluster',
+                palette='tab10', alpha=0.6, size='sequence', sizes=(20,200))
+plt.title("Anomaly Score vs Sequence Length by Cluster")
+plt.xlabel("Sequence Length")
+plt.ylabel("Anomaly Score")
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/06_sequence_vs_score_by_cluster.png", dpi=300, bbox_inches='tight')
 plt.close()
 
-# GRAFICA 3: BOXPLOT POR ESTADO DE ANOMALÍA
-df['anomaly_str'] = df['anomaly'].astype(str)
-plt.figure()
-sns.boxplot(
-    data=df,
-    x='anomaly_str',
-    y=FEATURE_TO_PLOT,
-    hue='anomaly_str',          # ASIGNAR 'hue' PARA EVITAR DEPRECATION
-    palette={'0': 'lightgreen', '1': 'red'},
-    legend=False
-)
-plt.title(f"BOXPLOT DE {FEATURE_TO_PLOT.upper()} POR ESTADO DE ANOMALÍA")
-plt.xlabel("DETECCIÓN IF (0=NORMAL, 1=ANOMALÍA)")
-plt.ylabel(FEATURE_TO_PLOT.upper())
-if SAVE_FIGURES:
-    plt.savefig(f"{RESULTS_FOLDER}/03_boxplot_{FEATURE_TO_PLOT}.png", dpi=300)
-print("[ INFO ] Gráfico 3 generado y guardado")
-if SHOW_FIGURES:
-    plt.show()
+# 7. Temporal Scatter of anomalies per cluster
+plt.figure(figsize=(18,6))
+sns.scatterplot(data=df_all_clusters, x='datetime', y='anomaly_score', hue='cluster',
+                palette='tab10', size='sequence', sizes=(20,200), alpha=0.6)
+plt.title("Temporal Distribution of Anomaly Scores per Cluster")
+plt.xlabel("Datetime")
+plt.ylabel("Anomaly Score")
+plt.xticks(rotation=45)
+plt.legend(title='Cluster', bbox_to_anchor=(1.05,1), loc='upper left')
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/07_temporal_score_by_cluster.png", dpi=300, bbox_inches='tight')
 plt.close()
 
-# GRAFICA 4: MATRIZ DE CORRELACIÓN (TOP 10 VARIABLES)
-numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
-corr = df[numeric_cols].corr().abs().nlargest(10, FEATURE_TO_PLOT)[[FEATURE_TO_PLOT]]
-corr = corr.sort_values(by=FEATURE_TO_PLOT, ascending=False)
+# ================================
+# 8 Summary metrics from 06_results.csv
+# ================================
+df_summary = pd.read_csv(RESULTS_SUMMARY_CSV)
+df_summary.set_index('file', inplace=True)
 
-plt.figure(figsize=(6, 5))
-sns.heatmap(corr, annot=True, cmap='coolwarm', cbar=False)
-plt.title(f"TOP 10 CORRELACIONES CON {FEATURE_TO_PLOT.upper()}")
-if SAVE_FIGURES:
-    plt.savefig(f"{RESULTS_FOLDER}/04_correlation_{FEATURE_TO_PLOT}.png", dpi=300)
-print("[ INFO ] Gráfico 4 generado y guardado")
-if SHOW_FIGURES:
-    plt.show()
+# 8. Performance Metrics
+metrics = ['precision', 'recall', 'f1_score', 'accuracy', 'mcc']
+df_summary[metrics].plot(kind='bar', figsize=(16,6))
+plt.title("Performance Metrics per Method / File")
+plt.ylabel("Score")
+plt.ylim(0,1.1)
+plt.xticks(rotation=45, ha='right')
+plt.legend(title='Metric')
+plt.tight_layout()
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/08_metrics_comparison.png", dpi=300)
 plt.close()
 
-# GRAFICA 5: EVOLUCIÓN TEMPORAL (SI EXISTE COLUMNA 'datetime')
-if 'datetime' in df.columns:
-    plt.figure()
-    sns.lineplot(
-        data=df,
-        x='datetime',
-        y=FEATURE_TO_PLOT,
-        hue='anomaly_str',
-        palette={'0': 'gray', '1': 'red'}
-    )
-    plt.title(f"EVOLUCIÓN TEMPORAL DE {FEATURE_TO_PLOT.upper()}")
-    plt.xlabel("TIEMPO")
-    plt.ylabel(FEATURE_TO_PLOT.upper())
-    plt.xticks(rotation=45)
-    if SAVE_FIGURES:
-        plt.savefig(f"{RESULTS_FOLDER}/05_temporal_{FEATURE_TO_PLOT}.png", dpi=300)
-    print("[ INFO ] Gráfico 5 generado y guardado")
-    if SHOW_FIGURES:
-        plt.show()
-    plt.close()
+# 9. Ratio detection vs False Positives
+ratio_metrics = ['ratio_detection', 'ratio_fp']
+df_summary[ratio_metrics].plot(kind='bar', figsize=(16,6), color=['green','red'])
+plt.title("Ratio Detection vs False Positives")
+plt.ylabel("Ratio")
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/09_ratio_detection_fp.png", dpi=300)
+plt.close()
 
-print("[ FINALIZADO ] GRÁFICAS GENERADAS EN CARPETA DE RESULTADOS.")
+# 10. Anomalies Detected vs Total Coincidences
+df_summary[['anomalies_detected', 'total_coincidences']].plot(kind='bar', figsize=(16,6), color=['blue','gray'])
+plt.title("Anomalies Detected vs Total Coincidences")
+plt.ylabel("Count")
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/10_detected_vs_coincidences.png", dpi=300)
+plt.close()
+
+print("✅ All 10 visualizations saved in:", RESULTS_FOLDER)
