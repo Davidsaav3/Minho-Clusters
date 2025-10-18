@@ -1,85 +1,74 @@
 import pandas as pd  # MANEJO DE DATAFRAMES
-import glob          # BUSCAR ARCHIVOS
-import os            # RUTAS Y DIRECTORIOS
+import glob          # BUSCAR ARCHIVOS POR PATRÓN
+import os            # MANEJO DE RUTAS Y CREACIÓN DE CARPETAS
 import json          # GUARDAR RESULTADOS EN JSON
 
-# FUNCIONES AUXILIARES
-def secuencia_info(series):
-    """CUENTA SECUENCIAS DE 1s: TOTAL Y LONGITUD MÁXIMA"""
-    in_seq = False
-    count_seq = 0
-    max_len = 0
-    current_len = 0
-    for v in series:
-        if v == 1:
-            current_len += 1
-            if not in_seq:
-                count_seq += 1
-                in_seq = True
-        else:
-            in_seq = False
-            current_len = 0
-        if current_len > max_len:
-            max_len = current_len
-    return count_seq, max_len
+# PARÁMETROS CONFIGURABLES
+RESULTS_FOLDER = '../../results'                       # CARPETA PRINCIPAL DE RESULTADOS
+EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
+GLOBAL_FILE_PATTERN = 'if_global'                     # PATRÓN PARA IDENTIFICAR IF GLOBAL
+CLUSTERS_JSON = 'clusters.json'                       # ARCHIVO JSON CON DEFINICIÓN DE CLUSTERS
+OUTPUT_JSON = os.path.join(RESULTS_FOLDER, '06_results.json') # JSON FINAL DE RESULTADOS
+SHOW_INFO = True                                      # MOSTRAR INFORMACIÓN EN PANTALLA
 
-# CARGAR ARCHIVOS
-results_path = '../../results/execution'
-files = glob.glob(os.path.join(results_path, '*.csv'))
+# CREAR CARPETAS NECESARIAS
+os.makedirs(RESULTS_FOLDER, exist_ok=True)            # CREAR CARPETA PRINCIPAL SI NO EXISTE
+os.makedirs(EXECUTION_FOLDER, exist_ok=True)         # CREAR CARPETA DE EJECUCIÓN SI NO EXISTE
+if SHOW_INFO:
+    print(f"[ INFO ] Carpetas creadas si no existían")
 
-# BUSCAR IF GLOBAL
-global_files = [f for f in files if 'if_global' in os.path.basename(f)]
+# CARGAR IF GLOBAL
+files = glob.glob(os.path.join(EXECUTION_FOLDER, '*.csv'))  # LISTAR TODOS LOS CSV
+global_files = [f for f in files if GLOBAL_FILE_PATTERN in os.path.basename(f)]  # FILTRAR IF GLOBAL
 if not global_files:
-    raise FileNotFoundError("[ ERROR ] No se encontró archivo 'if_global'")
-global_file = global_files[0]
-df_global = pd.read_csv(global_file)
+    raise FileNotFoundError(f"[ ERROR ] No se encontró archivo con patrón '{GLOBAL_FILE_PATTERN}'")
 
-# DETECTAR COLUMNA DE ANOMALÍAS
+df_global = pd.read_csv(global_files[0])  # CARGAR CSV GLOBAL
+
+# DETECTAR COLUMNAS IMPORTANTES
 if 'anomaly_global' in df_global.columns:
-    anomaly_global_col = 'anomaly_global'
+    anomaly_global_col = 'anomaly_global'  # COLUMNA DE ANOMALÍAS GLOBALES
 elif 'anomaly' in df_global.columns:
     anomaly_global_col = 'anomaly'
 else:
-    raise ValueError("[ ERROR ] No hay columna de anomalías en IF global")
+    raise ValueError("[ ERROR ] No se encontró columna de anomalías en IF global")
 
-# IF GLOBAL
-total_global = df_global[anomaly_global_col].sum()
-seq_count, seq_max = secuencia_info(df_global[anomaly_global_col])
-results = {
-    'if_global': {
-        'total_anomalies': int(total_global),
-        'sequence_count': int(seq_count),
-        'max_sequence': int(seq_max)
-    },
-    'clusters': {}
-}
+if 'sequence' in df_global.columns:
+    sequence_col = 'sequence'  # COLUMNA DE SECUENCIA
+else:
+    raise ValueError("[ ERROR ] No existe columna 'sequence' en IF global")
 
-# CARGAR DEFINICIÓN DE CLUSTERS DESDE JSON
-json_path = 'clusters.json'
-with open(json_path, 'r', encoding='utf-8') as f:
-    clusters_json = json.load(f)
-print(f"[ INFO ] Clusters cargados desde '{json_path}'")
+# RESUMEN IF GLOBAL
+total_global = df_global[anomaly_global_col].sum()  # CALCULAR TOTAL DE ANOMALÍAS GLOBALES
+max_sequence_global = df_global[sequence_col].max() # CALCULAR LONGITUD MÁXIMA DE SECUENCIA
+results = {'if_global': {'total_anomalies': int(total_global),
+                         'max_sequence': int(max_sequence_global)},
+           'clusters': {}}
 
-# CONSTRUIR GRUPOS DE ARCHIVOS AUTOMÁTICAMENTE
+# CARGAR DEFINICIÓN DE CLUSTERS
+with open(CLUSTERS_JSON, 'r', encoding='utf-8') as f:
+    clusters_json = json.load(f)  # CARGAR CONFIGURACIÓN DE CLUSTERS DESDE JSON
+if SHOW_INFO:
+    print(f"[ INFO ] Clusters cargados desde '{CLUSTERS_JSON}'")
+
+# CONSTRUIR GRUPOS DE ARCHIVOS POR CLUSTER
 cluster_groups = {}
 for cluster_name, subparts in clusters_json.items():
-    group_key = f"cluster_{cluster_name}"
-    cluster_groups[group_key] = []
-    for sub_name in subparts.keys():
-        file_name = f"cluster_{cluster_name}_{sub_name}"
-        cluster_groups[group_key].append(file_name)
+    group_key = f"cluster_{cluster_name}"  # NOMBRE DEL GRUPO
+    cluster_groups[group_key] = [f"cluster_{cluster_name}_{sub_name}" for sub_name in subparts.keys()]  # ARCHIVOS POR SUBCLUSTER
 
-# EVALUAR CLUSTERS
+# EVALUAR CADA CLUSTER
 for grupo, subclusters in cluster_groups.items():
     results['clusters'][grupo] = {}
     for sub in subclusters:
-        file_path = os.path.join(results_path, f"{sub}.csv")
+        file_path = os.path.join(EXECUTION_FOLDER, f"{sub}.csv")  # RUTA DEL CSV
         if not os.path.exists(file_path):
-            results['clusters'][grupo][sub] = {'error': 'archivo no encontrado'}
+            results['clusters'][grupo][sub] = {'error': 'archivo no encontrado'}  # MARCAR ERROR SI NO EXISTE
             continue
 
-        df_cluster = pd.read_csv(file_path)
+        df_cluster = pd.read_csv(file_path)  # CARGAR CSV DEL CLUSTER
 
+        # DETECTAR COLUMNA DE ANOMALÍAS
         if 'anomaly' in df_cluster.columns:
             anomaly_col = 'anomaly'
         elif 'anomaly_global' in df_cluster.columns:
@@ -88,9 +77,16 @@ for grupo, subclusters in cluster_groups.items():
             results['clusters'][grupo][sub] = {'error': 'columna de anomalías no encontrada'}
             continue
 
-        total_cluster = df_cluster[anomaly_col].sum()
-        seq_count, seq_max = secuencia_info(df_cluster[anomaly_col])
+        # VERIFICAR QUE EXISTE LA COLUMNA 'SEQUENCE'
+        if 'sequence' not in df_cluster.columns:
+            results['clusters'][grupo][sub] = {'error': 'columna sequence no encontrada'}
+            continue
 
+        # CALCULAR TOTAL DE ANOMALÍAS Y MÁXIMA SECUENCIA DEL CLUSTER
+        total_cluster = df_cluster[anomaly_col].sum()
+        max_sequence_cluster = df_cluster['sequence'].max()
+
+        # CALCULAR COINCIDENCIAS CON IF GLOBAL
         merged = pd.merge(
             df_global[[anomaly_global_col]].rename(columns={anomaly_global_col:'global_anomaly'}),
             df_cluster[[anomaly_col]].rename(columns={anomaly_col:'cluster_anomaly'}),
@@ -99,17 +95,16 @@ for grupo, subclusters in cluster_groups.items():
         coincidencias = ((merged['global_anomaly']==1) & (merged['cluster_anomaly']==1)).sum()
         porcentaje = 100 * coincidencias / total_cluster if total_cluster > 0 else 0
 
+        # GUARDAR RESULTADOS DEL CLUSTER
         results['clusters'][grupo][sub] = {
             'total_anomalies': int(total_cluster),
-            'sequence_count': int(seq_count),
-            'max_sequence': int(seq_max),
+            'max_sequence': int(max_sequence_cluster),
             'coincidences_with_global': int(coincidencias),
-            'coincidence_percent': round(porcentaje,2)
+            'coincidence_percent': round(porcentaje, 2)
         }
 
 # GUARDAR RESULTADOS EN JSON
-os.makedirs('../../results', exist_ok=True)
-with open('../../results/06_results.json', 'w', encoding='utf-8') as f:
-    json.dump(results, f, indent=4, ensure_ascii=False)
-
-print("[ GUARDADO ] Resultados de IF global y clusters en '../../results/06_results.json'")
+with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
+    json.dump(results, f, indent=4, ensure_ascii=False)  # GUARDAR RESULTADOS FINALES EN JSON
+if SHOW_INFO:
+    print(f"[ GUARDADO ] Resultados de IF global y clusters en '{OUTPUT_JSON}'")

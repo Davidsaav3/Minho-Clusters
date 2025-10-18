@@ -1,31 +1,14 @@
-import subprocess
-import sys
-import logging
-import os
+import subprocess  # EJECUTAR OTROS SCRIPTS DESDE PYTHON
+import sys          # PARA USAR EL INTERPRETE ACTUAL
+import logging      # REGISTRAR MENSAJES EN ARCHIVO
+import os           # CREAR CARPETAS
 
-# CREAR CARPETA DE RESULTADOS
-os.makedirs('../../results/execution', exist_ok=True)
-
-# CONFIGURAR LOG PARA SOBRESCRIBIR
-logging.basicConfig(
-    filename='../../results/execution/log.txt',  # Archivo de log
-    filemode='w',           # SOBRESCRIBIR cada ejecución
-    level=logging.INFO,
-    format='%(message)s',   # SIN fecha ni nivel
-    encoding='utf-8'        # Para acentos y ñ
-)
-
-# FUNCIÓN AUXILIAR PARA LOG + PANTALLA
-def log_print(msg, level='info'):
-    if level == 'info':
-        logging.info(msg)  # Se guarda en log.txt
-        print(msg)         # Se imprime en pantalla
-    elif level == 'error':
-        logging.error(msg)
-        print(msg)
-
-# LISTA DE SCRIPTS
-scripts = [
+# PARÁMETROS CONFIGURABLES
+RESULTS_FOLDER = '../../results/execution'  # CARPETA DONDE SE GUARDAN RESULTADOS Y LOGS
+LOG_FILE = os.path.join(RESULTS_FOLDER, 'log.txt')  # ARCHIVO DE LOG
+LOG_LEVEL = logging.INFO                           # NIVEL DE LOG: DEBUG, INFO, WARNING, ERROR
+LOG_OVERWRITE = True                               # TRUE = SOBRESCRIBIR LOG CADA EJECUCIÓN
+SCRIPTS = [                                        # LISTA DE SCRIPTS A EJECUTAR EN ORDEN
     '01_if.py',
     '02_manual_clustering.py',
     '03_automatic_clustering.py',
@@ -33,17 +16,42 @@ scripts = [
     '05_temporal_continuity.py',
     '06_metrics.py'
 ]
+SHOW_OUTPUT = True  # TRUE = IMPRIMIR SALIDA EN PANTALLA
 
-log_print("[ INICIO ]")
+# CREAR CARPETA DE RESULTADOS
+os.makedirs(RESULTS_FOLDER, exist_ok=True)  # CREAR CARPETA SI NO EXISTE
 
-for s in scripts:
-    log_print(f"\n[ EJECUTANDO ] {s}\n")
+# CONFIGURAR LOG
+logging.basicConfig(
+    filename=LOG_FILE,
+    filemode='w' if LOG_OVERWRITE else 'a',  # SOBRESCRIBIR O ADJUNTAR
+    level=LOG_LEVEL,
+    format='%(message)s',  # SIN FECHA NI NIVEL
+    encoding='utf-8'
+)
+
+# FUNCIÓN AUXILIAR PARA LOG + PANTALLA
+def log_print(msg, level='info'):
+    """REGISTRAR MENSAJE EN LOG Y OPCIONALMENTE IMPRIMIR EN PANTALLA"""
+    if level == 'info':
+        logging.info(msg)
+        if SHOW_OUTPUT:
+            print(msg)
+    elif level == 'error':
+        logging.error(msg)
+        if SHOW_OUTPUT:
+            print(msg)
+
+# EJECUTAR SCRIPTS
+log_print("[ INICIO ]")  # MARCAR INICIO
+
+for script in SCRIPTS:
+    log_print(f"\n[ EJECUTANDO ] {script}\n")
     try:
-        # EJECUTAR SCRIPT Y CAPTURAR SALIDA EN TIEMPO REAL
         process = subprocess.Popen(
-            [sys.executable, s],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            [sys.executable, script],  # USAR INTERPRETE ACTUAL
+            stdout=subprocess.PIPE,    # CAPTURAR SALIDA
+            stderr=subprocess.PIPE,    # CAPTURAR ERRORES
             text=True,
             bufsize=1,
             universal_newlines=True
@@ -51,18 +59,17 @@ for s in scripts:
 
         # LEER SALIDA LÍNEA POR LÍNEA
         for line in process.stdout:
-            line = line.rstrip()
-            log_print(line)
+            log_print(line.rstrip())
 
+        # LEER ERRORES LÍNEA POR LÍNEA
         for line in process.stderr:
-            line = line.rstrip()
-            log_print(line, level='error')
+            log_print(line.rstrip(), level='error')
 
-        process.wait()
+        process.wait()  # ESPERAR FIN DEL PROCESO
         if process.returncode != 0:
-            log_print(f"[ ERROR ] {s} terminó con código {process.returncode}", level='error')
+            log_print(f"[ ERROR ] {script} terminó con código {process.returncode}", level='error')
 
     except Exception as e:
-        log_print(f"[ EXCEPCIÓN ] {s}: {e}", level='error')
+        log_print(f"[ EXCEPCIÓN ] {script}: {e}", level='error')
 
-log_print("\n[ FIN ]")
+log_print("\n[ FIN ]")  # MARCAR FIN DEL PROCESO

@@ -1,68 +1,81 @@
-# IMPORTS
 import subprocess
 import sys
 import logging
 import os
 
-# CREAR CARPETA SI NO EXISTE
-os.makedirs('../../results/preparation', exist_ok=True)
+# CONFIGURACIÓN GENERAL 
+RESULTS_DIR = '../../results/preparation'   # CARPETA PRINCIPAL DE RESULTADOS
+LOG_FILE = os.path.join(RESULTS_DIR, 'log.txt')  # ARCHIVO DE LOG
+OVERWRITE_LOG = True   # TRUE = SOBRESCRIBIR LOG, FALSE = AGREGAR
+SHOW_STDOUT = True     # TRUE = MOSTRAR SALIDA POR PANTALLA
+SHOW_STDERR = True     # TRUE = MOSTRAR ERRORES POR PANTALLA
 
-# CONFIGURAR LOG PARA SOBRESCRIBIR
+# LISTA DE SCRIPTS Y ACTIVACIÓN INDIVIDUAL
+SCRIPTS = [
+    {'name': '01_metrics.py', 'active': True},        # CALCULA MÉTRICAS INICIALES
+    {'name': '02_nulls.py', 'active': True},          # TRATAMIENTO DE NULOS
+    {'name': '03_codification.py', 'active': True},   # CODIFICACIÓN DE VARIABLES
+    {'name': '04_scale.py', 'active': True},          # ESCALADO DE DATOS
+    {'name': '05_variance.py', 'active': True},       # SELECCIÓN POR VARIANZA
+]
+
+# CREAR CARPETA DE RESULTADOS
+os.makedirs(RESULTS_DIR, exist_ok=True)  # CREAR CARPETA PRINCIPAL SI NO EXISTE
+
+# CONFIGURAR LOG
 logging.basicConfig(
-    filename='../../results/preparation/log.txt',  # Archivo de log
-    filemode='w',           # SOBRESCRIBIR cada ejecución
+    filename=LOG_FILE,
+    filemode='w' if OVERWRITE_LOG else 'a',  # SOBRESCRIBIR O AGREGAR LOG
     level=logging.INFO,
-    format='%(message)s',   # SIN fecha ni nivel
-    encoding='utf-8'        # Para acentos y ñ
+    format='%(message)s',                    # SOLO MENSAJE, SIN FECHA NI NIVEL
+    encoding='utf-8'                          # SOPORTE PARA ACENTOS Y Ñ
 )
 
 # FUNCIÓN AUXILIAR PARA LOG + PANTALLA
 def log_print(msg, level='info'):
+    """IMPRIME MENSAJE EN PANTALLA Y LO GUARDA EN LOG"""
     if level == 'info':
-        logging.info(msg)  # Se guarda en log.txt
-        print(msg)         # Se imprime en pantalla
+        logging.info(msg)
+        if SHOW_STDOUT:
+            print(msg)
     elif level == 'error':
         logging.error(msg)
-        print(msg)
+        if SHOW_STDERR:
+            print(msg)
 
-# LISTA DE SCRIPTS EN ORDEN
-scripts = [
-    '01_metrics.py',
-    '02_nulls.py',
-    '03_codification.py',
-    '04_scale.py',
-    '05_variance.py',
-]
+# EJECUCIÓN
+log_print("\n[ INICIO ]")  # MENSAJE INICIAL
 
-log_print("\n[ INICIO ]")
+for script in SCRIPTS:
+    if not script['active']:
+        log_print(f"[ SKIP ] {script['name']} DESACTIVADO")  # OMITIR SCRIPT DESACTIVADO
+        continue
 
-# EJECUTAR PIPELINE CON SALIDA EN TIEMPO REAL
-for script in scripts:
-    log_print(f"\n[ EJECUTANDO ] {script}\n")
+    log_print(f"\n[ EJECUTANDO SCRIPT ] {script['name']}\n")
     try:
-        # EJECUTAR SCRIPT Y LEER SALIDA LÍNEA A LÍNEA
+        # EJECUTAR SCRIPT Y CAPTURAR SALIDA EN TIEMPO REAL
         process = subprocess.Popen(
-            [sys.executable, script],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            [sys.executable, script['name']],  # PYTHON + SCRIPT
+            stdout=subprocess.PIPE,           # CAPTURAR SALIDA STDOUT
+            stderr=subprocess.PIPE,           # CAPTURAR ERRORES STDERR
             text=True,
             bufsize=1,
             universal_newlines=True
         )
 
-        # LEER SALIDA STANDARD
+        # LEER SALIDA STDOUT LÍNEA A LÍNEA
         for line in process.stdout:
             log_print(line.rstrip())
 
-        # LEER SALIDA DE ERRORES
+        # LEER SALIDA STDERR LÍNEA A LÍNEA
         for line in process.stderr:
             log_print(line.rstrip(), level='error')
 
-        process.wait()
+        process.wait()  # ESPERAR FINALIZACIÓN
         if process.returncode != 0:
-            log_print(f"[ ERROR ] {script} terminó con código {process.returncode}", level='error')
+            log_print(f"[ ERROR ] {script['name']} TERMINÓ CON CÓDIGO {process.returncode}", level='error')
 
     except Exception as e:
-        log_print(f"[ EXCEPCIÓN ] {script}: {e}", level='error')
+        log_print(f"[ EXCEPCIÓN ] {script['name']}: {e}", level='error')
 
-log_print("\n[ FIN ]")
+log_print("\n[ FIN ]")  
