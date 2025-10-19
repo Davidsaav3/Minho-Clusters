@@ -30,40 +30,24 @@ def add_sequence_column(df, anomaly_col):
     df['sequence'] = seq                          # AÑADIR COLUMNA DE SECUENCIA AL DATAFRAME
     return total_seq, max_seq                     # DEVOLVER TOTAL DE SECUENCIAS Y LONGITUD MÁXIMA
 
-# PROCESAR IF_GLOBAL.CSV
-if os.path.exists(IF_GLOBAL_FILE):
-    df_global = pd.read_csv(IF_GLOBAL_FILE)      # CARGAR CSV GLOBAL
-    is_anomaly_col = df_global['is_anomaly'] if 'is_anomaly' in df_global.columns else pd.Series([0]*len(df_global), name='is_anomaly')  # OBTENER COLUMNA is_anomaly
-    total_seq, max_seq = add_sequence_column(df_global, 'anomaly')  # CALCULAR SECUENCIAS DE ANOMALÍAS
-    df_global['is_anomaly'] = is_anomaly_col     # MANTENER COLUMNA ORIGINAL is_anomaly
-    df_global.to_csv(IF_GLOBAL_FILE, index=False) # GUARDAR CSV ACTUALIZADO
-    if SHOW_INFO:
-        print(f"[ GUARDADO ] if_global.csv actualizado con secuencias")
-        print(f"[ INFO ] Secuencias globales: {total_seq}, longitud máxima: {max_seq}")
+# LISTA DE TODOS LOS ARCHIVOS A PROCESAR
+files_to_process = [IF_GLOBAL_FILE, INPUT_IF_CSV] + glob.glob(CLUSTER_PATTERN)
+# SE INCLUYEN ARCHIVOS GLOBALES Y TODOS LOS CSV DE CLUSTERS
 
-# PROCESAR 01_IF.CSV
-df_if = pd.read_csv(INPUT_IF_CSV)               # CARGAR CSV DE IF POR CLUSTERS
-is_anomaly_col = df_if['is_anomaly'] if 'is_anomaly' in df_if.columns else pd.Series([0]*len(df_if), name='is_anomaly')  # OBTENER COLUMNA is_anomaly
-total_seq, max_seq = add_sequence_column(df_if, 'anomaly')  # CALCULAR SECUENCIAS
-df_if['is_anomaly'] = is_anomaly_col            # MANTENER COLUMNA ORIGINAL is_anomaly
-df_if.to_csv(INPUT_IF_CSV, index=False)         # GUARDAR CSV ACTUALIZADO
-if SHOW_INFO:
-    print(f"[ GUARDADO ] 01_if.csv actualizado con secuencias")
-    print(f"[ INFO ] Secuencias IF: {total_seq}, longitud máxima: {max_seq}")
+# PROCESAR TODOS LOS ARCHIVOS
+for file_path in files_to_process:
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path)             # CARGAR CSV
+        if 'anomaly' not in df.columns:         # OMITIR SI NO HAY COLUMNA ANOMALY
+            if SHOW_INFO:
+                print(f"[ SKIP ] No hay columna 'anomaly' en {file_path}")
+            continue
 
-# PROCESAR CSV DE CLUSTERS
-cluster_files = glob.glob(CLUSTER_PATTERN)      # LISTAR TODOS LOS CSV DE CLUSTERS
-for file_path in cluster_files:
-    df_cluster = pd.read_csv(file_path)         # CARGAR CSV DEL CLUSTER
-    if 'anomaly' not in df_cluster.columns:     # OMITIR SI NO HAY COLUMNA ANOMALY
+        total_seq, max_seq = add_sequence_column(df, 'anomaly')  # CALCULAR SECUENCIAS
+        # LA COLUMNA 'is_anomaly' SE MANTIENE IGUAL
+
+        df.to_csv(file_path, index=False)       # GUARDAR CSV ACTUALIZADO
+
         if SHOW_INFO:
-            print(f"[ SKIP ] No hay columna 'anomaly' en {file_path}")
-        continue
-
-    is_anomaly_col = df_cluster['is_anomaly'] if 'is_anomaly' in df_cluster.columns else pd.Series([0]*len(df_cluster), name='is_anomaly')  # OBTENER COLUMNA is_anomaly
-    total_seq, max_seq = add_sequence_column(df_cluster, 'anomaly')  # CALCULAR SECUENCIAS
-    df_cluster['is_anomaly'] = is_anomaly_col    # MANTENER COLUMNA ORIGINAL is_anomaly
-    df_cluster.to_csv(file_path, index=False)    # GUARDAR CSV ACTUALIZADO
-    if SHOW_INFO:
-        print(f"[ GUARDADO ] {file_path} actualizado con secuencias")
-        print(f"[ INFO ] Secuencias: {total_seq}, longitud máxima: {max_seq}")
+            print(f"[ GUARDADO ] {os.path.basename(file_path)} actualizado con secuencias")
+            print(f"[ INFO ] Secuencias: {total_seq}, longitud máxima: {max_seq}")

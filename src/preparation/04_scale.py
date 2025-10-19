@@ -1,12 +1,12 @@
 import pandas as pd  # PARA MANEJO DE DATAFRAMES
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, MaxAbsScaler  # ESCALADORES DE CARACTERÍSTICAS
 
-# PARÁMETROS CONFIGURABLES
+# PARÁMETROS 
 INPUT_FILE = '../../results/preparation/03_codification.csv'  # CSV DE ENTRADA YA CODIFICADO
 OUTPUT_FILE = '../../results/preparation/04_scale.csv'        # CSV ESCALADO QUE SE GUARDARÁ
 SCALER_TYPE = 'standard'                                      # TIPO DE ESCALADO: 'standard', 'minmax', 'robust', 'maxabs'
 SHOW_INFO = True                                              # MOSTRAR MENSAJES DE INFO EN PANTALLA
-SAVE_INTERMEDIATE = False                                     # GUARDAR DATASET INTERMEDIO ANTES DE ESCALAR
+SAVE_INTERMEDIATE = True                                     # GUARDAR DATASET INTERMEDIO ANTES DE ESCALAR
 FEATURES_TO_SCALE = None                                      # COLUMNAS A ESCALAR, NONE = TODAS
 CLIP_VALUES = False                                           # RECORTAR VALORES EXTREMOS DESPUÉS DEL ESCALADO
 CLIP_MIN = 0                                                  # VALOR MÍNIMO SI SE RECORTAN EXTREMOS

@@ -3,7 +3,7 @@ import sys          # USAR EL INTERPRETE ACTUAL DE PYTHON
 import logging      # REGISTRAR MENSAJES EN ARCHIVO
 import os           # CREAR CARPETAS Y MANEJAR RUTAS
 
-# PARÁMETROS CONFIGURABLES
+# PARÁMETROS 
 RESULTS_FOLDER = '../../results/execution'            # CARPETA DONDE SE GUARDAN RESULTADOS Y LOGS
 LOG_FILE = os.path.join(RESULTS_FOLDER, 'log.txt')   # ARCHIVO DE LOG
 LOG_LEVEL = logging.INFO                              # NIVEL DE LOG: DEBUG, INFO, WARNING, ERROR

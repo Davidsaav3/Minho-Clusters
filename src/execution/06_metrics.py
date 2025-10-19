@@ -19,12 +19,6 @@ columns_order = [
     'ratio_detection', 'ratio_fp', 'perc_global_anomalies_detected', 'perc_cluster_vs_global', 'total_coincidences'
 ]
 
-# CREAR CARPETAS SI NO EXISTEN
-os.makedirs(RESULTS_FOLDER, exist_ok=True)
-os.makedirs(EXECUTION_FOLDER, exist_ok=True)
-if SHOW_INFO:
-    print(f"[ INFO ] Carpetas creadas si no existían")
-
 # CARGAR IF GLOBAL
 files = glob.glob(os.path.join(EXECUTION_FOLDER, '*.csv'))           # LISTAR TODOS LOS CSV EN EJECUCIÓN
 global_files = [f for f in files if GLOBAL_FILE_PATTERN in os.path.basename(f)]  # FILTRAR EL CSV GLOBAL

@@ -1,18 +1,38 @@
 import pandas as pd  # PARA MANEJO DE DATAFRAMES
-from sklearn.impute import SimpleImputer  # PARA IMPUTAR VALORES NULOS
+from sklearn.impute import SimpleImputer  # PARA CORREGIR VALORES NULOS
 import json  # PARA GUARDAR INFORMACIÓN DE COLUMNAS EN FORMATO JSON
 
-# PARÁMETROS CONFIGURABLES
+# PARÁMETROS 
 INPUT_FILE = '../../data/dataset.csv'                  # RUTA DEL DATASET ORIGINAL
 OUTPUT_CSV = '../../results/preparation/02_nulls.csv'  # RUTA DEL DATASET FINAL SIN NULOS
 OUTPUT_JSON = '../../results/preparation/02_aux.json'  # RUTA DEL JSON CON INFORMACIÓN DE COLUMNAS
-NUMERIC_STRATEGY = 'median'                            # ESTRATEGIA DE IMPUTACIÓN PARA COLUMNAS NUMÉRICAS ('mean','median','constant')
-CATEGORICAL_STRATEGY = 'most_frequent'                 # ESTRATEGIA DE IMPUTACIÓN PARA COLUMNAS CATEGÓRICAS ('most_frequent','constant')
-FILL_CONSTANT_NUMERIC = 0                               # VALOR A USAR SI strategy='constant' PARA NUMÉRICOS
-FILL_CONSTANT_CATEGORICAL = 'unknown'                  # VALOR A USAR SI strategy='constant' PARA CATEGÓRICOS
+
+NUMERIC_STRATEGY = 'median'                            
+# ESTRATEGIA PARA RELLENAR NaN EN COLUMNAS NUMÉRICAS
+# OPCIONES:
+# - 'mean'       : REEMPLAZA CON LA MEDIA. IMPLICA QUE LOS DATOS SE AJUSTAN AL PROMEDIO, PERO PUEDE SER SENSIBLE A OUTLIERS.
+# - 'median'     : REEMPLAZA CON LA MEDIANA. RESISTENTE A OUTLIERS Y MANTIENE LA DISTRIBUCIÓN CENTRAL.
+# - 'constant'   : REEMPLAZA CON FILL_CONSTANT_NUMERIC. PUEDE INTRODUCIR SESGO SI EL VALOR NO REPRESENTA LA DISTRIBUCIÓN REAL.
+# IMPLICA QUE NO QUEDARÁN NaN Y LOS MODELOS PODRÁN PROCESAR TODAS LAS FILAS
+
+FILL_CONSTANT_NUMERIC = 0                               
+# VALOR FIJO PARA COLUMNAS NUMÉRICAS SI strategy='constant'
+# IMPLICA QUE TODOS LOS NaN SE CONVERTIRÁN EN 0, LO QUE PUEDE INTRODUCIR SESGO SI 0 NO ES REPRESENTATIVO
+
+CATEGORICAL_STRATEGY = 'most_frequent'                 
+# ESTRATEGIA PARA RELLENAR NaN EN COLUMNAS CATEGÓRICAS
+# OPCIONES:
+# - 'most_frequent' : REEMPLAZA CON LA CATEGORÍA MÁS FRECUENTE. PUEDE SESGAR HACIA ESA CATEGORÍA SI HAY MUCHOS NaN.
+# - 'constant'      : REEMPLAZA CON FILL_CONSTANT_CATEGORICAL. TRATA LOS NaN COMO NUEVA CATEGORÍA SEPARADA.
+# IMPLICA QUE NO HABRÁ NaN Y LAS COLUMNAS PODRÁN SER CODIFICADAS PARA MODELOS
+
+FILL_CONSTANT_CATEGORICAL = 'unknown'                  
+# VALOR FIJO PARA COLUMNAS CATEGÓRICAS SI strategy='constant'
+# IMPLICA QUE TODOS LOS NaN SE CONVERTIRÁN EN 'UNKNOWN' Y SE TRATARÁN COMO NUEVA CATEGORÍA EN LOS MODELOS
+
 REMOVE_EMPTY_COLUMNS = True                             # ELIMINAR COLUMNAS COMPLETAMENTE VACÍAS
 SHOW_INFO = True                                       # MOSTRAR MENSAJES INFORMATIVOS EN PANTALLA
-SAVE_INTERMEDIATE = False                              # GUARDAR CSV INTERMEDIO ANTES DE IMPUTAR NULOS
+SAVE_INTERMEDIATE = True                              # GUARDAR CSV INTERMEDIO ANTES DE CORREGIR NULOS
 
 # CARGAR DATASET
 df = pd.read_csv(INPUT_FILE)  # LEER EL CSV DE ENTRADA
@@ -28,8 +48,8 @@ if SHOW_INFO:
 # GUARDAR INFORMACIÓN INICIAL DE COLUMNAS
 columns_info = {
     'categorical': cat_cols,                # LISTA DE COLUMNAS CATEGÓRICAS DETECTADAS
-    'numeric_imputed': num_cols,            # COLUMNAS NUMÉRICAS QUE SE IMPUTARÁN
-    'categorical_imputed': cat_cols,        # COLUMNAS CATEGÓRICAS QUE SE IMPUTARÁN
+    'numeric_imputed': num_cols,            # COLUMNAS NUMÉRICAS QUE SE CORREGIRAN
+    'categorical_imputed': cat_cols,        # COLUMNAS CATEGÓRICAS QUE SE CORREGIRAN
     'removed_empty_columns': []             # COLUMNAS VACÍAS QUE SE ELIMINARÁN
 }
 
@@ -48,23 +68,23 @@ if SAVE_INTERMEDIATE:
     if SHOW_INFO:
         print(f"[ GUARDADO ] Dataset intermedio en '{intermediate_csv}'")
 
-# IMPUTAR COLUMNAS NUMÉRICAS
+# CORREGIR COLUMNAS NUMÉRICAS
 num_strategy_params = {'strategy': NUMERIC_STRATEGY}  # CONFIGURAR ESTRATEGIA
 if NUMERIC_STRATEGY == 'constant':  # SI USAMOS CONSTANTE, DEFINIR VALOR
     num_strategy_params['fill_value'] = FILL_CONSTANT_NUMERIC
 
 imputer_num = SimpleImputer(**num_strategy_params)  # CREAR OBJETO IMPUTER
-df[num_cols] = imputer_num.fit_transform(df[num_cols])  # IMPUTAR NULOS NUMÉRICOS
+df[num_cols] = imputer_num.fit_transform(df[num_cols])  # CORREGIR NULOS NUMÉRICOS
 if SHOW_INFO:
     print(f"[ INFO ] Valores nulos numéricos imputados con '{NUMERIC_STRATEGY}'")
 
-# IMPUTAR COLUMNAS CATEGÓRICAS
+# CORREGIR COLUMNAS CATEGÓRICAS
 cat_strategy_params = {'strategy': CATEGORICAL_STRATEGY}  # CONFIGURAR ESTRATEGIA
 if CATEGORICAL_STRATEGY == 'constant':  # SI USAMOS CONSTANTE, DEFINIR VALOR
     cat_strategy_params['fill_value'] = FILL_CONSTANT_CATEGORICAL
 
 imputer_cat = SimpleImputer(**cat_strategy_params)  # CREAR OBJETO IMPUTER
-df[cat_cols] = imputer_cat.fit_transform(df[cat_cols])  # IMPUTAR NULOS CATEGÓRICOS
+df[cat_cols] = imputer_cat.fit_transform(df[cat_cols])  # CORREGIR NULOS CATEGÓRICOS
 if SHOW_INFO:
     print(f"[ INFO ] Valores nulos categóricos imputados con '{CATEGORICAL_STRATEGY}'")
 
@@ -76,6 +96,6 @@ if SHOW_INFO:
 
 # GUARDAR INFORMACIÓN DE COLUMNAS EN JSON
 with open(OUTPUT_JSON, 'w') as f:
-    json.dump(columns_info, f, indent=4)  # GUARDAR COLUMNAS IMPUTADAS Y ELIMINADAS
+    json.dump(columns_info, f, indent=4)  # GUARDAR COLUMNAS CORREGIDAS Y ELIMINADAS
 if SHOW_INFO:
-    print(f"[ GUARDADO ] Columnas imputadas guardadas en '{OUTPUT_JSON}'")
+    print(f"[ GUARDADO ] Columnas CORREGIDAS guardadas en '{OUTPUT_JSON}'")

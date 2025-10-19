@@ -10,18 +10,12 @@ CLUSTERS_JSON = 'clusters.json'                         # JSON CON DEFINICIÓN D
 MANUAL_COLUMN = 'cluster_manual'                        # COLUMNA ADICIONAL A MANTENER SI EXISTE
 SHOW_INFO = True                                        # MOSTRAR INFORMACIÓN EN CONSOLA
 
-# CREAR CARPETAS SI NO EXISTEN
-os.makedirs(RESULTS_FOLDER, exist_ok=True)
-os.makedirs(EXECUTION_FOLDER, exist_ok=True)
-if SHOW_INFO:
-    print("[ INFO ] CARPETAS CREADAS SI NO EXISTÍAN")
-
 # CARGAR DATASET
 df = pd.read_csv(INPUT_CSV)
 if SHOW_INFO:
     print(f"[ INFO ] DATASET CARGADO DESDE '{INPUT_CSV}'")
 
-# SEPARAR COLUMNA is_anomaly PARA NO INCLUIRLA EN SUBCLUSTERS
+# SEPARAR COLUMNA is_anomaly PARA GENERAR CLUSTERS
 if 'is_anomaly' in df.columns:
     is_anomaly_column = df['is_anomaly']           # GUARDAR ETIQUETA ORIGINAL
     df_input = df.drop(columns=['is_anomaly'])     # ELIMINAR PARA NO USARLA EN CLUSTERS
@@ -41,7 +35,7 @@ for cluster_name, subparts in clusters.items():
         # FILTRAR COLUMNAS EXISTENTES EN EL DATASET
         cols_to_save = [c for c in cols if c in df_input.columns]
         
-        # AÑADIR COLUMNA MANUAL SI EXISTE
+        # AÑADIR COLUMNA SI EXISTE
         if MANUAL_COLUMN in df_input.columns:
             cols_to_save.append(MANUAL_COLUMN)
         

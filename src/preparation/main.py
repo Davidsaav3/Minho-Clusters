@@ -54,7 +54,7 @@ for script in SCRIPTS:
         log_print(f"[ SKIP ] {script['name']} DESACTIVADO")
         continue
 
-    log_print(f"\n[ EJECUTANDO  ] {script['name']}\n")
+    log_print(f"\n[ EJECUTANDO ] {script['name']}\n")
     try:
         # EJECUTAR SCRIPT USANDO EL INTERPRETE ACTUAL
         process = subprocess.Popen(
@@ -85,4 +85,4 @@ for script in SCRIPTS:
         log_print(f"[ EXCEPCIÓN ] {script['name']}: {e}", level='error')
 
 # MENSAJE FINAL DE TERMINACIÓN
-log_print("\n[ FIN DE EJECUCIÓN DE SCRIPTS ]")
+log_print("\n[ FIN ]")
