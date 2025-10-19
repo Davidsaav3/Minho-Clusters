@@ -23,7 +23,7 @@ REPLACE_SPACES = '-'        # REEMPLAZA ESPACIOS EN LOS NOMBRES DE NUEVAS COLUMN
 df = pd.read_csv(INPUT_FILE)  
 print(f"[ INFO ] Dataset cargado: {df.shape[0]} FILAS, {df.shape[1]} COLUMNAS")  # MUESTRA DIMENSIONES DEL DATASET
 
-# INICIALIZAR DICCIONARIO PARA REGISTRAR MODIFICACIONES REALIZADAS
+# INICIALIZAR ARCHIVO AUX PARA REGISTRAR MODIFICACIONES REALIZADAS
 columns_changes = {
     'fecha_to_timestamp': [],     # COLUMNAS DE FECHA CONVERTIDAS A TIMESTAMP
     'hora_to_seconds': [],        # COLUMNAS DE HORA CONVERTIDAS A SEGUNDOS
@@ -41,7 +41,7 @@ for col in ['datetime', 'date']:                         # RECORRE COLUMNAS DE F
         # CONVIERTE EL DATETIME A SEGUNDOS DESDE 1970 (UNIX TIMESTAMP)
         # IMPLICA QUE EL RESULTADO ES NUMÉRICO (INT) Y ADECUADO PARA CÁLCULOS MATEMÁTICOS
         # DIVIDIR ENTRE 10**9: CONVIERTE DE NANOS A SEGUNDOS
-        columns_changes['fecha_to_timestamp'].append(col) # REGISTRA CAMBIO EN EL DICCIONARIO
+        columns_changes['fecha_to_timestamp'].append(col) # REGISTRA CAMBIO EN EL ARCHIVO AUX
 print("[ INFO ] Columnas de fecha convertidas a segundos desde 1970 (incluyendo hora y minuto)")
 
 hora_cols = [c for c in FECHA_COLS if c not in ['datetime', 'date']]  # SELECCIONA COLUMNAS DE HORA EXCLUYENDO FECHAS PRINCIPALES

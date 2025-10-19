@@ -82,10 +82,66 @@ plt.ylabel("Frequency")                                      # ETIQUETA EJE Y
 if SAVE_FIGURES:
     plt.savefig(f"{RESULTS_FOLDER}/03_anomaly_score_distribution.png", dpi=300)  # GUARDA EL HISTOGRAMA
 plt.close()
+# Parámetros
+RESULTS_FOLDER = '../../results/execution/plots'
+SAVE_FIGURES = True
+
+# 4. Cargar archivo del cluster
+# 4. Cargar archivo del cluster
+df_cluster = pd.read_csv('../../results/execution/cluster_ubicacion_Ull_Pueblo.csv')
+
+# Asegurar columna 'sequence'
+if 'sequence' not in df_cluster.columns:
+    df_cluster['sequence'] = 0
+
+# Filtrar secuencias activas (>0) o usar todas si no hay ninguna
+if df_cluster['sequence'].sum() > 0:
+    df_sequences = df_cluster[df_cluster['sequence'] > 0].copy()
+else:
+    df_sequences = df_cluster.copy()
+
+# Agrupar por 'datetime' (texto) y sumar secuencias
+df_plot = df_sequences.groupby('datetime', as_index=False)['sequence'].sum()
+
+# Si no hay datos, rellenar con 0 para evitar gráfico vacío
+if df_plot.empty:
+    df_plot = pd.DataFrame({
+        'datetime': ['no_data'],
+        'sequence': [0]
+    })
+
+# Convertir datetime a categoría ordenada
+df_plot['datetime_cat'] = pd.Categorical(df_plot['datetime'], categories=df_plot['datetime'], ordered=True)
+
+# Crear gráfico de barras ancho
+plt.figure(figsize=(24, 6))
+sns.barplot(
+    data=df_plot,
+    x='datetime_cat',
+    y='sequence',
+    color='skyblue'
+)
+
+plt.title("Temporal Distribution of Repeated Anomalies (Sequence Length)")
+plt.xlabel("Datetime")
+plt.ylabel("Total Anomaly Sequence Length")
+
+# Reducir número de etiquetas X para que no colapse
+max_labels = 20
+step = max(1, len(df_plot) // max_labels)
+plt.xticks(rotation=45)
+plt.xticks(ticks=range(0, len(df_plot), step), labels=df_plot['datetime'][::step])
+
+# Guardar figura
+if SAVE_FIGURES:
+    os.makedirs(RESULTS_FOLDER, exist_ok=True)
+    plt.savefig(f"{RESULTS_FOLDER}/04_anomaly_sequence_over_time.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+print("[ INFO ] Gráfico 4 guardado para el cluster")
 
 
 
-# Rutas y parámetros
 CLUSTER_FILES_PATH = '../../results/execution/cluster_*.csv'
 RESULTS_FOLDER = '../../results/execution/plots'
 SAVE_FIGURES = True
@@ -94,44 +150,6 @@ target_cluster_name = "cluster_ubicacion_Ull_Pueblo.csv"  # Cluster específico
 # Buscar archivo del cluster
 cluster_files = glob.glob(CLUSTER_FILES_PATH)
 selected_files = [f for f in cluster_files if target_cluster_name in os.path.basename(f)]
-
-if selected_files:
-    cluster_file = selected_files[0]
-    df_cluster = pd.read_csv(cluster_file)
-
-    # Asegurar columna 'sequence'
-    if 'sequence' not in df_cluster.columns:
-        df_cluster['sequence'] = 0
-
-    # Filtrar solo secuencias activas
-    df_sequences = df_cluster[df_cluster['sequence'] > 0].copy()
-
-    # Agrupar por valor textual de 'datetime'
-    df_plot = df_sequences.groupby('datetime')['sequence'].sum().reset_index()
-
-    # Crear gráfico de barras doble ancho
-    plt.figure(figsize=(24, 6))
-    sns.barplot(
-        data=df_plot,
-        x='datetime',
-        y='sequence',
-        color='skyblue'
-    )
-    plt.title(f"Temporal Distribution of Repeated Anomalies (Sequence Length) - {target_cluster_name}")
-    plt.xlabel("Datetime")
-    plt.ylabel("Total Anomaly Sequence Length")
-    plt.xticks(rotation=90)  # Rota etiquetas X para mejor lectura
-
-    # Guardar figura
-    if SAVE_FIGURES:
-        os.makedirs(RESULTS_FOLDER, exist_ok=True)
-        plt.savefig(f"{RESULTS_FOLDER}/04_anomaly_sequence_over_time.png", dpi=300, bbox_inches='tight')
-    plt.close()
-    print(f"[ INFO ] Gráfico 4 guardado para el cluster: {target_cluster_name}")
-else:
-    print(f"[ WARN ] No se encontraron archivos de clusters con '{target_cluster_name}' en el nombre.")
-
-
 
 dfs_clusters = []    
 # 5 y 6 CARGA Y COMBINA LOS ARCHIVOS DE CLUSTERS
@@ -188,3 +206,48 @@ plt.legend(title='Cluster', bbox_to_anchor=(1.05, 1), loc='upper left')
 if SAVE_FIGURES:
     plt.savefig(f"{RESULTS_FOLDER}/06_temporal_score_by_cluster.png", dpi=300, bbox_inches='tight')
 plt.close()
+
+# CARGA MÉTRICAS DE RENDIMIENTO
+df_summary = pd.read_csv(RESULTS_SUMMARY_CSV)          # Carga el CSV con las métricas calculadas de los modelos
+df_summary.set_index('file', inplace=True)             # Usa el nombre del archivo (método o modelo) como índice
+
+# 7. GRÁFICO DE MÉTRICAS DE RENDIMIENTO
+metrics = ['precision', 'recall', 'f1_score', 'accuracy', 'mcc']  # Lista de métricas a visualizar
+df_summary[metrics].plot(kind='bar', figsize=(16, 6))              # Gráfico de barras comparando el rendimiento por método
+plt.title("Performance Metrics per Method / File")                 # Título del gráfico
+plt.ylabel("Score")                                                # Etiqueta eje Y
+plt.ylim(0, 1.1)                                                   # Escala del eje Y de 0 a 1.1 para ver bien las diferencias
+plt.xticks(rotation=45, ha='right')                                # Rota las etiquetas X
+plt.legend(title='Metric')                                         # Muestra la leyenda de métricas
+plt.tight_layout()                                                 # Ajusta márgenes
+if SAVE_FIGURES:
+    plt.savefig(f"{RESULTS_FOLDER}/07_metrics_comparison.png", dpi=300)  # Guarda la figura
+plt.close()
+
+# 8. RATIO DE DETECCIÓN VS FALSOS POSITIVOS
+ratio_metrics = ['anomalies_real','anomalies_detected','detections_correct', 'total_coincidences']                    # Selecciona las métricas de ratio
+df_summary[ratio_metrics].plot(kind='bar',figsize=(16, 6),)
+plt.title("Ratio Detection vs False Positives")                    # Título del gráfico
+plt.ylabel("Ratio")                                                # Etiqueta eje Y
+plt.xticks(rotation=45, ha='right')                                # Rota etiquetas X
+plt.tight_layout()
+if SAVE_FIGURES:
+    plt.savefig(f"{RESULTS_FOLDER}/08_ratio_detection_fp.png", dpi=300)  # Guarda la figura
+plt.close()
+
+# 9. TRUE POSITIVES, FALSE POSITIVES, FALSE NEGATIVES
+df_summary[['detections_correct', 'false_positives', 'false_negatives']].plot(
+    kind='bar',
+    figsize=(16, 6),
+    color=['blue', 'green', 'red']  # Verde = correct detections, Rojo = FP, Naranja = FN
+)
+plt.title("True Positives, False Positives and False Negatives")
+plt.ylabel("Count")
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+if SAVE_FIGURES:
+    plt.savefig(f"{RESULTS_FOLDER}/09_tp_fp_fn.png", dpi=300)
+plt.close()
+
+# MENSAJE FINAL DE CONFIRMACIÓN
+print("Visualizations saved in:", RESULTS_FOLDER)  # Mensaje en consola confirmando la ubicación de las gráficas
