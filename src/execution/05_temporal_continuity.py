@@ -6,9 +6,14 @@ import os                                        # IMPORTAR OS PARA MANEJO DE RU
 RESULTS_FOLDER = '../../results'                # CARPETA PRINCIPAL DE RESULTADOS
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
 IF_GLOBAL_FILE = os.path.join(EXECUTION_FOLDER, 'if_global.csv')  # CSV GLOBAL DE IF
-INPUT_IF_CSV = os.path.join(EXECUTION_FOLDER, '01_if.csv')        # CSV DE IF POR CLUSTERS
 CLUSTER_PATTERN = os.path.join(EXECUTION_FOLDER, 'cluster_*.csv') # PATRÓN DE CSV DE CLUSTERS
 SHOW_INFO = True                                # MOSTRAR INFORMACIÓN EN CONSOLA
+
+# BUSCAR ARCHIVOS QUE EMPIECEN POR 'cluster_' PERO NO TERMINEN EN '_if.csv'
+cluster_files = [
+    f for f in glob.glob(CLUSTER_PATTERN)
+    if not f.endswith('_if.csv')
+]
 
 # FUNCIÓN AUXILIAR PARA CALCULAR SECUENCIAS DE ANOMALÍAS
 def add_sequence_column(df, anomaly_col):
@@ -31,7 +36,7 @@ def add_sequence_column(df, anomaly_col):
     return total_seq, max_seq                     # DEVOLVER TOTAL DE SECUENCIAS Y LONGITUD MÁXIMA
 
 # LISTA DE TODOS LOS ARCHIVOS A PROCESAR
-files_to_process = [IF_GLOBAL_FILE, INPUT_IF_CSV] + glob.glob(CLUSTER_PATTERN)
+files_to_process = [IF_GLOBAL_FILE] + cluster_files
 # SE INCLUYEN ARCHIVOS GLOBALES Y TODOS LOS CSV DE CLUSTERS
 
 # PROCESAR TODOS LOS ARCHIVOS

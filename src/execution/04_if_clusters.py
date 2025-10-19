@@ -1,20 +1,19 @@
 import pandas as pd
 from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
 import glob
 import os
 import numpy as np
 
-# PARÁMETROS 
-RESULTS_FOLDER = '../../results'                        
-EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')
-CLUSTER_PATTERN = 'cluster_*.csv'  # PATRÓN DE ARCHIVOS DE CLUSTERS
+# PARÁMETROS GENERALES
+RESULTS_FOLDER = '../../results'  # Carpeta principal de resultados
+EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # Carpeta de ejecución
+CLUSTER_PATTERN = 'cluster_*.csv'  # Patrón de archivos de clusters
 
-SAVE_ANOMALY_CSV = True  
-# TRUE = GUARDAR CSV SOLO CON ANOMALÍAS DETECTADAS
-SORT_ANOMALY_SCORE = True  
-# TRUE = ORDENAR CSV DE ANOMALÍAS POR SCORE (MÁS ANÓMALAS ARRIBA)
-INCLUDE_SCORE = True  
-# TRUE = INCLUIR COLUMNA 'anomaly_score' EN CSV DE ANOMALÍAS
+SAVE_ANOMALY_CSV = True  # Guardar solo anomalías detectadas
+SORT_ANOMALY_SCORE = True  # Ordenar CSV de anomalías por score (más anómalas arriba)
+INCLUDE_SCORE = True  # Incluir columna 'anomaly_score' en CSV de anomalías
+NORMALIZE_SCORE = True  # Activar/desactivar normalización de anomaly_score entre 0 y 1
 
 # HIPERPARÁMETROS ISOLATION FOREST
 N_ESTIMATORS = 100
@@ -46,26 +45,28 @@ VERBOSE = 0
 SHOW_INFO = True
 # TRUE = MOSTRAR INFORMACIÓN DEL PROCESO EN CONSOLA
 
-# LISTAR ARCHIVOS
-files = glob.glob(os.path.join(EXECUTION_FOLDER, CLUSTER_PATTERN))  # LISTAR CSV DE CLUSTERS
+
+# LISTAR ARCHIVOS DE CLUSTERS
+files = glob.glob(os.path.join(EXECUTION_FOLDER, CLUSTER_PATTERN))
 if SHOW_INFO:
     print(f"[ INFO ] ARCHIVOS ENCONTRADOS PARA IF: {len(files)}")
 
 # PROCESAR CADA ARCHIVO
 for file_path in files:
-    df = pd.read_csv(file_path)  # CARGAR CSV
+    # Cargar CSV
+    df = pd.read_csv(file_path)
     if SHOW_INFO:
         print(f"[ INFO ] PROCESANDO {file_path}: {df.shape[0]} FILAS, {df.shape[1]} COLUMNAS")
 
-    # SEPARAR COLUMNA 'is_anomaly' SI EXISTE
+    # SEPARAR COLUMNA 'is_anomaly'
     if 'is_anomaly' in df.columns:
-        df_input = df.drop(columns=['is_anomaly'])  # ELIMINAR COLUMNA ORIGINAL
-        is_anomaly_column = df['is_anomaly']       # GUARDAR COLUMNA PARA POSTERIOR USO
+        df_input = df.drop(columns=['is_anomaly'])  # No usar en entrenamiento
+        is_anomaly_column = df['is_anomaly']  # Guardar para comparación posterior
     else:
         df_input = df.copy()
-        is_anomaly_column = pd.Series([0]*len(df_input), name='is_anomaly')  # CREAR COLUMNA FALSA
+        is_anomaly_column = pd.Series([0]*len(df_input), name='is_anomaly')  # Crear columna temporal
 
-    # SELECCIONAR COLUMNAS NUMÉRICAS PARA IF
+    # SELECCIONAR COLUMNAS NUMÉRICAS
     num_cols = df_input.select_dtypes(include=['int64', 'float64']).columns.tolist()
     if len(num_cols) == 0:
         if SHOW_INFO:
@@ -73,6 +74,10 @@ for file_path in files:
         continue
     if SHOW_INFO:
         print(f"[ INFO ] NÚMERO DE COLUMNAS NUMÉRICAS: {len(num_cols)}")
+
+    # ESCALAR DATOS
+    scaler = StandardScaler()  # Evitar que columnas con gran magnitud dominen la detección
+    df_scaled = scaler.fit_transform(df_input[num_cols])  # Transformación estándar (media=0, std=1)
 
     # CONFIGURAR ISOLATION FOREST
     clf = IsolationForest(
@@ -86,33 +91,55 @@ for file_path in files:
         verbose=VERBOSE
     )
 
-    # ENTRENAR Y PREDECIR ANOMALÍAS
-    clf.fit(df_input[num_cols])                          # ENTRENAMIENTO
-    df['anomaly'] = np.where(clf.predict(df_input[num_cols]) == 1, 0, 1)  # PREDICCIÓN 0=NORMAL, 1=ANOMALÍA
-    df['anomaly_score'] = clf.decision_function(df_input[num_cols]) * -1  # CALCULAR SCORE
-    df['is_anomaly'] = is_anomaly_column               # AÑADIR COLUMNA ORIGINAL
+    # ENTRENAMIENTO Y PREDICCIÓN
+    clf.fit(df_scaled)  # Entrenar bosque de aislamiento
+    anomaly_score = clf.decision_function(df_scaled) * -1  # Score: más positivo = más anómalo
+    pred = clf.predict(df_scaled)  # Predicción de anomalías
+    df['anomaly'] = np.where(pred == 1, 0, 1)  # Convertir a 0=normal, 1=anomalía
 
-    # INFORMACIÓN GENERAL
-    total_anomalies = df['anomaly'].sum()             # CONTAR ANOMALÍAS
-    total_normals = df.shape[0] - total_anomalies    # CONTAR NORMALES
+    # Añadir score y columna original de referencia
+    df['anomaly_score'] = anomaly_score
+    df['is_anomaly'] = is_anomaly_column
+
+    # INFORMACIÓN GENERAL SOBRE ANOMALÍAS
+    num_anomalies = df['anomaly'].sum()
+    num_normals = df.shape[0] - num_anomalies
     if SHOW_INFO:
-        print(f"[ INFO ] ANOMALÍAS DETECTADAS: {total_anomalies}")
-        print(f"[ INFO ] REGISTROS NORMALES: {total_normals}")
-        print(f"[ INFO ] PORCENTAJE ANOMALÍAS: {total_anomalies/df.shape[0]*100:.2f}%")
+        print(f"[ INFO ] REGISTROS TOTALES: {df.shape[0]}")
+        print(f"[ INFO ] ANOMALÍAS DETECTADAS: {num_anomalies}")
+        print(f"[ INFO ] REGISTROS NORMALES: {num_normals}")
+        print(f"[ INFO ] PORCENTAJE ANOMALÍAS: {num_anomalies/df.shape[0]*100:.2f}%")
 
-    # GUARDAR CSV COMPLETO CON PREDICCIONES
+    # GUARDAR CSV COMPLETO
     df.to_csv(file_path, index=False)
     if SHOW_INFO:
         print(f"[ GUARDADO ] RESULTADOS IF COMPLETOS EN {file_path}")
 
     # GUARDAR CSV SOLO CON ANOMALÍAS
     if SAVE_ANOMALY_CSV:
-        df_anomalies = df[df['anomaly'] == 1].copy()  # FILTRAR ANOMALÍAS
+        df_anomalies = df[df['anomaly'] == 1].copy()  # Filtrar solo anomalías
+        df_anomalies['anomaly_score'] = df_anomalies['anomaly_score'].astype(float)
+
+        # Normalizar anomaly_score entre 0 y 1 si NORMALIZE_SCORE está activado
+        if NORMALIZE_SCORE:
+            min_score = df_anomalies['anomaly_score'].min()
+            max_score = df_anomalies['anomaly_score'].max()
+            if max_score > min_score:  # Evitar división por cero
+                df_anomalies['anomaly_score'] = (df_anomalies['anomaly_score'] - min_score) / (max_score - min_score)
+
+        # Ordenar de mayor a menor si está activado
         if SORT_ANOMALY_SCORE:
-            df_anomalies = df_anomalies.sort_values(by='anomaly_score', ascending=False)  # ORDENAR
+            df_anomalies = df_anomalies.sort_values(
+                by='anomaly_score',
+                ascending=False
+            ).reset_index(drop=True)
+
+        # Eliminar score si no se desea incluir
         if not INCLUDE_SCORE:
-            df_anomalies = df_anomalies.drop(columns=['anomaly_score'])  # ELIMINAR SCORE SI NO SE INCLUYE
-        output_anomaly_csv = file_path.replace('.csv', '_if.csv')  # NOMBRE CSV ANOMALÍAS
+            df_anomalies.drop(columns=['anomaly_score'], inplace=True)
+
+        # Guardar CSV de anomalías
+        output_anomaly_csv = file_path.replace('.csv', '_if.csv')
         df_anomalies.to_csv(output_anomaly_csv, index=False)
         if SHOW_INFO:
             print(f"[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN {output_anomaly_csv}")

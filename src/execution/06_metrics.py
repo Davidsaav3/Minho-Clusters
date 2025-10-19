@@ -16,7 +16,7 @@ SHOW_INFO = True                                 # MOSTRAR INFORMACIÓN EN CONSO
 columns_order = [
     'file', 'anomalies_real', 'anomalies_detected', 'detections_correct', 'false_positives', 'false_negatives',
     'total_sequences', 'max_sequence', 'precision', 'recall', 'f1_score', 'accuracy', 'mcc',
-    'ratio_detection', 'ratio_fp', 'perc_global_anomalies_detected', 'perc_cluster_vs_global', 'total_coincidences'
+    'ratio_detection', 'ratio_fp', 'ratio_fn', 'perc_global_anomalies_detected', 'perc_cluster_vs_global', 'total_coincidences'
 ]
 
 # CARGAR IF GLOBAL
@@ -59,6 +59,7 @@ csv_rows = [{
     'mcc': round(matthews_corrcoef(y_true_global, y_pred_global),4),                      # MCC
     'ratio_detection': round(recall_score(y_true_global, y_pred_global, zero_division=0),4),  # RATIO DE DETECCIÓN
     'ratio_fp': round(fp_global / len(y_true_global),4) if len(y_true_global)>0 else 0,  # RATIO FALSOS POSITIVOS
+    'ratio_fn': round(fp_global / len(y_true_global),4) if len(y_true_global)>0 else 0,  # RATIO FALSOS POSITIVOS
     'perc_global_anomalies_detected': 100.0,                                    # PORCENTAJE GLOBAL DETECTADO
     'perc_cluster_vs_global': 100.0,                                           # % CLUSTER VS GLOBAL
     'total_coincidences': tp_global                                              # COINCIDENCIAS TOTALES
@@ -109,6 +110,7 @@ for cluster_name, subclusters in clusters_json.items():                   # ITER
             'mcc': round(matthews_corrcoef(y_true_global, y_pred),4),
             'ratio_detection': round(recall_score(y_true_global, y_pred, zero_division=0),4),
             'ratio_fp': round(fp / len(y_true_global),4) if len(y_true_global)>0 else 0,
+            'ratio_fn': round(fp / len(y_true_global),4) if len(y_true_global)>0 else 0,
             'perc_global_anomalies_detected': perc_global_anomalies_detected,
             'perc_cluster_vs_global': perc_cluster_vs_global,
             'total_coincidences': int(tp)
