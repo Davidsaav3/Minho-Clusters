@@ -1,30 +1,30 @@
-import subprocess  # EJECUTAR OTROS SCRIPTS DESDE PYTHON
-import sys          # USAR EL INTERPRETE ACTUAL DE PYTHON
-import logging      # REGISTRAR MENSAJES EN ARCHIVO
-import os           # CREAR CARPETAS Y MANEJAR RUTAS
+import subprocess  
+import sys          
+import logging     
+import os           
 
 # PARÁMETROS 
-RESULTS_FOLDER = '../../results/execution'            # CARPETA DONDE SE GUARDAN RESULTADOS Y LOGS
-LOG_FILE = os.path.join(RESULTS_FOLDER, 'log.txt')   # ARCHIVO DE LOG
+RESULTS_FOLDER = '../../results/execution'           
+LOG_FILE = os.path.join(RESULTS_FOLDER, 'log.txt')  
 LOG_LEVEL = logging.INFO                              # NIVEL DE LOG: DEBUG, INFO, WARNING, ERROR
 LOG_OVERWRITE = True                                  # TRUE = SOBRESCRIBIR LOG CADA EJECUCIÓN
 
 # LISTA DE SCRIPTS A EJECUTAR EN ORDEN
 SCRIPTS = [   
-    '00_ contaminate.py',           # SCRIPT 0: CONTAMINAR DATASET
-    '01_if.py',                      # SCRIPT 1: DETECCIÓN GLOBAL DE ANOMALÍAS
-    '02_manual_clustering.py',       # SCRIPT 2: CLUSTERING MANUAL
-    '03_automatic_clustering.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
-    '04_if_clusters.py',             # SCRIPT 4: DETECCIÓN DE ANOMALÍAS POR CLUSTER
+    '01_ contaminate.py',           # SCRIPT 1: CONTAMINAR DATASET
+    '02_clustering_vertical.py',      # SCRIPT 2: CLUSTERING MANUAL
+    '03_clustering_horizontal.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
+    '04_if.py',                     # SCRIPT 4: DETECCIÓN DE ANOMALÍAS
     '05_temporal_continuity.py',    # SCRIPT 5: SECUENCIAS TEMPORALES
-    '06_metrics.py',                 # SCRIPT 6: CÁLCULO DE MÉTRICAS
-    '07_visualize.py'                # SCRIPT 7: VISUALIZACIÓN DE RESULTADOS
+
+    '06_metrics.py',                # SCRIPT 6: CÁLCULO DE MÉTRICAS
+    '07_visualize.py'               # SCRIPT 7: VISUALIZACIÓN DE RESULTADOS
 ]
 
-SHOW_OUTPUT = True  # TRUE = IMPRIMIR SALIDA DE LOS SCRIPTS EN PANTALLA
+SHOW_OUTPUT = True  
 
 # CREAR CARPETA DE RESULTADOS
-os.makedirs(RESULTS_FOLDER, exist_ok=True)  # CREAR CARPETA SI NO EXISTE
+os.makedirs(RESULTS_FOLDER, exist_ok=True) 
 
 # CONFIGURAR LOG
 logging.basicConfig(

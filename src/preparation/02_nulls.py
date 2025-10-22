@@ -76,7 +76,7 @@ if NUMERIC_STRATEGY == 'constant':  # SI USAMOS CONSTANTE, DEFINIR VALOR
 imputer_num = SimpleImputer(**num_strategy_params)  # CREAR OBJETO IMPUTER
 df[num_cols] = imputer_num.fit_transform(df[num_cols])  # CORREGIR NULOS NUMÉRICOS
 if SHOW_INFO:
-    print(f"[ INFO ] Valores nulos numéricos imputados con '{NUMERIC_STRATEGY}'")
+    print(f"[ INFO ] Valores nulos numéricos corregidos con '{NUMERIC_STRATEGY}'")
 
 # CORREGIR COLUMNAS CATEGÓRICAS
 cat_strategy_params = {'strategy': CATEGORICAL_STRATEGY}  # CONFIGURAR ESTRATEGIA
@@ -86,7 +86,7 @@ if CATEGORICAL_STRATEGY == 'constant':  # SI USAMOS CONSTANTE, DEFINIR VALOR
 imputer_cat = SimpleImputer(**cat_strategy_params)  # CREAR OBJETO IMPUTER
 df[cat_cols] = imputer_cat.fit_transform(df[cat_cols])  # CORREGIR NULOS CATEGÓRICOS
 if SHOW_INFO:
-    print(f"[ INFO ] Valores nulos categóricos imputados con '{CATEGORICAL_STRATEGY}'")
+    print(f"[ INFO ] Valores nulos categóricos corregidos con '{CATEGORICAL_STRATEGY}'")
 
 # GUARDAR DATASET FINAL
 df.to_csv(OUTPUT_CSV, index=False)  # GUARDAR CSV FINAL SIN NULOS

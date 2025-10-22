@@ -5,7 +5,7 @@ import json
 # PARÁMETROS
 RESULTS_FOLDER = '../../results'                         # CARPETA PRINCIPAL DE RESULTADOS
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
-INPUT_CSV = '../../results/execution/00_contaminated.csv'     # CSV DE ENTRADA
+INPUT_CSV = '../../results/execution/01_contaminated.csv'     # CSV DE ENTRADA
 CLUSTERS_JSON = 'clusters.json'                         # JSON CON DEFINICIÓN DE CLUSTERS
 MANUAL_COLUMN = 'cluster_manual'                        # COLUMNA ADICIONAL A MANTENER SI EXISTE
 SHOW_INFO = True                                        # MOSTRAR INFORMACIÓN EN CONSOLA

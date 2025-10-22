@@ -5,7 +5,7 @@ import os                                        # IMPORTAR OS PARA MANEJO DE RU
 # PARÁMETROS DE CONFIGURACIÓN
 RESULTS_FOLDER = '../../results'                # CARPETA PRINCIPAL DE RESULTADOS
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DE EJECUCIÓN
-IF_GLOBAL_FILE = os.path.join(EXECUTION_FOLDER, 'if_global.csv')  # CSV GLOBAL DE IF
+GLOBAL_FILE = os.path.join(EXECUTION_FOLDER, '04_global.csv')  # CSV GLOBAL DE IF
 CLUSTER_PATTERN = os.path.join(EXECUTION_FOLDER, 'cluster_*.csv') # PATRÓN DE CSV DE CLUSTERS
 SHOW_INFO = True                                # MOSTRAR INFORMACIÓN EN CONSOLA
 
@@ -36,7 +36,7 @@ def add_sequence_column(df, anomaly_col):
     return total_seq, max_seq                     # DEVOLVER TOTAL DE SECUENCIAS Y LONGITUD MÁXIMA
 
 # LISTA DE TODOS LOS ARCHIVOS A PROCESAR
-files_to_process = [IF_GLOBAL_FILE] + cluster_files
+files_to_process = [GLOBAL_FILE] + cluster_files
 # SE INCLUYEN ARCHIVOS GLOBALES Y TODOS LOS CSV DE CLUSTERS
 
 # PROCESAR TODOS LOS ARCHIVOS
