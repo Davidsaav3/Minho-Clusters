@@ -165,7 +165,8 @@ for file in selected_files:                                    # RECORRE CADA AR
 
 # CONCATENA TODOS LOS DATAFRAMES EN UNO SOLO
 df_all_clusters = pd.concat(dfs_clusters, ignore_index=True)
-
+df_if = pd.read_csv(GLOBAL_CSV)
+ 
 # 5. SCATTER DETALLADO CON LEYENDA
 plt.figure(figsize=(12, 6))
 sns.scatterplot(

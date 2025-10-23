@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 # CONFIGURACIÓN DE PARÁMETROS
-INPUT_CSV = '../../results/preparation/05_variance.csv'       # ARCHIVO DE ENTRADA DEL DATASET
+INPUT_CSV = '../../results/preparation/05_variance_recortado.csv'       # ARCHIVO DE ENTRADA DEL DATASET
 OUTPUT_CSV = '../../results/execution/01_contaminated.csv'    # ARCHIVO DE SALIDA DEL DATASET CONTAMINADO
 RESULTS_FOLDER = '../../results/preparation'                  # CARPETA PARA RESULTADOS INTERMEDIOS
 
@@ -99,10 +99,3 @@ if ADD_LABEL:
 df_contaminated.to_csv(OUTPUT_CSV, index=False)
 if SHOW_INFO:
     print(f"[ GUARDADO ] DATASET CONTAMINADO EN '{OUTPUT_CSV}'")
-
-# OPCIONAL: GUARDAR COLUMNAS EXCLUIDAS
-if ignored_cols:
-    ignored_path = os.path.join(RESULTS_FOLDER, 'ignored_columns.csv')
-    pd.Series(ignored_cols, name='not_contaminated_columns').to_csv(ignored_path, index=False)
-    if SHOW_INFO:
-        print(f"[ GUARDADO ] LISTA DE COLUMNAS NO CONTAMINADAS EN '{ignored_path}'")

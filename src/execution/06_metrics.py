@@ -31,9 +31,31 @@ if 'anomaly' not in df_global.columns:
 if 'sequence' not in df_global.columns:
     raise ValueError("[ ERROR ] No existe columna 'sequence' en IF global")
 
+def contar_secuencias(col):
+    seq = col.fillna(0).reset_index(drop=True)
+    n = len(seq)
+    count = 0
+    i = 0
+    while i < n:
+        if seq[i] == 0:
+            i += 1
+            continue
+        # Detectar bloque no-cero
+        j = i
+        bloque = []
+        while j < n and seq[j] != 0:
+            bloque.append(seq[j])
+            j += 1
+        # Contar si el bloque tiene al menos una secuencia creciente consecutiva
+        if len(bloque) >= 2 and all(bloque[k] == bloque[k-1] + 1 for k in range(1, len(bloque))):
+            count += 1
+        i = j  # saltar al siguiente bloque
+    return count
+
 # DEFINIR VARIABLES GLOBALES
 y_true_global = df_global['anomaly']                                  # ANOMALÍAS REALES GLOBALES
-total_global = int(y_true_global.sum())                               # TOTAL DE ANOMALÍAS
+total_global = int(y_true_global.sum())
+total_seq= contar_secuencias(df_global['sequence'])                                                           # TOTAL DE ANOMALÍAS
 max_sequence_global = int(df_global['sequence'].max())                # LONGITUD MÁXIMA DE SECUENCIA
 y_pred_global = y_true_global                                         # IF GLOBAL SE CONSIDERA PREDICCIÓN PERFECTA
 
@@ -50,7 +72,7 @@ csv_rows = [{
     'detections_correct': int(tp_global),                               # DETECCIONES CORRECTAS
     'false_positives': int(fp_global),                                  # FALSOS POSITIVOS
     'false_negatives': int(fn_global),                                  # FALSOS NEGATIVOS
-    'total_sequences': total_global,                                     # TOTAL DE SECUENCIAS
+    'total_sequences': total_seq,                                     # TOTAL DE SECUENCIAS
     'max_sequence': max_sequence_global,                                 # LONGITUD MÁXIMA DE SECUENCIA
     'precision': round(precision_score(y_true_global, y_pred_global, zero_division=0),4),  # PRECISIÓN
     'recall': round(recall_score(y_true_global, y_pred_global, zero_division=0),4),       # RECALL
@@ -83,6 +105,8 @@ for cluster_name, subclusters in clusters_json.items():                   # ITER
             csv_rows.append({'file': f"{cluster_name}_{sub_name}", 'error': 'columna anomaly o sequence no encontrada'})
             continue
 
+        total_seq= contar_secuencias(df_sub['sequence'])
+
         y_pred = df_sub['anomaly']                                          # PREDICCIONES DEL SUBCLUSTER
         tp = ((y_true_global==1) & (y_pred==1)).sum()                       # TP CON RESPECTO GLOBAL
         fp = ((y_true_global==0) & (y_pred==1)).sum()                       # FP CON RESPECTO GLOBAL
@@ -100,7 +124,7 @@ for cluster_name, subclusters in clusters_json.items():                   # ITER
             'detections_correct': int(tp),
             'false_positives': int(fp),
             'false_negatives': int(fn),
-            'total_sequences': int(df_sub['sequence'].sum()),
+            'total_sequences': total_seq,
             'max_sequence': int(df_sub['sequence'].max()),
             'precision': round(precision_score(y_true_global, y_pred, zero_division=0),4),
             'recall': round(recall_score(y_true_global, y_pred, zero_division=0),4),

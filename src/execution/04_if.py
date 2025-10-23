@@ -228,3 +228,10 @@ for file_path in files:
         df_anomalies.to_csv(output_anomaly_csv, index=False)
         if SHOW_INFO:
             print(f"[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN {output_anomaly_csv}")
+
+# BORRADO 03_GLOBAL.CSV
+if os.path.exists(INPUT_CSV):
+    os.remove(INPUT_CSV)
+    print(f"[ OK ] Archivo eliminado: {INPUT_CSV}")
+else:
+    print(f"[ INFO ] No se encontró el archivo: {INPUT_CSV}")

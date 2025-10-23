@@ -1,223 +1,123 @@
 import pandas as pd
-from sklearn.ensemble import IsolationForest
-from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import MiniBatchKMeans, KMeans, DBSCAN, AgglomerativeClustering, Birch
+from sklearn.decomposition import PCA
 import glob
 import os
-import numpy as np
 
-# PARÁMETROS GENERALES
-RESULTS_FOLDER = '../../results'  # Carpeta principal de resultados
-EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # Carpeta de ejecución
-CLUSTER_PATTERN = 'cluster_*.csv'  # Patrón de archivos de clusters
-INPUT_CSV = '../../results/execution/01_contaminated.csv'     # ARCHIVO GLOBAL DE ENTRADA
+# PARÁMETROS 
+RESULTS_FOLDER = '../../results'                         # CARPETA PRINCIPAL DE RESULTADOS
+EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DONDE SE GUARDAN RESULTADOS
+CLUSTER_PATTERN = 'cluster_*.csv'                       # PATRÓN PARA ARCHIVOS DE CLUSTERS A PROCESAR
+INPUT_CSV = os.path.join(EXECUTION_FOLDER, '01_contaminated.csv')
 OUTPUT_CSV = os.path.join(EXECUTION_FOLDER, '03_global.csv')  # SALIDA IF GLOBAL
 
-SAVE_ANOMALY_CSV = True  # Guardar solo anomalías detectadas
-SORT_ANOMALY_SCORE = True  # Ordenar CSV de anomalías por score (más anómalas arriba)
-INCLUDE_SCORE = True  # Incluir columna 'anomaly_score' en CSV de anomalías
-NORMALIZE_SCORE = True  # Activar/desactivar normalización de anomaly_score entre 0 y 1
+USE_PCA = False                
+# SI ES TRUE, SE APLICA PCA (ANÁLISIS DE COMPONENTES PRINCIPALES) PARA REDUCIR LA DIMENSIONALIDAD DEL DATASET.
+# PCA TRANSFORMA LAS VARIABLES ORIGINALES EN NUEVAS VARIABLES ORTOGONALES (COMPONENTES PRINCIPALES) 
+# QUE RETIENEN LA MÁXIMA VARIANZA POSIBLE. ESTO AYUDA A MEJORAR RENDIMIENTO Y VISUALIZACIÓN.
 
-# HIPERPARÁMETROS ISOLATION FOREST
-N_ESTIMATORS = 100
-# NÚMERO DE ÁRBOLES EN EL BOSQUE
-# MÁS ÁRBOLES = MODELO MÁS ESTABLE Y PRECISO, PERO MÁS LENTO
-MAX_SAMPLES = 'auto'
-# NÚMERO DE MUESTRAS POR ÁRBOL
-# 'auto' USA TODAS LAS FILAS
-# MENOS MUESTRAS = ENTRENAMIENTO MÁS RÁPIDO, PERO MENOS ROBUSTO
-CONTAMINATION = 0.01
-# FRACCIÓN ESTIMADA DE ANOMALÍAS
-# AJUSTA UMBRAL PARA CLASIFICAR ANOMALÍAS
-# RECOMENDADO: 0.01-0.05 SEGÚN EXPECTATIVA DE ANOMALÍAS
-MAX_FEATURES = 1.0
-# PROPORCIÓN DE CARACTERÍSTICAS A USAR POR ÁRBOL
-# MENOS CARACTERÍSTICAS = MÁS VARIABILIDAD ENTRE ÁRBOLES
+N_PCA_COMPONENTS = 20         
+# NÚMERO MÁXIMO DE COMPONENTES PRINCIPALES A CONSERVAR.
+# - MÁXIMO: NO PUEDE SUPERAR EL NÚMERO DE VARIABLES ORIGINALES DEL DATASET.
+# - MÍNIMO: 1 (AL MENOS UNA COMPONENTE PRINCIPAL PARA REPRESENTAR VARIANZA).
+# - NORMAL: SE ELIGEN COMPONENTES SUFICIENTES PARA RETENER ENTRE 80%-95% DE LA VARIANZA TOTAL.
+# LIMITA LA DIMENSIONALIDAD DEL DATASET Y RETIENE SOLO LA VARIANZA MÁS RELEVANTE.
 
-BOOTSTRAP = False
-# TRUE = MUESTREO CON REPETICIÓN POR ÁRBOL
-# FALSE = MUESTRA SIN REPETICIÓN, MÁS PRECISO
-N_JOBS = -1
-# NÚMERO DE HILOS PARA ENTRENAMIENTO
-# -1 USA TODOS LOS HILOS DISPONIBLES
-RANDOM_STATE = 42
-# SEMILLA PARA REPRODUCIBILIDAD DE RESULTADOS
-VERBOSE = 0
-# NIVEL DE VERBOSIDAD DEL MODELO
-# 0 = SILENCIOSO, >0 = INFORMACIÓN DETALLADA DURANTE ENTRENAMIENTO
-SHOW_INFO = True
-# TRUE = MOSTRAR INFORMACIÓN DEL PROCESO EN CONSOLA
+# PARÁMETROS DE CLUSTERING
+CLUSTER_METHOD = 'dbscan'  
+# MÉTODO DE CLUSTERING A UTILIZAR:
+# 'kmeans'     -> CLUSTERING CLÁSICO, AGRUPA EN N_CLUSTERS BASADO EN DISTANCIA
+# 'minibatch'  -> K-MEANS POR LOTES, MÁS RÁPIDO PARA GRANDES DATASETS
+# 'dbscan'     -> CLUSTERING BASADO EN DENSIDAD, NO REQUIERE N_CLUSTERS, DETECTA RUIDO
+# 'birch'      -> CLUSTERING HIERÁRQUICO PARA GRANDES DATASETS, CONSTRUIR ÁRBOLES DE CLUSTERS
 
+N_CLUSTERS = 4                
+# NÚMERO DE CLUSTERS A GENERAR PARA MÉTODOS QUE LO REQUIEREN (KMEANS, MINIBATCH, BIRCH)
 
-# ISOLATION FOREST GLOBAL
-# CARGAR DATASET GLOBAL
-df = pd.read_csv(INPUT_CSV)
-if SHOW_INFO:
-    print(f"[ INFO ] DATASET GLOBAL CARGADO: {df.shape[0]} FILAS, {df.shape[1]} COLUMNAS")
+EPS_DBSCAN = 1.5              
+# RADIO MÁXIMO PARA CONSIDERAR PUNTOS COMO VECINOS EN DBSCAN. 
+# DOS PUNTOS DENTRO DE EPS PUEDEN PERTENECER AL MISMO CLUSTER.
 
-# SEPARAR COLUMNA 'is_anomaly'
-if 'is_anomaly' in df.columns:
-    df_input = df.drop(columns=['is_anomaly'])  # NO USAR EN ENTRENAMIENTO
-    is_anomaly_column = df['is_anomaly']       # GUARDAR PARA COMPARACIÓN
-else:
-    df_input = df.copy()
-    is_anomaly_column = pd.Series([0]*len(df_input), name='is_anomaly')  # COLUMNA TEMPORAL
+MIN_SAMPLES_DBSCAN = 15
+# NÚMERO MÍNIMO DE PUNTOS NECESARIOS DENTRO DEL RADIO EPS PARA FORMAR UN CLUSTER EN DBSCAN.
+# PUNTOS CON MENOS VECINOS SE CONSIDERAN RUIDO.
 
-# SELECCIONAR COLUMNAS NUMÉRICAS
-num_cols = df_input.select_dtypes(include=['int64', 'float64']).columns.tolist()
+SHOW_INFO = True              
+# SI ES TRUE, MUESTRA INFORMACIÓN DETALLADA DEL PROCESO EN CONSOLA.
 
-# ESCALAR DATOS
-scaler = StandardScaler()  # EVITA DOMINANCIA DE MAGNITUDES
-df_scaled = scaler.fit_transform(df_input[num_cols])
+# -------------------------
+# FUNCION PARA APLICAR CLUSTERING A UN DATAFRAME
+# -------------------------
+def apply_clustering(df, show_info=True):
+    # SELECCIONAR SOLO COLUMNAS NUMÉRICAS PARA CLUSTERING
+    num_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    if len(num_cols) == 0:
+        if show_info:
+            print("[ SKIP ] NO HAY COLUMNAS NUMÉRICAS, OMITIENDO DATAFRAME")
+        return df
 
-# ENTRENAR ISOLATION FOREST GLOBAL
-clf = IsolationForest(
-    n_estimators=N_ESTIMATORS,
-    max_samples=MAX_SAMPLES,
-    contamination=CONTAMINATION,
-    max_features=MAX_FEATURES,
-    bootstrap=BOOTSTRAP,
-    n_jobs=N_JOBS,
-    random_state=RANDOM_STATE,
-    verbose=VERBOSE
-)
-clf.fit(df_scaled)
+    if show_info:
+        print(f"[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: {len(num_cols)}")
 
-# CALCULAR SCORE Y PREDICCIÓN
-anomaly_score = clf.decision_function(df_scaled) * -1  # MÁS POSITIVO = MÁS ANÓMALO
-pred = clf.predict(df_scaled)  # 1 = NORMAL, -1 = ANOMALÍA
-df['anomaly'] = np.where(pred == 1, 0, 1)  # 0=normal, 1=anomalía
-df['anomaly_score'] = anomaly_score
-df['is_anomaly'] = is_anomaly_column
+    # REDUCCIÓN DIMENSIONAL OPCIONAL CON PCA
+    if USE_PCA:
+        n_components = min(N_PCA_COMPONENTS, len(num_cols), len(df))  
+        pca = PCA(n_components=n_components, random_state=42)
+        X_input = pca.fit_transform(df[num_cols])
+        if show_info:
+            print(f"[ INFO ] PCA APLICADO, COMPONENTES: {X_input.shape[1]}")
+    else:
+        X_input = df[num_cols].values
+        if show_info:
+            print("[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA")
 
-# INFORMACIÓN GENERAL
-num_anomalies = df['anomaly'].sum()
-num_normals = df.shape[0] - num_anomalies
-if SHOW_INFO:
-    print(f"[ INFO ] REGISTROS TOTALES (GLOBAL): {df.shape[0]}")
-    print(f"[ INFO ] ANOMALÍAS DETECTADAS (GLOBAL): {num_anomalies}")
-    print(f"[ INFO ] REGISTROS NORMALES (GLOBAL): {num_normals}")
-    print(f"[ INFO ] PORCENTAJE ANOMALÍAS (GLOBAL): {num_anomalies/df.shape[0]*100:.2f}%")
+    # SELECCIÓN DEL MÉTODO DE CLUSTERING
+    if CLUSTER_METHOD == 'minibatch':
+        model = MiniBatchKMeans(n_clusters=N_CLUSTERS, batch_size=1000, random_state=42)
+    elif CLUSTER_METHOD == 'birch':
+        model = Birch(n_clusters=N_CLUSTERS)
+    elif CLUSTER_METHOD == 'dbscan':
+        model = DBSCAN(eps=EPS_DBSCAN, min_samples=MIN_SAMPLES_DBSCAN)
+    elif CLUSTER_METHOD == 'kmeans':
+        model = KMeans(n_clusters=N_CLUSTERS, random_state=42)
+    else:
+        raise ValueError(f"[ ERROR ] MÉTODO DE CLUSTERING DESCONOCIDO: {CLUSTER_METHOD}")
 
-# GUARDAR CSV COMPLETO
-df.to_csv(OUTPUT_CSV, index=False)
-if SHOW_INFO:
-    print(f"[ GUARDADO ] CSV COMPLETO CON ANOMALÍAS EN '{OUTPUT_CSV}'")
+    # AJUSTAR MODELO Y OBTENER PREDICCIONES DE CLUSTERS
+    df['cluster'] = model.fit_predict(X_input)
+    n_clusters_found = len(set(df['cluster']))
+    if show_info:
+        print(f"[ RESULTADO ] CLUSTERS ENCONTRADOS: {n_clusters_found}")
 
-# GUARDAR CSV SOLO CON ANOMALÍAS
-if SAVE_ANOMALY_CSV:
-    df_anomalies = df.loc[df['anomaly'] == 1].copy()
-    df_anomalies['anomaly_score'] = df_anomalies['anomaly_score'].astype(float)
+    return df
 
-    # NORMALIZAR SCORE ENTRE 0 Y 1 SI SE ACTIVA
-    if NORMALIZE_SCORE:
-        min_score = df_anomalies['anomaly_score'].min()
-        max_score = df_anomalies['anomaly_score'].max()
-        if max_score > min_score:  # EVITAR DIVISIÓN POR CERO
-            df_anomalies['anomaly_score'] = (df_anomalies['anomaly_score'] - min_score) / (max_score - min_score)
-
-    # ORDENAR DE MAYOR A MENOR
-    if SORT_ANOMALY_SCORE:
-        df_anomalies = df_anomalies.sort_values(by='anomaly_score', ascending=False).reset_index(drop=True)
-
-    # ELIMINAR SCORE SI NO SE INCLUYE
-    if not INCLUDE_SCORE:
-        df_anomalies.drop(columns=['anomaly_score'], inplace=True)
-
-# ISOLATION FOREST POR CLUSTER
-# LISTAR ARCHIVOS DE CLUSTERS
+# -------------------------
+# PROCESAR ARCHIVOS DE CLUSTERS
+# -------------------------
 files = glob.glob(os.path.join(EXECUTION_FOLDER, CLUSTER_PATTERN))
 if SHOW_INFO:
-    print(f"[ INFO ] ARCHIVOS ENCONTRADOS PARA IF POR CLUSTER: {len(files)}")
+    print(f"[ INFO ] ARCHIVOS ENCONTRADOS PARA CLUSTERING: {len(files)}")
 
-# PROCESAR CADA ARCHIVO
 for file_path in files:
-    # Cargar CSV
     df = pd.read_csv(file_path)
     if SHOW_INFO:
-        print(f"[ INFO ] PROCESANDO {file_path}: {df.shape[0]} FILAS, {df.shape[1]} COLUMNAS")
+        print(f"[ INFO ] PROCESANDO {file_path}, DIMENSIONES: {df.shape}")
 
-    # SEPARAR COLUMNA 'is_anomaly'
-    if 'is_anomaly' in df.columns:
-        df_input = df.drop(columns=['is_anomaly'])  # No usar en entrenamiento
-        is_anomaly_column = df['is_anomaly']  # Guardar para comparación posterior
-    else:
-        df_input = df.copy()
-        is_anomaly_column = pd.Series([0]*len(df_input), name='is_anomaly')  # Crear columna temporal
+    df = apply_clustering(df, show_info=SHOW_INFO)
 
-    # SELECCIONAR COLUMNAS NUMÉRICAS
-    num_cols = df_input.select_dtypes(include=['int64', 'float64']).columns.tolist()
-    if len(num_cols) == 0:
-        if SHOW_INFO:
-            print("[ SKIP ] NO HAY COLUMNAS NUMÉRICAS PARA APLICAR IF")
-        continue
-    if SHOW_INFO:
-        print(f"[ INFO ] NÚMERO DE COLUMNAS NUMÉRICAS: {len(num_cols)}")
-
-    # ESCALAR DATOS
-    scaler = StandardScaler()  # Evitar que columnas con gran magnitud dominen la detección
-    df_scaled = scaler.fit_transform(df_input[num_cols])  # Transformación estándar (media=0, std=1)
-
-    # CONFIGURAR ISOLATION FOREST
-    clf = IsolationForest(
-        n_estimators=N_ESTIMATORS,
-        max_samples=MAX_SAMPLES,
-        contamination=CONTAMINATION,
-        max_features=MAX_FEATURES,
-        bootstrap=BOOTSTRAP,
-        n_jobs=N_JOBS,
-        random_state=RANDOM_STATE,
-        verbose=VERBOSE
-    )
-
-    # ENTRENAMIENTO Y PREDICCIÓN
-    clf.fit(df_scaled)  # Entrenar bosque de aislamiento
-    anomaly_score = clf.decision_function(df_scaled) * -1  # Score: más positivo = más anómalo
-    pred = clf.predict(df_scaled)  # Predicción de anomalías
-    df['anomaly'] = np.where(pred == 1, 0, 1)  # Convertir a 0=normal, 1=anomalía
-
-    # Añadir score y columna original de referencia
-    df['anomaly_score'] = anomaly_score
-    df['is_anomaly'] = is_anomaly_column
-
-    # INFORMACIÓN GENERAL SOBRE ANOMALÍAS
-    num_anomalies = df['anomaly'].sum()
-    num_normals = df.shape[0] - num_anomalies
-    if SHOW_INFO:
-        print(f"[ INFO ] REGISTROS TOTALES: {df.shape[0]}")
-        print(f"[ INFO ] ANOMALÍAS DETECTADAS: {num_anomalies}")
-        print(f"[ INFO ] REGISTROS NORMALES: {num_normals}")
-        print(f"[ INFO ] PORCENTAJE ANOMALÍAS: {num_anomalies/df.shape[0]*100:.2f}%")
-
-    # GUARDAR CSV COMPLETO
     df.to_csv(file_path, index=False)
     if SHOW_INFO:
-        print(f"[ GUARDADO ] RESULTADOS IF COMPLETOS EN {file_path}")
+        print(f"[ GUARDADO ] CLUSTERING APLICADO EN {file_path}")
 
-    # GUARDAR CSV SOLO CON ANOMALÍAS
-    if SAVE_ANOMALY_CSV:
-        df_anomalies = df[df['anomaly'] == 1].copy()  # Filtrar solo anomalías
-        df_anomalies['anomaly_score'] = df_anomalies['anomaly_score'].astype(float)
+# -------------------------
+# PROCESAR EL ARCHIVO GLOBAL DE ENTRADA
+# -------------------------
+df_global = pd.read_csv(INPUT_CSV)
+if SHOW_INFO:
+    print(f"[ INFO ] PROCESANDO ARCHIVO GLOBAL: {INPUT_CSV}, DIMENSIONES: {df_global.shape}")
 
-        # Normalizar anomaly_score entre 0 y 1 si NORMALIZE_SCORE está activado
-        if NORMALIZE_SCORE:
-            min_score = df_anomalies['anomaly_score'].min()
-            max_score = df_anomalies['anomaly_score'].max()
-            if max_score > min_score:  # Evitar división por cero
-                df_anomalies['anomaly_score'] = (df_anomalies['anomaly_score'] - min_score) / (max_score - min_score)
+df_global = apply_clustering(df_global, show_info=SHOW_INFO)
 
-        # Ordenar de mayor a menor si está activado
-        if SORT_ANOMALY_SCORE:
-            df_anomalies = df_anomalies.sort_values(
-                by='anomaly_score',
-                ascending=False
-            ).reset_index(drop=True)
-
-        # Eliminar score si no se desea incluir
-        if not INCLUDE_SCORE:
-            df_anomalies.drop(columns=['anomaly_score'], inplace=True)
-
-        # Guardar CSV de anomalías
-        output_anomaly_csv = file_path.replace('.csv', '_if.csv')
-        df_anomalies.to_csv(output_anomaly_csv, index=False)
-        if SHOW_INFO:
-            print(f"[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN {output_anomaly_csv}")
+df_global.to_csv(OUTPUT_CSV, index=False)
+if SHOW_INFO:
+    print(f"[ GUARDADO ] ARCHIVO GLOBAL CON CLUSTERS GUARDADO EN: {OUTPUT_CSV}")

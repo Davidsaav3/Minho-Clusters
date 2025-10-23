@@ -36,6 +36,10 @@ SAVE_INTERMEDIATE = True                              # GUARDAR CSV INTERMEDIO A
 
 # CARGAR DATASET
 df = pd.read_csv(INPUT_FILE)  # LEER EL CSV DE ENTRADA
+
+# ELIMINAR COLUMNAS 'Unnamed:' AUTOMÁTICAS (errores CSV)
+df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+
 if SHOW_INFO:
     print(f"[ INFO ] Dataset cargado: {df.shape[0]} FILAS, {df.shape[1]} COLUMNAS")
 
@@ -68,15 +72,28 @@ if SAVE_INTERMEDIATE:
     if SHOW_INFO:
         print(f"[ GUARDADO ] Dataset intermedio en '{intermediate_csv}'")
 
+# FILTRAR SOLO COLUMNAS EXISTENTES (NUMÉRICAS)
+num_cols_actuales = [c for c in num_cols if c in df.columns]
+if len(num_cols_actuales) < len(num_cols):
+    faltantes = set(num_cols) - set(num_cols_actuales)
+    print(f"[WARNING] Columnas numéricas no encontradas y se omiten: {faltantes}")
+
 # CORREGIR COLUMNAS NUMÉRICAS
 num_strategy_params = {'strategy': NUMERIC_STRATEGY}  # CONFIGURAR ESTRATEGIA
 if NUMERIC_STRATEGY == 'constant':  # SI USAMOS CONSTANTE, DEFINIR VALOR
     num_strategy_params['fill_value'] = FILL_CONSTANT_NUMERIC
 
 imputer_num = SimpleImputer(**num_strategy_params)  # CREAR OBJETO IMPUTER
-df[num_cols] = imputer_num.fit_transform(df[num_cols])  # CORREGIR NULOS NUMÉRICOS
-if SHOW_INFO:
-    print(f"[ INFO ] Valores nulos numéricos corregidos con '{NUMERIC_STRATEGY}'")
+if num_cols_actuales:  # SOLO IMPUTAR SI HAY COLUMNAS DISPONIBLES
+    df[num_cols_actuales] = imputer_num.fit_transform(df[num_cols_actuales])  # CORREGIR NULOS NUMÉRICOS
+    if SHOW_INFO:
+        print(f"[ INFO ] Valores nulos numéricos corregidos con '{NUMERIC_STRATEGY}'")
+
+# FILTRAR SOLO COLUMNAS EXISTENTES (CATEGÓRICAS)
+cat_cols_actuales = [c for c in cat_cols if c in df.columns]
+if len(cat_cols_actuales) < len(cat_cols):
+    faltantes = set(cat_cols) - set(cat_cols_actuales)
+    print(f"[WARNING] Columnas categóricas no encontradas y se omiten: {faltantes}")
 
 # CORREGIR COLUMNAS CATEGÓRICAS
 cat_strategy_params = {'strategy': CATEGORICAL_STRATEGY}  # CONFIGURAR ESTRATEGIA
@@ -84,9 +101,10 @@ if CATEGORICAL_STRATEGY == 'constant':  # SI USAMOS CONSTANTE, DEFINIR VALOR
     cat_strategy_params['fill_value'] = FILL_CONSTANT_CATEGORICAL
 
 imputer_cat = SimpleImputer(**cat_strategy_params)  # CREAR OBJETO IMPUTER
-df[cat_cols] = imputer_cat.fit_transform(df[cat_cols])  # CORREGIR NULOS CATEGÓRICOS
-if SHOW_INFO:
-    print(f"[ INFO ] Valores nulos categóricos corregidos con '{CATEGORICAL_STRATEGY}'")
+if cat_cols_actuales:  # SOLO IMPUTAR SI HAY COLUMNAS DISPONIBLES
+    df[cat_cols_actuales] = imputer_cat.fit_transform(df[cat_cols_actuales])  # CORREGIR NULOS CATEGÓRICOS
+    if SHOW_INFO:
+        print(f"[ INFO ] Valores nulos categóricos corregidos con '{CATEGORICAL_STRATEGY}'")
 
 # GUARDAR DATASET FINAL
 df.to_csv(OUTPUT_CSV, index=False)  # GUARDAR CSV FINAL SIN NULOS
