@@ -70,12 +70,17 @@ df_contaminated = df.copy()  # SE TRABAJA SOBRE UNA COPIA PARA NO ALTERAR EL ORI
 # APLICAR CONTAMINACIÓN SEGÚN OPERACIÓN DEFINIDA
 for col in cols_to_contaminate:
     if df[col].dtype in ['int64', 'float64']:  # SOLO COLUMNAS NUMÉRICAS
-        # GENERAR RUIDO GAUSSIANO BASADO EN LA DESVIACIÓN ESTÁNDAR DE LA COLUMNA
+        # GENERAR RUIDO GAUSSIANO PARA CONTAMINAR LOS DATOS
+        # - MEDIA 0: el ruido se distribuye alrededor del valor original, sin sesgo positivo o negativo
+        # - DESVIACIÓN PROPORCIONAL A LA DESVIACIÓN DE LA COLUMNA: el tamaño del ruido se adapta a la variabilidad natural de los datos
+        #   (NOISE_INTENSITY ajusta la magnitud relativa del ruido)
+        # - size=n_contam: se genera un vector de ruido solo para las filas seleccionadas para contaminación
         noise = np.random.normal(0, NOISE_INTENSITY * df[col].std(), size=n_contam)
 
         # APLICAR RUIDO SEGÚN LA OPERACIÓN DEFINIDA
         if OPERACION_RUIDO == 'SUMA':
-            df_contaminated.loc[contam_indices, col] += noise  # SUMAR RUIDO
+            # SUMAR RUIDO A LOS DATOS SELECCIONADOS, SIMULA ANOMALÍAS O VARIACIONES NATURALES EN LOS DATOS
+            df_contaminated.loc[contam_indices, col] += noise
         elif OPERACION_RUIDO == 'RESTA':
             df_contaminated.loc[contam_indices, col] -= noise  # RESTAR RUIDO
         elif OPERACION_RUIDO == 'MULTIPLICACION':

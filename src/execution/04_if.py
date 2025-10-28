@@ -55,14 +55,21 @@ df = pd.read_csv(INPUT_CSV)
 if SHOW_INFO:
     print(f"[ INFO ] DATASET GLOBAL CARGADO: {df.shape[0]} FILAS, {df.shape[1]} COLUMNAS")
 
-# SEPARAR COLUMNA 'is_anomaly'
+# [ SEPARAR COLUMNAS DE REFERENCIA ]
 if 'is_anomaly' in df.columns:
-    df_input = df.drop(columns=['is_anomaly'])  # NO USAR EN ENTRENAMIENTO
-    is_anomaly_column = df['is_anomaly']       # GUARDAR PARA COMPARACIÓN
-else:
-    df_input = df.copy()
-    is_anomaly_column = pd.Series([0]*len(df_input), name='is_anomaly')  # COLUMNA TEMPORAL
+    # GUARDAR COLUMNAS DE COMPARACIÓN
+    is_anomaly_column = df['is_anomaly']
+    cluster_column = df['cluster'] if 'cluster' in df.columns else pd.Series([None]*len(df), name='cluster')
 
+    # ELIMINAR COLUMNAS NO USADAS EN EL ENTRENAMIENTO
+    df_input = df.drop(columns=[col for col in ['is_anomaly', 'cluster'] if col in df.columns])
+
+else:
+    # SI NO EXISTE 'is_anomaly', CREAR TEMPORAL
+    is_anomaly_column = pd.Series([0]*len(df), name='is_anomaly')
+    cluster_column = df['cluster'] if 'cluster' in df.columns else pd.Series([None]*len(df), name='cluster')
+    df_input = df.copy()
+    
 # SELECCIONAR COLUMNAS NUMÉRICAS
 num_cols = df_input.select_dtypes(include=['int64', 'float64']).columns.tolist()
 
@@ -89,6 +96,7 @@ pred = clf.predict(df_scaled)  # 1 = NORMAL, -1 = ANOMALÍA
 df['anomaly'] = np.where(pred == 1, 0, 1)  # 0=normal, 1=anomalía
 df['anomaly_score'] = anomaly_score
 df['is_anomaly'] = is_anomaly_column
+df['cluster'] = cluster_column
 
 # INFORMACIÓN GENERAL
 num_anomalies = df['anomaly'].sum()
@@ -143,13 +151,18 @@ for file_path in files:
     if SHOW_INFO:
         print(f"[ INFO ] PROCESANDO {file_path}: {df.shape[0]} FILAS, {df.shape[1]} COLUMNAS")
 
-    # SEPARAR COLUMNA 'is_anomaly'
+    # [ SEPARAR COLUMNAS 'is_anomaly' ]
     if 'is_anomaly' in df.columns:
-        df_input = df.drop(columns=['is_anomaly'])  # No usar en entrenamiento
-        is_anomaly_column = df['is_anomaly']  # Guardar para comparación posterior
+        # GUARDAR COLUMNAS PARA COMPARACIÓN POSTERIOR
+        is_anomaly_column = df['is_anomaly']
+
+        # ELIMINAR DEL CONJUNTO DE ENTRADA
+        df_input = df.drop(columns=[col for col in ['is_anomaly', 'cluster'] if col in df.columns])
+
     else:
+        # SI NO EXISTE 'is_anomaly', CREAR TEMPORAL
+        is_anomaly_column = pd.Series([0] * len(df), name='is_anomaly')
         df_input = df.copy()
-        is_anomaly_column = pd.Series([0]*len(df_input), name='is_anomaly')  # Crear columna temporal
 
     # SELECCIONAR COLUMNAS NUMÉRICAS
     num_cols = df_input.select_dtypes(include=['int64', 'float64']).columns.tolist()
