@@ -18,8 +18,8 @@ SCRIPTS = [
     '05_temporal_continuity.py',    # SCRIPT 5: SECUENCIAS TEMPORALES
 
     '06_metrics.py',                # SCRIPT 6: CÁLCULO DE MÉTRICAS
-    '07_visualize.py'               # SCRIPT 7: VISUALIZACIÓN DE RESULTADOS
 ]
+#     '07_visualize.py'               # SCRIPT 7: VISUALIZACIÓN DE RESULTADOS
 
 SHOW_OUTPUT = True  
 

@@ -156,21 +156,23 @@ if SHOW_INFO:
     print(f"[ INFO ] ANOMALÍAS DETECTADAS (UNCONTAMINATED): {df_uncont['anomaly'].sum()}")
     print(f"[ INFO ] PORCENTAJE ANOMALÍAS: {df_uncont['anomaly'].sum()/df_uncont.shape[0]*100:.2f}%")
 
+
 df_uncont.to_csv(OUTPUT_UNCONTAMINATED_IF_CSV, index=False)
 if SHOW_INFO:
     print(f"[ GUARDADO ] RESULTADOS IF SIN CONTAMINACIÓN EN '{OUTPUT_UNCONTAMINATED_IF_CSV}'")
 
+
 # 
-# AÑADIR COLUMNA genuine_anomaly y anomaly_genuine_score
+# AÑADIR COLUMNA genuine_anomaly y genuine_anomaly_score
 # 
 if df is not None and os.path.exists(OUTPUT_UNCONTAMINATED_IF_CSV):
     df_uncont_ref = pd.read_csv(OUTPUT_UNCONTAMINATED_IF_CSV)
     if 'anomaly' in df_uncont_ref.columns and 'anomaly_score' in df_uncont_ref.columns and len(df_uncont_ref) == len(df):
         df['genuine_anomaly'] = df_uncont_ref['anomaly'].values
-        df['anomaly_genuine_score'] = df_uncont_ref['anomaly_score'].values
+        df['genuine_anomaly_score'] = df_uncont_ref['anomaly_score'].values
         df.to_csv(OUTPUT_CSV, index=False)
         if SHOW_INFO:
-            print(f"[ INFO ] Columnas 'genuine_anomaly' y 'anomaly_genuine_score' añadidas a '{OUTPUT_CSV}'")
+            print(f"[ INFO ] Columnas 'genuine_anomaly' y 'genuine_anomaly_score' añadidas a '{OUTPUT_CSV}'")
     else:
         print("[ WARNING ] No se pudo añadir columnas genuinas: longitud o columnas no coinciden")
 else:
