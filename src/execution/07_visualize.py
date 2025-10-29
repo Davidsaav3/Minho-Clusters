@@ -25,9 +25,9 @@ HEATMAP_SIZE = (30, 18)
 DPI = 300
 TAB10_COLORS = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
 
-PLOT_1_ENABLED = False
+PLOT_1_ENABLED = True
 PLOT_2_ENABLED = False
-PLOT_3_ENABLED = True
+PLOT_3_ENABLED = False
 PLOT_4_ENABLED = False
 PLOT_5_ENABLED = False
 PLOT_6_ENABLED = False
@@ -58,48 +58,75 @@ cluster_files = [f for f in glob.glob(CLUSTER_FILES_PATH) if not f.endswith('_if
 all_files = [GLOBAL_CSV] + cluster_files
 
 if PLOT_1_ENABLED:
-    # Columnas numéricas + columnas que empiezan por 'openweather' o 'aemet'
     numeric_columns = df_if.select_dtypes(include=[np.number]).columns.tolist()
     features_to_plot = numeric_columns 
 
-    # Excluir columnas irrelevantes
     exclude_cols = ['anomaly', 'is_anomaly', 'sequence', 'cluster', 'datetime', 
                     'date','time','year','month','day','hour','minute','weekday',
                     'day_of_year','week_of_year','working_day','season','holiday',
-                    'weekend']  # agrega más si quieres excluir otras fijas
-
-    # Excluir también columnas que empiecen por openweather_ o aemet_
+                    'weekend']
     exclude_cols += [col for col in df_if.columns if col.startswith('openweather_') or col.startswith('aemet_')]
 
     features_to_plot = [col for col in df_if.select_dtypes(include=[np.number]).columns if col not in exclude_cols]
+
+    # Recuento de intersecciones
+    detectadas = df_if['anomaly']==1
+    genuinas = df_if['genuine_anomaly']==1
+    reales = df_if['is_anomaly']==1
+
+    count_detectadas = detectadas.sum()
+    count_genuinas = genuinas.sum()
+    count_reales = reales.sum()
+
+    count_detect_genu = (detectadas & genuinas).sum()
+    count_detect_real = (detectadas & reales).sum()
+    count_genu_real = (genuinas & reales).sum()
+    count_all_three = (detectadas & genuinas & reales).sum()
 
     for feature in features_to_plot:
         plt.figure(figsize=LARGE_FIGURE_SIZE)
 
         # Normales
-        plt.scatter(df_if[(df_if['is_anomaly']==0) & (df_if['anomaly']==0)]['datetime'],
-                    df_if[(df_if['is_anomaly']==0) & (df_if['anomaly']==0)][feature],
+        plt.scatter(df_if[~detectadas & ~reales]['datetime'],
+                    df_if[~detectadas & ~reales][feature],
                     color='blue', alpha=0.5, s=20, label='Normal')
 
-        # Anomalías detectadas: tamaño según sequence
-        anomalies = df_if[df_if['anomaly']==1].copy()
+        # Detectadas
+        anomalies = df_if[detectadas].copy()
         if not anomalies.empty:
-            sizes = np.interp(anomalies['sequence'], (anomalies['sequence'].min(), anomalies['sequence'].max()), (150, 400))
+            sizes = np.interp(anomalies['sequence'] if 'sequence' in df_if.columns else np.ones(len(anomalies)),
+                              (anomalies['sequence'].min() if 'sequence' in df_if.columns else 1, 
+                               anomalies['sequence'].max() if 'sequence' in df_if.columns else 1), 
+                              (150, 400))
             plt.scatter(anomalies['datetime'], anomalies[feature],
-                        color='orange', s=sizes, alpha=0.8, label='Anomalía Detectada (tamaño = secuencia)')
+                        color='orange', s=sizes, alpha=0.5,
+                        label=f'Detectadas ({count_detectadas})')
 
-        # Anomalías reales
-        plt.scatter(df_if[df_if['is_anomaly']==1]['datetime'],
-                    df_if[df_if['is_anomaly']==1][feature],
-                    color='red', marker='X', s=60, alpha=0.7, label='Anomalía Real')
+        # Genuinas
+        genuine_anomalies = df_if[genuinas].copy()
+        if not genuine_anomalies.empty:
+            plt.scatter(genuine_anomalies['datetime'], genuine_anomalies[feature],
+                        color='green', marker='o', s=80, alpha=0.5,
+                        label=f'Genuinas ({count_genuinas})')
 
+        # Reales
+        reales_df = df_if[reales].copy()
+        if not reales_df.empty:
+            plt.scatter(reales_df['datetime'], reales_df[feature],
+                        color='red', marker='X', s=60, alpha=0.5,
+                        label=f'Reales ({count_reales})')
+
+        # Agregar anotaciones de intersección en la leyenda
+        inter_label = (f"Intersecciones: Detect&Genu={count_detect_genu}, "
+                       f"Detect&Real={count_detect_real}, Genu&Real={count_genu_real}, "
+                       f"Todas= {count_all_three}")
         plt.title(f"Anomalías Reales vs Detectadas: {feature.upper()}")
         plt.xlabel("Datetime")
         plt.ylabel(feature.upper())
         plt.xticks(rotation=45)
         plt.legend(title='Leyenda', loc='upper right')
-        plt.annotate("Tamaño de punto = longitud de la secuencia", xy=(0.01, -0.15),
-                     xycoords='axes fraction', fontsize=10, color='orange', ha='left')
+        plt.annotate(inter_label, xy=(0.01, -0.15), xycoords='axes fraction', fontsize=10, color='black', ha='left')
+        plt.annotate("Tamaño de punto = longitud de la secuencia", xy=(0.01, -0.20), xycoords='axes fraction', fontsize=10, color='orange', ha='left')
 
         if SAVE_FIGURES:
             plt.savefig(f"{SUBFOLDER_ANOMALIES}/{feature}.png", dpi=DPI, bbox_inches='tight')
@@ -107,6 +134,7 @@ if PLOT_1_ENABLED:
             plt.show()
         plt.close()
         print(f" [ GRÁFICO 1 ] {feature}.png")
+
 
 
 if PLOT_2_ENABLED:
