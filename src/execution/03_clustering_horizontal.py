@@ -1,9 +1,8 @@
 import pandas as pd
-from sklearn.cluster import MiniBatchKMeans, KMeans, DBSCAN, Birch
+from sklearn.cluster import MiniBatchKMeans, KMeans, DBSCAN, AgglomerativeClustering, Birch
 from sklearn.decomposition import PCA
 import glob
 import os
-import itertools
 
 # PARÁMETROS 
 RESULTS_FOLDER = '../../results'                         # CARPETA PRINCIPAL DE RESULTADOS
@@ -25,27 +24,57 @@ N_PCA_COMPONENTS = 20
 # LIMITA LA DIMENSIONALIDAD DEL DATASET Y RETIENE SOLO LA VARIANZA MÁS RELEVANTE.
 
 # PARÁMETROS DE CLUSTERING
-# AHORA SE HARÁN VARIACIONES CON CADA UNO DE LOS 4 ALGORITMOS
-CLUSTER_METHODS = ['kmeans', 'minibatch', 'dbscan', 'birch']
+CLUSTER_METHOD = 'kmeans'  
+# MÉTODO DE CLUSTERING A UTILIZAR:
+# 'kmeans'     -> CLUSTERING CLÁSICO, AGRUPA EN N_CLUSTERS BASADO EN DISTANCIA
+# 'minibatch'  -> K-MEANS POR LOTES, MÁS RÁPIDO PARA GRANDES DATASETS
+# 'dbscan'     -> CLUSTERING BASADO EN DENSIDAD, NO REQUIERE N_CLUSTERS, DETECTA RUIDO
+# 'birch'      -> CLUSTERING HIERÁRQUICO PARA GRANDES DATASETS, CONSTRUIR ÁRBOLES DE CLUSTERS
 
 #---------------------------------------------------------------------------------
-N_CLUSTERS_LIST = [3, 4, 5]              
-# LISTA DE N_CLUSTERS A PROBAR PARA KMEANS, MINI-BATCH Y BIRCH
+N_CLUSTERS = 4                
+# NÚMERO DE CLUSTERS A GENERAR PARA MÉTODOS QUE REQUIEREN UN NÚMERO FIJO DE GRUPOS
+# COMO KMEANS, MINI-BATCH KMEANS O BIRCH.
+# CADA CLUSTER REPRESENTA UN GRUPO DE FILAS SIMILARES ENTRE SÍ (NO COLUMNAS).
+# PARA UN DATASET DE ~8000 FILAS, UN VALOR ENTRE 3 Y 8 ES RAZONABLE:
+# - DATOS MUY HETEROGÉNEOS → MÁS CLUSTERS (6–8)
+# - DATOS HOMOGÉNEOS → MENOS CLUSTERS (3–5)
+# BUENA PRÁCTICA: AJUSTAR SEGÚN MÉTRICAS DE SILHOUETTE O DAVIES–BOULDIN.
 
-EPS_DBSCAN_LIST = [4.0, 5.0, 6.0]              
-# LISTA DE EPS A PROBAR EN DBSCAN
+EPS_DBSCAN = 5.0              
+# RADIO MÁXIMO (EPS) PARA CONSIDERAR QUE DOS FILAS SON VECINOS EN DBSCAN.
+# DOS FILAS DENTRO DE ESTE RADIO PUEDEN AGRUPARSE EN EL MISMO CLUSTER.
+# CONCEPTUALMENTE, EPS DEFINE EL “ALCANCE” DE DENSIDAD:
+# - EPS PEQUEÑO → MUCHOS PUNTOS SE CONSIDERAN RUIDO
+# - EPS GRANDE → CLUSTERS DEMASIADO UNIDOS
+# EN ALTA DIMENSIÓN (150 COLUMNAS) Y 8000 FILAS, LAS DISTANCIAS SE CONCENTRAN,
+# POR LO QUE EPS TIENE QUE SER MAYOR (≈4–6) PARA AGRUPAR PUNTOS DENSOS.
+# RECOMENDACIÓN: CALCULAR DISTANCIA MEDIA AL k-ÉSIMO VECINO (k ≈ MIN_SAMPLES) PARA AJUSTAR EPS.
 
-MIN_SAMPLES_DBSCAN_LIST = [50, 80, 100]        
-# LISTA DE MIN_SAMPLES A PROBAR EN DBSCAN
+MIN_SAMPLES_DBSCAN = 80
+# NÚMERO MÍNIMO DE FILAS DENTRO DE EPS NECESARIAS PARA FORMAR UN CLUSTER.
+# FILAS CON MENOS VECINOS SE CONSIDERAN RUIDO O OUTLIERS.
+# DEFINE EL DENSITY THRESHOLD: CUÁNTA DENSIDAD DE FILAS SE NECESITA PARA CLUSTER.
+# REGLA GENERAL: MIN_SAMPLES ≈ 2 * NUM_FEATURES (COLUMNAS), PERO CON 150 COLUMNAS
+# Y 8000 FILAS, VALORES ENTRE 50–100 SUELE FUNCIONAR BIEN.
+# - MÁS ALTO → MÁS FILAS CONSIDERADAS RUIDO
+# - MÁS BAJO → CLUSTERS MÁS GRANDES, POSIBLE UNIÓN DE CLUSTERS
 
-BATCH_SIZE_LIST = [5000, 10000]                
-# LISTA DE TAMAÑOS DE LOTE PARA MINI-BATCH KMEANS Y BIRCH
+BATCH_SIZE = 10000
+# TAMAÑO DE LOTE PARA PROCESAR FILAS EN MINI-BATCH KMEANS O BIRCH.
+# SIGNIFICA CUÁNTAS FILAS SE PROCESAN A LA VEZ DURANTE EL AJUSTE DEL MODELO.
+# LOTES GRANDES → AJUSTE MÁS PRECISO, MÁS MEMORIA
+# LOTES PEQUEÑOS → MENOR USO DE MEMORIA, MÁS RUIDO EN ACTUALIZACIONES
+
+#---------------------------------------------------------------------
 
 SHOW_INFO = True              
 # SI ES TRUE, MUESTRA INFORMACIÓN DETALLADA DEL PROCESO EN CONSOLA.
 
+# -------------------------
 # FUNCION PARA APLICAR CLUSTERING A UN DATAFRAME
-def apply_clustering(df, method='kmeans', n_clusters=4, eps=5.0, min_samples=80, batch_size=10000, show_info=True):
+# -------------------------
+def apply_clustering(df, show_info=True):
     # SELECCIONAR SOLO COLUMNAS NUMÉRICAS PARA CLUSTERING
     num_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
     if len(num_cols) == 0:
@@ -69,16 +98,16 @@ def apply_clustering(df, method='kmeans', n_clusters=4, eps=5.0, min_samples=80,
             print("[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA")
 
     # SELECCIÓN DEL MÉTODO DE CLUSTERING
-    if method == 'minibatch':
-        model = MiniBatchKMeans(n_clusters=n_clusters, batch_size=batch_size, random_state=42)
-    elif method == 'birch':
-        model = Birch(n_clusters=n_clusters)
-    elif method == 'dbscan':
-        model = DBSCAN(eps=eps, min_samples=min_samples)
-    elif method == 'kmeans':
-        model = KMeans(n_clusters=n_clusters, random_state=42)
+    if CLUSTER_METHOD == 'minibatch':
+        model = MiniBatchKMeans(n_clusters=N_CLUSTERS, batch_size=BATCH_SIZE, random_state=42)
+    elif CLUSTER_METHOD == 'birch':
+        model = Birch(n_clusters=N_CLUSTERS)
+    elif CLUSTER_METHOD == 'dbscan':
+        model = DBSCAN(eps=EPS_DBSCAN, min_samples=MIN_SAMPLES_DBSCAN)
+    elif CLUSTER_METHOD == 'kmeans':
+        model = KMeans(n_clusters=N_CLUSTERS, random_state=42)
     else:
-        raise ValueError(f"[ ERROR ] MÉTODO DE CLUSTERING DESCONOCIDO: {method}")
+        raise ValueError(f"[ ERROR ] MÉTODO DE CLUSTERING DESCONOCIDO: {CLUSTER_METHOD}")
 
     # AJUSTAR MODELO Y OBTENER PREDICCIONES DE CLUSTERS
     df['cluster'] = model.fit_predict(X_input)
@@ -88,41 +117,36 @@ def apply_clustering(df, method='kmeans', n_clusters=4, eps=5.0, min_samples=80,
     
     return df
 
+"""
+# -------------------------
+# PROCESAR ARCHIVOS DE CLUSTERS
+# -------------------------
+files = glob.glob(os.path.join(EXECUTION_FOLDER, CLUSTER_PATTERN))
+if SHOW_INFO:
+    print(f"[ INFO ] ARCHIVOS ENCONTRADOS PARA CLUSTERING: {len(files)}")
+
+for file_path in files:
+    df = pd.read_csv(file_path)
+    if SHOW_INFO:
+        print(f"[ INFO ] PROCESANDO {file_path}, DIMENSIONES: {df.shape}")
+
+    df = apply_clustering(df, show_info=SHOW_INFO)
+
+    df.to_csv(file_path, index=False)
+    if SHOW_INFO:
+        print(f"[ GUARDADO ] CLUSTERING APLICADO EN {file_path}")
+"""
+
+# -------------------------
 # PROCESAR EL ARCHIVO GLOBAL DE ENTRADA
+# -------------------------
 df_global = pd.read_csv(INPUT_CSV)
 if SHOW_INFO:
     print(f"[ INFO ] PROCESANDO ARCHIVO GLOBAL: {INPUT_CSV}, DIMENSIONES: {df_global.shape}")
 
-# CREAR LA VERSIÓN BASE 03_global
-df_base = apply_clustering(df_global.copy(), method='kmeans', n_clusters=4, show_info=SHOW_INFO)
-df_base.to_csv(OUTPUT_CSV, index=False)
+df_global = apply_clustering(df_global, show_info=SHOW_INFO)
+
+
+df_global.to_csv(OUTPUT_CSV, index=False)
 if SHOW_INFO:
-    print(f"[ GUARDADO ] ARCHIVO GLOBAL BASE CON CLUSTERS GUARDADO EN: {OUTPUT_CSV}")
-
-# CREAR VARIACIONES PRINCIPALES
-for method in CLUSTER_METHODS:
-    # DEFINIR RANGOS DE PARÁMETROS SEGÚN MÉTODO
-    if method in ['kmeans', 'minibatch', 'birch']:
-        param_combinations = list(itertools.product(N_CLUSTERS_LIST, BATCH_SIZE_LIST))
-    elif method == 'dbscan':
-        param_combinations = list(itertools.product(EPS_DBSCAN_LIST, MIN_SAMPLES_DBSCAN_LIST))
-    else:
-        param_combinations = [(4,)]  # fallback
-
-    for params in param_combinations:
-        df_copy = df_global.copy()
-        if method in ['kmeans', 'minibatch', 'birch']:
-            n_clusters_val, batch_val = params
-            df_result = apply_clustering(df_copy, method=method, n_clusters=n_clusters_val, batch_size=batch_val, show_info=SHOW_INFO)
-            param_str = f"n{n_clusters_val}_batch{batch_val}"
-        elif method == 'dbscan':
-            eps_val, min_samples_val = params
-            df_result = apply_clustering(df_copy, method=method, eps=eps_val, min_samples=min_samples_val, show_info=SHOW_INFO)
-            param_str = f"eps{eps_val}_min{min_samples_val}"
-
-        # GUARDAR CSV CON NOMBRE QUE REFLEJE MÉTODO Y PARÁMETROS
-        filename = f"03_global_{method}_{param_str}.csv"
-        output_path = os.path.join(EXECUTION_FOLDER, filename)
-        df_result.to_csv(output_path, index=False)
-        if SHOW_INFO:
-            print(f"[ GUARDADO ] VARIACIÓN {filename} GUARDADA")
+    print(f"[ GUARDADO ] ARCHIVO GLOBAL CON CLUSTERS GUARDADO EN: {OUTPUT_CSV}")

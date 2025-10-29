@@ -12,11 +12,10 @@ RESULTS_FOLDER = '../../results/execution/plots'
 SUBFOLDER_FREQUENCY = '../../results/execution/plots/00_frequencia'
 ANOMALIES_DATASET_GLOBAL = '../../results/execution/plots/01_anomalies_dataset_global'
 ANOMALIES_DATASET_SEQUENCE = '../../results/execution/plots/02_anomalies_dataset_sequence'
-SCORE = '../../results/execution/plots/03_scores'
+ANOMALIES_IF_HORIZONTAL = '../../results/execution/plots/03_anomalies_if_horizontal'
 TYPE_HORIZONTAL_GROUPS = '../../results/execution/plots/04_type_horizontal_grups'
-ANOMALIES_IF_HORIZONTAL = '../../results/execution/plots/05_anomalies_if_horizontal'
-NEW_REGISTERS = '../../results/execution/plots/06_new_registers'
-HORIZONTAL_VERTICAL = '../../results/execution/plots/07_horizontal_vertical'
+NEW_REGISTERS = '../../results/execution/plots/05_new_registers'
+HORIZONTAL_VERTICAL = '../../results/execution/plots/06_horizontal_vertical'
 
 SAVE_FIGURES = True
 SHOW_FIGURES = False
@@ -32,8 +31,8 @@ PLOT_0_ENABLED = False
 PLOT_1_ENABLED = False
 PLOT_2_ENABLED = False
 PLOT_3_ENABLED = False
-PLOT_4_ENABLED = True
-PLOT_5_ENABLED = False
+PLOT_4_ENABLED =False
+PLOT_5_ENABLED = True
 PLOT_6_ENABLED = False
 PLOT_7_ENABLED = False
 PLOT_8_ENABLED = False
@@ -49,9 +48,8 @@ plt.rcParams['figure.figsize'] = FIGURE_SIZE
 os.makedirs(SUBFOLDER_FREQUENCY, exist_ok=True)
 os.makedirs(ANOMALIES_DATASET_GLOBAL, exist_ok=True)
 os.makedirs(ANOMALIES_DATASET_SEQUENCE, exist_ok=True)
-os.makedirs(SCORE, exist_ok=True)
-os.makedirs(TYPE_HORIZONTAL_GROUPS, exist_ok=True)
 os.makedirs(ANOMALIES_IF_HORIZONTAL, exist_ok=True)
+os.makedirs(TYPE_HORIZONTAL_GROUPS, exist_ok=True)
 os.makedirs(NEW_REGISTERS, exist_ok=True)
 os.makedirs(HORIZONTAL_VERTICAL, exist_ok=True)
 
@@ -358,7 +356,7 @@ if PLOT_3_ENABLED:
 
         plt.tight_layout()
         if SAVE_FIGURES:
-            plt.savefig(os.path.join(SCORE, f"{cluster_name}.png"), dpi=DPI, bbox_inches='tight')
+            plt.savefig(os.path.join(ANOMALIES_IF_HORIZONTAL, f"{cluster_name}.png"), dpi=DPI, bbox_inches='tight')
         plt.close()
         print(f" [ GRÁFICO 3 ] {cluster_name}.png")
 
@@ -464,6 +462,78 @@ if PLOT_4_ENABLED:
         plt.close()
         print(f" [ GRÁFICO 4 ] {cluster_name}.png")
 
+
+if PLOT_5_ENABLED:
+    # CARGAR ARCHIVOS PREDICTIVOS
+    predictive_files = glob.glob(os.path.join('../../results/execution/', '03_global_predictive_*.csv'))
+
+    for file_path in predictive_files:
+        df_pred = pd.read_csv(file_path)
+        cluster_name = os.path.splitext(os.path.basename(file_path))[0]
+
+        # ASEGURAR COLUMNAS NECESARIAS
+        df_pred['datetime'] = df_pred.get('datetime', 0)
+        df_pred['anomaly_score'] = df_pred.get('anomaly_score', 0)
+        df_pred['cluster'] = df_pred.get('cluster', cluster_name)
+        df_pred['predictive'] = df_pred.get('predictive', '')
+
+        plt.figure(figsize=LARGE_FIGURE_SIZE)
+
+        # IDENTIFICAR TODOS LOS CLUSTERS PRESENTES
+        unique_clusters = df_pred['cluster'].unique()
+        palette = sns.color_palette('tab10', n_colors=len(unique_clusters))
+
+        # CREAR CONJUNTO DE CLUSTERS QUE APARECEN EN PREDICTIVE
+        predictive_clusters = set()
+        for pred in df_pred['predictive']:
+            if pd.notna(pred) and pred != '':
+                predictive_clusters.update(pred.split('-'))
+
+        # SCATTER PRINCIPAL POR CLUSTER
+        for i, clust in enumerate(unique_clusters):
+            subset = df_pred[df_pred['cluster'] == clust]
+            # MARCAR EN LA LEYENDA SI EL CLUSTER APARECE EN predictive_clusters
+            label_name = f"{clust}" + (" (Predictive)" if str(clust) in predictive_clusters else "")
+            plt.scatter(
+                subset['datetime'],
+                subset['anomaly_score'],
+                color=palette[i],
+                alpha=0.6,
+                label=label_name
+            )
+
+        # MARCAR ANOMALÍAS DETECTADAS (is_anomaly=1)
+        detected = df_pred[df_pred['is_anomaly'] == 1]
+        if not detected.empty:
+            plt.scatter(
+                detected['datetime'],
+                detected['anomaly_score'],
+                facecolor='white',
+                edgecolor='black',
+                marker='X',
+                s=20,
+                linewidth=0.5,
+                alpha=1.0,
+                zorder=12,
+                label='Contaminada'
+            )
+
+        # CONFIGURACIÓN VISUAL
+        plt.title(f"Distribución temporal de scores (Predictive) - {cluster_name}")
+        plt.xlabel("Datetime")
+        plt.ylabel("Score de Anomalía")
+        plt.xticks(rotation=45)
+
+        # LEYENDA Y GUARDADO
+        handles, labels = plt.gca().get_legend_handles_labels()
+        by_label = dict(zip(labels, handles))
+        plt.legend(by_label.values(), by_label.keys(), title='Cluster / Tipo', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        plt.tight_layout()
+        if SAVE_FIGURES:
+            plt.savefig(os.path.join(NEW_REGISTERS, f"{cluster_name}_predictive.png"), dpi=DPI, bbox_inches='tight')
+        plt.close()
+        print(f" [ GRÁFICO 5 ] {cluster_name}_predictive.png")
 
 
 if PLOT_10_ENABLED:

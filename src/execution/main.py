@@ -13,7 +13,8 @@ LOG_OVERWRITE = True                                  # TRUE = SOBRESCRIBIR LOG 
 SCRIPTS = [   
     '01_ contaminate.py',           # SCRIPT 1: CONTAMINAR DATASET
     '02_clustering_vertical.py',      # SCRIPT 2: CLUSTERING MANUAL
-    '03_clustering_horizontal.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
+    '03_clustering_horizontal_research.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
+    '03_clustering_horizontal_predictive.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
     '04_if.py',                     # SCRIPT 4: DETECCIÓN DE ANOMALÍAS
     '05_temporal_continuity.py',    # SCRIPT 5: SECUENCIAS TEMPORALES
 
