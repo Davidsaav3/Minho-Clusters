@@ -21,11 +21,8 @@ SHOW_INFO = True               # SI TRUE MUESTRA INFO EN CONSOLA
 CHUNK_SIZE = 25                # NÚMERO DE FILAS POR BLOQUE EN EL FLUJO
 
 # FUNCIÓN DE CLUSTERING
+# RETORNA DATAFRAME CON COLUMNA 'cluster'
 def apply_clustering(df, show_info=True):
-    """
-    FUNCION QUE APLICA CLUSTERING AL DATAFRAME
-    RETORNA DATAFRAME CON COLUMNA 'cluster' Y MODELO ENTRENADO
-    """
     # OBTENER COLUMNAS NUMÉRICAS PARA CLUSTERING (EXCLUIR 'is_anomaly')
     num_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
     if 'is_anomaly' in num_cols:
@@ -85,7 +82,7 @@ df = pd.read_csv(INPUT_CSV)  # LEER CSV DE ENTRADA
 if SHOW_INFO:
     print(f"[INFO] ARCHIVO CARGADO: {INPUT_CSV} ({df.shape[0]} FILAS)")
 
-# DIVIDIR DATASET 50/50 ORDENADO
+# DIVIDIR DATASET 50/50 
 split_index = int(len(df) * 0.5)
 train_df = df.iloc[:split_index].copy()   # PRIMER 50% PARA ENTRENAMIENTO
 stream_df = df.iloc[split_index:].copy()  # SEGUNDO 50% PARA FLUJO INCREMENTAL
