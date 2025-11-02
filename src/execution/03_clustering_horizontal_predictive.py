@@ -108,8 +108,14 @@ col_means = train_df[num_cols].mean()
 
 # FLUJO INCREMENTAL
 file_counter = 1  # CONTADOR DE ARCHIVOS SALIDA
+max_iterations = 15  # LÍMITE DE ARCHIVOS A CREAR
 
 for start in range(0, len(stream_df), CHUNK_SIZE):
+    if file_counter > max_iterations:  # SALIR SI SE ALCANZA EL LÍMITE
+        if SHOW_INFO:
+            print(f"[INFO] LÍMITE DE {max_iterations} BLOQUES ALCANZADO, DETENIENDO FLUJO")
+        break
+
     chunk = stream_df.iloc[start:start+CHUNK_SIZE].copy()  # EXTRAER BLOQUE DE FLUJO
 
     # IMPUTAR NAN SOLO EN COLUMNAS EXISTENTES DEL BLOQUE
@@ -142,7 +148,4 @@ for start in range(0, len(stream_df), CHUNK_SIZE):
     if SHOW_INFO:
         print(f"[FLUJO] BLOQUE {file_counter} CLUSTERS CON ANOMALÍAS RELEVANTES {top_clusters} -> {output_csv} | Predictive: {train_df['predictive'].iloc[0]}")
 
-    file_counter += 1
-
-if SHOW_INFO:
-    print("[FIN] FLUJO INCREMENTAL COMPLETADO")
+    file_counter += 1  # INCREMENTAR CONTADOR DE BLOQUES

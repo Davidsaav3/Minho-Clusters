@@ -11,16 +11,21 @@ LOG_OVERWRITE = True                                  # TRUE = SOBRESCRIBIR LOG 
 
 # LISTA DE SCRIPTS A EJECUTAR EN ORDEN
 SCRIPTS = [   
-    '01_ contaminate.py',           # SCRIPT 1: CONTAMINAR DATASET
+    '01_contaminate.py',           # SCRIPT 1: CONTAMINAR DATASET
+    '01_contaminate_research.py', 
     '02_clustering_vertical.py',      # SCRIPT 2: CLUSTERING MANUAL
-    '03_clustering_horizontal_research.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
-    '03_clustering_horizontal_predictive.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
+    '03_clustering_horizontal.py',   # SCRIPT 3: CLUSTERING AUTOMÁTICO
+    '03_clustering_horizontal_research.py', 
+    '03_clustering_horizontal_predictive.py',
     '04_if.py',                     # SCRIPT 4: DETECCIÓN DE ANOMALÍAS
     '05_temporal_continuity.py',    # SCRIPT 5: SECUENCIAS TEMPORALES
-
     '06_metrics.py',                # SCRIPT 6: CÁLCULO DE MÉTRICAS
 ]
-#     '07_visualize.py'               # SCRIPT 7: VISUALIZACIÓN DE RESULTADOS
+# '01_contaminate_research.py',  
+# '03_clustering_horizontal_research.py',   
+# '03_clustering_horizontal_predictive.py',   
+# '07_visualize.py'     '07_visualize.py',
+            
 
 SHOW_OUTPUT = True  
 

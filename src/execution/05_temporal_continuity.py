@@ -81,11 +81,13 @@ for file_path in files_to_process:
         total_gseq, max_gseq = add_sequence_column(df, 'genuine_anomaly', 'genuine_sequence')
         if SHOW_INFO:
             print(f"[ OK ] {filename}: {total_gseq} secuencias genuinas detectadas (longitud máx = {max_gseq})")
+    """
     else:
         if SHOW_INFO and file_path != GLOBAL_FILE:
             print(f"[ SKIP ] {filename}: se omite genuine_anomaly en clusters.")
         elif SHOW_INFO:
             print(f"[ SKIP ] {filename}: no contiene columna 'genuine_anomaly' -> no se crea 'genuine_sequence'.")
+    """
 
     # GUARDAR CSV ACTUALIZADO
     df.to_csv(file_path, index=False)

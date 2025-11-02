@@ -8,6 +8,7 @@ import os
 RESULTS_FOLDER = '../../results'                         # CARPETA PRINCIPAL DE RESULTADOS
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # CARPETA DONDE SE GUARDAN RESULTADOS
 CLUSTER_PATTERN = 'cluster_*.csv'                       # PATRÓN PARA ARCHIVOS DE CLUSTERS A PROCESAR
+CONTAMINATION_PATTERN = 'contaminated_*.csv'           # PATRÓN PARA ARCHIVOS DE CLUSTERS CONTAMINADOS
 INPUT_CSV = os.path.join(EXECUTION_FOLDER, '01_contaminated.csv')
 OUTPUT_CSV = os.path.join(EXECUTION_FOLDER, '03_global.csv')  # SALIDA IF GLOBAL
 
@@ -24,7 +25,7 @@ N_PCA_COMPONENTS = 20
 # LIMITA LA DIMENSIONALIDAD DEL DATASET Y RETIENE SOLO LA VARIANZA MÁS RELEVANTE.
 
 # PARÁMETROS DE CLUSTERING
-CLUSTER_METHOD = 'kmeans'  
+CLUSTER_METHOD = 'minibatch'  
 # MÉTODO DE CLUSTERING A UTILIZAR:
 # 'kmeans'     -> CLUSTERING CLÁSICO, AGRUPA EN N_CLUSTERS BASADO EN DISTANCIA
 # 'minibatch'  -> K-MEANS POR LOTES, MÁS RÁPIDO PARA GRANDES DATASETS
@@ -32,7 +33,7 @@ CLUSTER_METHOD = 'kmeans'
 # 'birch'      -> CLUSTERING HIERÁRQUICO PARA GRANDES DATASETS, CONSTRUIR ÁRBOLES DE CLUSTERS
 
 #---------------------------------------------------------------------------------
-N_CLUSTERS = 4                
+N_CLUSTERS = 2                
 # NÚMERO DE CLUSTERS A GENERAR PARA MÉTODOS QUE REQUIEREN UN NÚMERO FIJO DE GRUPOS
 # COMO KMEANS, MINI-BATCH KMEANS O BIRCH.
 # CADA CLUSTER REPRESENTA UN GRUPO DE FILAS SIMILARES ENTRE SÍ
@@ -69,14 +70,12 @@ BATCH_SIZE = 10000
 # LOTES GRANDES → AJUSTE MÁS PRECISO, MÁS MEMORIA
 # LOTES PEQUEÑOS → MENOR USO DE MEMORIA, MÁS RUIDO EN ACTUALIZACIONES
 
-#---------------------------------------------------------------------
+#---------------------------------------------------------------------------------
 
 SHOW_INFO = True              
 # SI ES TRUE, MUESTRA INFORMACIÓN DETALLADA DEL PROCESO EN CONSOLA.
 
-# -------------------------
 # FUNCION PARA APLICAR CLUSTERING A UN DATAFRAME
-# -------------------------
 def apply_clustering(df, show_info=True):
     # SELECCIONAR SOLO COLUMNAS NUMÉRICAS PARA CLUSTERING
     num_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
@@ -120,11 +119,9 @@ def apply_clustering(df, show_info=True):
     
     return df
 
-"""
-# -------------------------
-# PROCESAR ARCHIVOS DE CLUSTERS
-# -------------------------
+# PROCESAR ARCHIVOS DE CLUSTERS Y CONTAMINADOS
 files = glob.glob(os.path.join(EXECUTION_FOLDER, CLUSTER_PATTERN))
+files += glob.glob(os.path.join(EXECUTION_FOLDER, CONTAMINATION_PATTERN))  # AÑADIR ARCHIVOS contaminated_*
 if SHOW_INFO:
     print(f"[ INFO ] ARCHIVOS ENCONTRADOS PARA CLUSTERING: {len(files)}")
 
@@ -138,17 +135,13 @@ for file_path in files:
     df.to_csv(file_path, index=False)
     if SHOW_INFO:
         print(f"[ GUARDADO ] CLUSTERING APLICADO EN {file_path}")
-"""
 
-# -------------------------
 # PROCESAR EL ARCHIVO GLOBAL DE ENTRADA
-# -------------------------
 df_global = pd.read_csv(INPUT_CSV)
 if SHOW_INFO:
     print(f"[ INFO ] PROCESANDO ARCHIVO GLOBAL: {INPUT_CSV}, DIMENSIONES: {df_global.shape}")
 
 df_global = apply_clustering(df_global, show_info=SHOW_INFO)
-
 
 df_global.to_csv(OUTPUT_CSV, index=False)
 if SHOW_INFO:

@@ -5,13 +5,12 @@ import glob
 import os
 import numpy as np
 
-# -----------------------------
 # PARÁMETROS GENERALES
-# -----------------------------
 RESULTS_FOLDER = '../../results'  # Carpeta principal de resultados
 EXECUTION_FOLDER = os.path.join(RESULTS_FOLDER, 'execution')  # Carpeta de ejecución
-
 CLUSTER_PATTERN = 'cluster_*.csv'  # Patrón de archivos de clusters
+CONTAMINATION_PATTERN = 'contamination_*.csv'  # Patrón de archivos contaminados
+
 INPUT_CSV = '../../results/execution/03_global.csv'  # ARCHIVO GLOBAL DE ENTRADA
 OUTPUT_CSV = os.path.join(EXECUTION_FOLDER, '04_global.csv')  # SALIDA IF GLOBAL
 OUTPUT_IF_CSV = os.path.join(EXECUTION_FOLDER, '04_global_if.csv')  # SALIDA IF GLOBAL SOLO ANOMALÍAS
@@ -19,14 +18,12 @@ INPUT_UNCONTAMINATED_CSV = '../../results/preparation/05_variance_recortado.csv'
 OUTPUT_UNCONTAMINATED_IF_CSV = os.path.join(EXECUTION_FOLDER, '04_global_if_uncontaminated.csv')  # SALIDA IF SIN CONTAMINACIÓN
 
 SAVE_ANOMALY_CSV = True  # Guardar solo anomalías detectadas
-SORT_ANOMALY_SCORE = True  # Ordenar CSV de anomalías por score (más anómalas arriba)
+SORT_ANOMALY_SCORE = True  # Ordenar CSV de anomalías por score
 INCLUDE_SCORE = True  # Incluir columna 'anomaly_score' en CSV de anomalías
 NORMALIZE_SCORE = True  # Normalizar anomaly_score entre 0 y 1
 SHOW_INFO = True  # Mostrar información en consola
 
-# -----------------------------
 # HIPERPARÁMETROS ISOLATION FOREST
-# -----------------------------
 N_ESTIMATORS = 100
 MAX_SAMPLES = 'auto'
 CONTAMINATION = 0.01
@@ -37,7 +34,7 @@ RANDOM_STATE = 42
 VERBOSE = 0
 
 # -----------------------------
-# ISOLATION FOREST GLOBAL (03_GLOBAL.CSV)
+# ISOLATION FOREST GLOBAL
 # -----------------------------
 if os.path.exists(INPUT_CSV):
     df = pd.read_csv(INPUT_CSV)
@@ -166,11 +163,16 @@ else:
     print("[ INFO ] No se añadieron columnas genuinas porque no existe el archivo sin contaminación o se omitió IF global.")
 
 # -----------------------------
-# ISOLATION FOREST POR CLUSTER
+# ISOLATION FOREST POR CLUSTER Y ARCHIVOS CONTAMINADOS
 # -----------------------------
-files = glob.glob(os.path.join(EXECUTION_FOLDER, CLUSTER_PATTERN))
+# Combina archivos por cluster y archivos contaminated_*
+files = glob.glob(os.path.join(EXECUTION_FOLDER, CLUSTER_PATTERN)) + \
+        glob.glob(os.path.join(EXECUTION_FOLDER, 'contaminated_*.csv'))
+# FILTRAR ARCHIVOS QUE TERMINAN EN '_if.csv'
+files = [f for f in files if not f.endswith('_if.csv')]
+
 if SHOW_INFO:
-    print(f"[ INFO ] ARCHIVOS ENCONTRADOS PARA IF POR CLUSTER: {len(files)}")
+    print(f"[ INFO ] ARCHIVOS ENCONTRADOS PARA IF POR CLUSTER/CONTAMINADOS: {len(files)}")
 
 for file_path in files:
     df = pd.read_csv(file_path)
@@ -239,7 +241,6 @@ for file_path in files:
         if SHOW_INFO:
             print(f"[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN {output_anomaly_csv}")
 
-            
 # -----------------------------
 # ISOLATION FOREST PARA 03_GLOBAL_PREDICTIVE_*
 # -----------------------------
@@ -298,3 +299,41 @@ for file_path in predictive_files:
     df.to_csv(file_path, index=False)
     if SHOW_INFO:
         print(f"[ GUARDADO ] RESULTADOS IF COMPLETOS EN {file_path}")
+
+
+
+# -----------------------------
+# AÑADIR COLUMNA 'doble_anomaly' A LOS ARCHIVOS CLUSTER_*
+# -----------------------------
+global_csv_path = os.path.join(EXECUTION_FOLDER, '04_global.csv')
+
+if os.path.exists(global_csv_path):
+    df_global = pd.read_csv(global_csv_path, skip_blank_lines=True)
+    if 'anomaly' in df_global.columns:
+        cluster_files = [f for f in glob.glob(os.path.join(EXECUTION_FOLDER, 'cluster_*.csv')) if not f.endswith('_if.csv')]
+        if SHOW_INFO:
+            print(f"[ INFO ] AÑADIENDO 'doble_anomaly' A {len(cluster_files)} ARCHIVOS DE CLUSTER...")
+
+        for cluster_file in cluster_files:
+            try:
+                df_cluster = pd.read_csv(cluster_file, skip_blank_lines=True)
+
+                # Alinear por índice (posición), ignorando posibles diferencias menores
+                min_len = min(len(df_cluster), len(df_global))
+                df_cluster = df_cluster.iloc[:min_len].copy()
+                df_global_part = df_global.iloc[:min_len]
+
+                df_cluster['doble_anomaly'] = np.where(
+                    (df_cluster['anomaly'] == 1) & (df_global_part['anomaly'] == 1), 1, 0
+                )
+
+                df_cluster.to_csv(cluster_file, index=False)
+                if SHOW_INFO:
+                    print(f"[ OK ] Añadida columna 'doble_anomaly' en {os.path.basename(cluster_file)} (filas={len(df_cluster)})")
+
+            except Exception as e:
+                print(f"[ ERROR ] No se pudo procesar {cluster_file}: {e}")
+    else:
+        print("[ WARNING ] El archivo global no contiene columna 'anomaly'. No se añade 'doble_anomaly'.")
+else:
+    print(f"[ WARNING ] No se encontró el archivo global en '{global_csv_path}'. No se añade 'doble_anomaly'.")
