@@ -1,67 +1,94 @@
-import pandas as pd, matplotlib.pyplot as plt, seaborn as sns, os, glob, numpy as np, matplotlib.patches as mpatches
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+import glob
+import numpy as np
+import matplotlib.patches as mpatches
 
 # CONFIGURACIÓN GLOBAL
 GLOBAL_CSV = '../../results/execution/04_global.csv'  # CSV GLOBAL PRINCIPAL
+VARIANCE_CSV = '../../results/preparation/02_nulls.csv'  # CSV con datetime
 CLUSTER_FILES_PATH = '../../results/execution/cluster_*.csv'  # PATRÓN ARCHIVOS DE CLUSTER
 RESULTS_SUMMARY_CSV = '../../results/execution/06_results.csv'  # CSV RESUMEN RESULTADOS
 RESULTS_FOLDER = '../../results/execution/plots'  # CARPETA RESULTADOS
-SUBFOLDER_FREQUENCY = '../../results/execution/plots/0_frequencia'  # SUBCARPETA FRECUENCIAS
-ANOMALIES_DATASET_GLOBAL = '../../results/execution/plots/1_anomalies_dataset_global'  # ANOMALÍAS GLOBALES
-ANOMALIES_DATASET_SEQUENCE = '../../results/execution/plots/2_anomalies_dataset_sequence'  # ANOMALÍAS POR SECUENCIA
-ANOMALIES_DATASET_SEQUENCE_2 = '../../results/execution/plots/02_anomalies_dataset_sequence'  # ANOMALÍAS POR SECUENCIA
-ANOMALIES_IF_HORIZONTAL = '../../results/execution/plots/3_anomalies_if_horizontal_vertical'  # ANOMALÍAS HORIZONTAL/IF
-ANOMALIES_IF_HORIZONTAL_2 = '../../results/execution/plots/03_anomalies_if_horizontal_vertical'  # ANOMALÍAS HORIZONTAL/IF
-TYPE_HORIZONTAL_GROUPS = '../../results/execution/plots/4_type_horizontal_grups'  # SCORES HORIZONTALES
-NEW_REGISTERS = '../../results/execution/plots/5_new_registers'  # REGISTROS PREDICTIVOS
-CONTAMINATION_CLUSTER_HORIZONTAL = '../../results/execution/plots/6_contamination_cluster_horizontal'  # REGISTROS PREDICTIVOS
+SUBFOLDER_FREQUENCY = '../../results/execution/plots/0_frequencia'
+ANOMALIES_DATASET_GLOBAL = '../../results/execution/plots/1_anomalies_dataset_global'
+ANOMALIES_DATASET_SEQUENCE = '../../results/execution/plots/2_anomalies_dataset_sequence'
+ANOMALIES_DATASET_SEQUENCE_2 = '../../results/execution/plots/02_anomalies_dataset_sequence'
+ANOMALIES_IF_HORIZONTAL = '../../results/execution/plots/3_anomalies_if_horizontal_vertical'
+ANOMALIES_IF_HORIZONTAL_2 = '../../results/execution/plots/03_anomalies_if_horizontal_vertical'
+TYPE_HORIZONTAL_GROUPS = '../../results/execution/plots/4_type_horizontal_grups'
+NEW_REGISTERS = '../../results/execution/plots/5_new_registers'
+CONTAMINATION_CLUSTER_HORIZONTAL = '../../results/execution/plots/6_contamination_cluster_horizontal'
+HORIZONTAL_CLUSTER = '../../results/execution/plots/7_horizontal_cluster'
 
-SAVE_FIGURES = True  # GUARDAR FIGURAS
-SHOW_FIGURES = False  # MOSTRAR FIGURAS
-STYLE = 'whitegrid'  # ESTILO SEABORN
-FIGURE_SIZE = (12, 6)  # TAMAÑO FIGURA POR DEFECTO
-LARGE_FIGURE_SIZE = (18, 6)  # TAMAÑO FIGURA GRANDE
-EXTRA_LARGE_FIGURE_SIZE = (24, 6)  # TAMAÑO FIGURA EXTRA GRANDE
-HEATMAP_SIZE = (30, 18)  # TAMAÑO HEATMAP
-DPI = 300  # RESOLUCIÓN FIGURAS
+SAVE_FIGURES = True
+SHOW_FIGURES = False
+STYLE = 'whitegrid'
+FIGURE_SIZE = (12, 6)
+LARGE_FIGURE_SIZE = (18, 6)
+EXTRA_LARGE_FIGURE_SIZE = (24, 6)
+HEATMAP_SIZE = (30, 18)
+DPI = 300
 
 # ACTIVACIÓN DE GRÁFICOS
-PLOT_0_ENABLED = False
-PLOT_1_ENABLED = False
-PLOT_2_ENABLED = False
+PLOT_0_ENABLED = True
+PLOT_1_ENABLED = True
+PLOT_2_ENABLED = True
 PLOT_02_ENABLED = True
-PLOT_3_ENABLED = False
+PLOT_3_ENABLED = True
 PLOT_03_ENABLED = True
-PLOT_4_ENABLED = False
-PLOT_5_ENABLED = False
-PLOT_6_ENABLED = False
-PLOT_10_ENABLED = False
-PLOT_11_ENABLED = False
-PLOT_12_ENABLED = False
-PLOT_13_ENABLED = False
-PLOT_14_ENABLED = False
+PLOT_4_ENABLED = True
+PLOT_5_ENABLED = True
+PLOT_6_ENABLED = True
+PLOT_7_ENABLED = True
+PLOT_10_ENABLED = True
+PLOT_11_ENABLED = True
+PLOT_12_ENABLED = True
+PLOT_13_ENABLED = True
+PLOT_14_ENABLED = True
+
 
 # CONFIGURAR ESTILO Y CREAR CARPETAS
 sns.set_style(STYLE)
 plt.rcParams['figure.figsize'] = FIGURE_SIZE
-os.makedirs(SUBFOLDER_FREQUENCY, exist_ok=True)
-os.makedirs(ANOMALIES_DATASET_GLOBAL, exist_ok=True)
-os.makedirs(ANOMALIES_DATASET_SEQUENCE, exist_ok=True)
-os.makedirs(ANOMALIES_DATASET_SEQUENCE_2, exist_ok=True)
-os.makedirs(ANOMALIES_IF_HORIZONTAL, exist_ok=True)
-os.makedirs(ANOMALIES_IF_HORIZONTAL_2, exist_ok=True)
-os.makedirs(TYPE_HORIZONTAL_GROUPS, exist_ok=True)
-os.makedirs(NEW_REGISTERS, exist_ok=True)
-os.makedirs(CONTAMINATION_CLUSTER_HORIZONTAL, exist_ok=True)
+for folder in [SUBFOLDER_FREQUENCY, ANOMALIES_DATASET_GLOBAL, ANOMALIES_DATASET_SEQUENCE,
+               ANOMALIES_DATASET_SEQUENCE_2, ANOMALIES_IF_HORIZONTAL, ANOMALIES_IF_HORIZONTAL_2,
+               TYPE_HORIZONTAL_GROUPS, NEW_REGISTERS, CONTAMINATION_CLUSTER_HORIZONTAL]:
+    os.makedirs(folder, exist_ok=True)
+
 
 # CARGAR DATOS BASE
-df_summary = pd.read_csv(RESULTS_SUMMARY_CSV).set_index('file')  # LEER CSV RESUMEN
-df_if = pd.read_csv(GLOBAL_CSV)  # LEER CSV GLOBAL
-for col in ['anomaly','is_anomaly','sequence']: df_if[col] = df_if[col].astype(int)  # CONVERTIR A ENTERO
-df_if['cluster'] = df_if.get('cluster', 0)  # ASEGURAR COLUMNA CLUSTER
+df_summary = pd.read_csv(RESULTS_SUMMARY_CSV).set_index('file')  # CSV resumen
+df_if = pd.read_csv(GLOBAL_CSV)  # CSV global
+for col in ['anomaly','is_anomaly','sequence']:
+    df_if[col] = df_if[col].astype(int)  # Asegurar enteros
+df_if['cluster'] = df_if.get('cluster', 0)  # Asegurar columna cluster
+
+# CARGAR datetime DESDE VARIANCE CSV
+df_datetime = pd.read_csv(VARIANCE_CSV, usecols=['datetime']).reset_index(drop=True)
+#
+df_if = df_if.reset_index(drop=True)
+df_if['datetime'] = df_datetime['datetime']  # Reemplazar datetime
+
+# CARGAR datetime DESDE VARIANCE CSV
+df_datetime = pd.read_csv(VARIANCE_CSV, usecols=['datetime']).reset_index(drop=True)
 
 # OBTENER ARCHIVOS DE CLUSTER
 cluster_files = [f for f in glob.glob(CLUSTER_FILES_PATH) if not f.endswith('_if.csv')]
-all_files = [GLOBAL_CSV] + cluster_files  # LISTA TODOS ARCHIVOS
+all_files = [GLOBAL_CSV] + cluster_files
+
+# ASIGNAR DATETIME A CADA CLUSTER
+for file in all_files:
+    df_cluster = pd.read_csv(file).reset_index(drop=True)
+    
+    # Solo asignar si el tamaño coincide
+    if len(df_cluster) == len(df_datetime):
+        df_cluster['datetime'] = df_datetime['datetime']
+    else:
+        print(f"⚠️ Tamaño diferente: {file}, datetime no asignado.")
+
 
 # PLOT 0: COMBINADO HISTOGRAMA ORIGINAL Y NUEVO (SCORES POSITIVOS + KDE)
 if PLOT_0_ENABLED:
@@ -90,6 +117,7 @@ if PLOT_0_ENABLED:
         mean_genuine = df_genuine_pos['genuine_anomaly_score'].mean()
         q25_genuine = df_genuine_pos['genuine_anomaly_score'].quantile(0.25)
         q75_genuine = df_genuine_pos['genuine_anomaly_score'].quantile(0.75)
+        std_genuine = df_genuine_pos['anomaly_score'].std()
 
         # RATIO DE COINCIDENCIA DE ANOMALÍAS
         coinciden = ((df_cluster_pos['is_anomaly'] == 1) & (df_cluster_pos['anomaly'] == 1)).sum()
@@ -109,7 +137,9 @@ if PLOT_0_ENABLED:
         axes[0].legend()
         axes[0].grid(alpha=0.3)
 
-        # DERECHA: NUEVO GRÁFICO (SCORES POSITIVOS + KDE)
+        # DERECHA: KDE = Kernel Density Estimate
+        # Estima la densidad de probabilidad de los datos de forma continua usando “kernels” (normalmente gaussiano).
+        # Una curva suave que representa la probabilidad de que un valor aparezca.
         sns.kdeplot(df_if_pos['anomaly_score'], color='blue', label='Global', fill=True, alpha=0.2, ax=axes[1])
         sns.kdeplot(df_cluster_pos['anomaly_score'], color='red', label=cluster_name, fill=True, alpha=0.3, common_norm=False, ax=axes[1])
         sns.kdeplot(df_genuine_pos['genuine_anomaly_score'], color='green', label='Genuine', fill=True, alpha=0.25, common_norm=False, ax=axes[1])
@@ -132,18 +162,24 @@ if PLOT_0_ENABLED:
             f"Media Global: {mean_global:.2f}\n"
             f"Media Cluster: {mean_cluster:.2f}\n"
             f"Media Genuine: {mean_genuine:.2f}\n"
+            f"\n"
             f"Std Global: {std_global:.2f}\n"
             f"Std Cluster: {std_cluster:.2f}\n"
-            f"Percentiles Global 25%/75%: {q25_global:.2f}/{q75_global:.2f}\n"
-            f"Percentiles Cluster 25%/75%: {q25_cluster:.2f}/{q75_cluster:.2f}\n"
-            f"Percentiles Genuine 25%/75%: {q25_genuine:.2f}/{q75_genuine:.2f}\n"
-            f"Ratio coincidencia: {ratio_coincidencia:.2f}"
+            f"Std Genuine: {std_genuine:.2f}\n"
+            f"\n"
+            f"Percentiles Global 25%: {q25_global:.2f}\n"
+            f"Percentiles Cluster 25%: {q25_cluster:.2f}\n"
+            f"Percentiles Genuine 25%: {q25_genuine:.2f}\n"
+            f"\n"
+            f"Percentiles Global 75%: {q75_global:.2f}\n"
+            f"Percentiles Cluster 75%: /{q75_cluster:.2f}\n"
+            f"Percentiles Genuine 75%: {q75_genuine:.2f}"
         )
         axes[1].text(1.05, 0.5, info_text,
                      transform=axes[1].transAxes, ha='left', va='center', fontsize=10,
                      bbox=dict(facecolor='white', alpha=0.6, edgecolor='gray'))
 
-        axes[1].set_title(f"Scores Positivos + KDE - {cluster_name}")
+        axes[1].set_title(f"Kernel Density Estimate (kdeplot) - {cluster_name}")
         axes[1].set_xlabel("Score de Anomalía")
         axes[1].set_ylabel("Densidad")
         axes[1].legend()
@@ -162,6 +198,10 @@ if PLOT_1_ENABLED:
     exclude_cols = ['anomaly','is_anomaly','sequence','cluster','datetime','date','time','year','month','day','hour','minute','weekday','day_of_year','week_of_year','working_day','season','holiday','weekend']
     exclude_cols += [c for c in df_if.columns if c.startswith(('openweather_','aemet_'))]  # EXCLUIR COLUMNAS NO NUMÉRICAS/EXTERNAS
     features = [c for c in df_if.select_dtypes(include=[np.number]).columns if c not in exclude_cols]  # SELECCIONAR FEATURES NUMÉRICOS
+
+    # CONVERTIR datetime A TIPO DATETIME Y ORDENAR
+    df_if['datetime'] = pd.to_datetime(df_if['datetime'], dayfirst=True)
+    df_if = df_if.sort_values('datetime').reset_index(drop=True)
     
     # FILTROS DE ANOMALÍAS
     detectadas = df_if['anomaly'] == 1
@@ -171,7 +211,7 @@ if PLOT_1_ENABLED:
         'det': detectadas.sum(), 'gen': genuinas.sum(), 'cont': contaminadas.sum(),
         'det_gen': (detectadas & genuinas).sum(), 'det_cont': (detectadas & contaminadas).sum(),
         'gen_cont': (genuinas & contaminadas).sum(), 'all': (detectadas & genuinas & contaminadas).sum()
-    }  # CONTAR ANOMALÍAS
+    }
 
     for f in features:
         plt.figure(figsize=LARGE_FIGURE_SIZE)
@@ -181,36 +221,42 @@ if PLOT_1_ENABLED:
                     df_if[~detectadas & ~contaminadas][f],
                     color='blue', alpha=0.5, s=20, label='Normal')
 
-        # Solo en anomaly_score.png: superponer genuine_anomaly_score en verde
+        # Genuine anomaly score en verde (solo para anomaly_score)
         if f == 'anomaly_score' and 'genuine_anomaly_score' in df_if.columns:
             plt.scatter(df_if['datetime'], df_if['genuine_anomaly_score'],
                         color='green', alpha=0.5, s=20, label='Genuine')
 
         # ANOMALÍAS DETECTADAS
-        det = df_if[detectadas]
+        det = df_if[detectadas].copy()
+        det[f] = pd.to_numeric(det[f], errors='coerce')
         if not det.empty:
             sizes = np.interp(det['sequence'], (det['sequence'].min(), det['sequence'].max()), (150,400)) if 'sequence' in det.columns else 200
             plt.scatter(det['datetime'], det[f], color='orange', s=sizes, alpha=0.3, label=f'Detectadas ({counts["det"]})')
 
         # ANOMALÍAS GENUINAS
-        gen = df_if[genuinas]
+        gen = df_if[genuinas].copy()
+        gen[f] = pd.to_numeric(gen[f], errors='coerce')
         if not gen.empty:
             sizes = np.interp(gen['genuine_sequence'], (gen['genuine_sequence'].min(), gen['genuine_sequence'].max()), (150,400)) if 'genuine_sequence' in gen.columns else 200
             plt.scatter(gen['datetime'], gen[f], color='red', s=sizes, alpha=0.4, label=f'Genuinas ({counts["gen"]})')
 
-        # ANOMALÍAS CONTAMINADAS
-        cont = df_if[contaminadas]
+        # ANOMALÍAS CONTAMINADAS (con jitter en Y)
+        cont = df_if[contaminadas].copy()
+        cont[f] = pd.to_numeric(cont[f], errors='coerce')
         if not cont.empty:
-            plt.scatter(cont['datetime'], cont[f], color='white', edgecolor='black', marker='X', s=80, alpha=1, label=f'Contaminadas ({counts["cont"]})')
+            jitter = np.random.uniform(-0.01, 0.01, size=len(cont))
+            plt.scatter(cont['datetime'], cont[f] + jitter, color='white', edgecolor='black',
+                        marker='X', s=80, alpha=1, label=f'Contaminadas ({counts["cont"]})')
 
         # INTERSECCIONES
         inter = f"Inter: D&G={counts['det_gen']}, D&C={counts['det_cont']}, G&C={counts['gen_cont']}, Todos={counts['all']}"
 
-        # CONFIGURACIÓN GRÁFICA
+        # CONFIGURACIÓN DEL GRÁFICO
         plt.title(f"Anomalías: {f.upper()}")
         plt.xlabel("Datetime")
         plt.ylabel(f.upper())
         plt.xticks(rotation=45)
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
         plt.legend(title='Leyenda', loc='upper right')
         plt.annotate(inter, xy=(0.01,-0.15), xycoords='axes fraction', fontsize=10)
         plt.annotate("Tamaño = longitud secuencia", xy=(0.01,-0.20), xycoords='axes fraction', fontsize=10, color='orange')
@@ -227,7 +273,7 @@ if PLOT_2_ENABLED:
         df = pd.read_csv(file)
         name = '04_global' if file == GLOBAL_CSV else os.path.splitext(os.path.basename(file))[0]
 
-        # --- ASIGNAR CLUSTER GLOBAL Y ANOMALÍAS GENUINAS SEGÚN FILA ---
+        # ASIGNAR CLUSTER GLOBAL Y ANOMALÍAS GENUINAS SEGÚN FILA
         if len(df) == len(df_if):
             df['cluster'] = df_if['cluster'].values
             if 'genuine_anomaly' in df_if.columns: df['genuine_anomaly'] = df_if['genuine_anomaly'].values
@@ -242,7 +288,7 @@ if PLOT_2_ENABLED:
         # Filtrar secuencias detectadas
         seq = df[df['sequence'] > 0].copy() if df['sequence'].sum() > 0 else df.copy()
 
-        # --- AGRUPAR POR DATETIME Y CLUSTER PARA BARRAS ---
+        # AGRUPAR POR DATETIME Y CLUSTER PARA BARRAS
         plot_df = seq.groupby(['datetime','cluster'], as_index=False)['sequence'].sum().sort_values('datetime')
         if plot_df.empty:
             plot_df = pd.DataFrame({'datetime':['no_data'],'cluster':['none'],'sequence':[0]})
@@ -251,7 +297,7 @@ if PLOT_2_ENABLED:
         unique_clusters = plot_df['cluster'].unique()
         palette = sns.color_palette('tab10', n_colors=len(unique_clusters))
 
-        # --- BARRAS POR CLUSTER ---
+        # BARRAS POR CLUSTER
         for i, c in enumerate(unique_clusters):
             cluster_df = plot_df[plot_df['cluster'] == c]
             n_cont = (seq[seq['cluster']==c]['is_anomaly'] == 1).sum()
@@ -261,10 +307,10 @@ if PLOT_2_ENABLED:
 
             sns.barplot(
                 data=cluster_df, x='datetime', y='sequence',
-                color=palette[i], label=label, dodge=True, edgecolor=None, width=2
+                color=palette[i], label=label, dodge=True, edgecolor=None, width=0.5
             )
 
-        # --- ANOMALÍAS GENUINAS ---
+        # ANOMALÍAS GENUINAS
         gen = seq[seq['genuine_anomaly'] == 1]
         if not gen.empty:
             for _, r in gen.iterrows():
@@ -272,7 +318,7 @@ if PLOT_2_ENABLED:
                     x = list(plot_df['datetime']).index(r['datetime'])
                     plt.scatter(x, r['sequence'], color='red', s=70, alpha=1.0, edgecolors='black', linewidths=0.6, zorder=12, label='Genuina')
 
-        # --- ANOMALÍAS CONTAMINADAS ---
+        # ANOMALÍAS CONTAMINADAS
         cont = seq[seq['is_anomaly'] == 1]
         if not cont.empty:
             for _, r in cont.iterrows():
@@ -280,13 +326,14 @@ if PLOT_2_ENABLED:
                     x = list(plot_df['datetime']).index(r['datetime'])
                     plt.scatter(x, r['sequence'], color='white', s=80, marker='X', edgecolors='black', linewidths=1.5, zorder=13, label='Contaminada')
 
-        # --- AJUSTE ETIQUETAS X Y LEYENDA ---
+        # AJUSTE ETIQUETAS X Y LEYENDA
         max_labels = 20
         step = max(1, len(plot_df['datetime'].unique()) // max_labels)
         plt.xticks(ticks=range(0, len(plot_df['datetime'].unique()), step),
                    labels=plot_df['datetime'].unique()[::step], rotation=45)
         handles, labels = plt.gca().get_legend_handles_labels()
         by_label = dict(zip(labels, handles))
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
         plt.legend(by_label.values(), by_label.keys(), title="Cluster / Anomalía", bbox_to_anchor=(1.05,1), loc='upper left')
 
         plt.title(f"Secuencias por Cluster - {name}")
@@ -301,14 +348,12 @@ if PLOT_2_ENABLED:
         plt.close()
         print(f" [ GRÁFICO 2 ] {name}.png")
 
-
-
 if PLOT_02_ENABLED:
     for file in all_files:
         df = pd.read_csv(file)
         name = '04_global' if file == GLOBAL_CSV else os.path.splitext(os.path.basename(file))[0]
 
-        # --- ASIGNAR CLUSTER GLOBAL Y ANOMALÍAS GENUINAS SEGÚN FILA ---
+        # ASIGNAR CLUSTER GLOBAL Y ANOMALÍAS GENUINAS SEGÚN FILA
         if len(df) == len(df_if):
             df['cluster'] = df_if['cluster'].values
             if 'genuine_anomaly' in df_if.columns: df['genuine_anomaly'] = df_if['genuine_anomaly'].values
@@ -317,15 +362,13 @@ if PLOT_02_ENABLED:
             df['cluster'] = name
             df['genuine_anomaly'] = df.get('genuine_anomaly', 0)
 
-        # Asegurar columna sequence
         df['sequence'] = df.get('sequence', 0)
 
         # Filtrar secuencias detectadas
-        # seq = df[df['sequence'] > 0].copy() if df['sequence'].sum() > 0 else df.copy()
         anomaly_mask = (df['anomaly'].values == 1) & (df_if['anomaly'].values == 1)
         seq = df[anomaly_mask & (df['sequence'] > 0)].copy()
 
-        # --- AGRUPAR POR DATETIME Y CLUSTER PARA BARRAS ---
+        # AGRUPAR POR DATETIME Y CLUSTER PARA BARRAS
         plot_df = seq.groupby(['datetime','cluster'], as_index=False)['sequence'].sum().sort_values('datetime')
         if plot_df.empty:
             plot_df = pd.DataFrame({'datetime':['no_data'],'cluster':['none'],'sequence':[0]})
@@ -334,7 +377,8 @@ if PLOT_02_ENABLED:
         unique_clusters = plot_df['cluster'].unique()
         palette = sns.color_palette('tab10', n_colors=len(unique_clusters))
 
-        # --- BARRAS POR CLUSTER ---
+        # --- BARRAS MÁS ESTRECHAS ---
+        bar_width = 0.5  # ajustar ancho
         for i, c in enumerate(unique_clusters):
             cluster_df = plot_df[plot_df['cluster'] == c]
             n_cont = (seq[seq['cluster']==c]['is_anomaly'] == 1).sum()
@@ -344,32 +388,67 @@ if PLOT_02_ENABLED:
 
             sns.barplot(
                 data=cluster_df, x='datetime', y='sequence',
-                color=palette[i], label=label, dodge=True, edgecolor=None, width=2
+                color=palette[i], label=label, dodge=True, edgecolor=None, width=bar_width
             )
 
-        # --- ANOMALÍAS GENUINAS ---
+        # ANOMALÍAS GENUINAS
         gen = seq[seq['genuine_anomaly'] == 1]
         if not gen.empty:
             for _, r in gen.iterrows():
                 if r['datetime'] in plot_df['datetime'].values:
                     x = list(plot_df['datetime']).index(r['datetime'])
-                    plt.scatter(x, r['sequence'], color='red', s=70, alpha=1.0, edgecolors='black', linewidths=0.6, zorder=12, label='Genuina')
+                    plt.scatter(x, r['sequence'], color='red', s=70, alpha=1.0,
+                                edgecolors='black', linewidths=0.6, zorder=12, label='Genuina')
 
-        # --- ANOMALÍAS CONTAMINADAS ---
+        # ANOMALÍAS CONTAMINADAS
         cont = seq[seq['is_anomaly'] == 1]
         if not cont.empty:
             for _, r in cont.iterrows():
                 if r['datetime'] in plot_df['datetime'].values:
                     x = list(plot_df['datetime']).index(r['datetime'])
-                    plt.scatter(x, r['sequence'], color='white', s=80, marker='X', edgecolors='black', linewidths=1.5, zorder=13, label='Contaminada')
+                    plt.scatter(x, r['sequence'], color='white', s=80, marker='X',
+                                edgecolors='black', linewidths=1.5, zorder=13, label='Contaminada')
 
-        # --- AJUSTE ETIQUETAS X Y LEYENDA ---
+        # ANOMALÍAS QUE COINCIDEN CON GLOBAL (cruces negras)
+        if name != '04_global' and 'anomaly' in df.columns and 'anomaly' in df_if.columns:
+            common_mask = (df['anomaly'] == 1) & (df_if['anomaly'] == 1)
+            df_common = df[common_mask]
+            if not df_common.empty:
+                for _, r in df_common.iterrows():
+                    if r['datetime'] in plot_df['datetime'].values:
+                        x = list(plot_df['datetime']).index(r['datetime'])
+                        # Desplazar ligeramente la X negra para no superponerse con rojo
+                        x_disp = x + 0.15  # ajustar desplazamiento
+                        plt.scatter(x_disp, r['sequence'], color='black', s=80, marker='X',
+                                    edgecolors='black', linewidths=1.5, zorder=14, label='Coincide con global')
+
+        # AJUSTE ETIQUETAS X Y LEYENDA
         max_labels = 20
         step = max(1, len(plot_df['datetime'].unique()) // max_labels)
         plt.xticks(ticks=range(0, len(plot_df['datetime'].unique()), step),
                    labels=plot_df['datetime'].unique()[::step], rotation=45)
+
+        # LEYENDA CON CONTEOS
         handles, labels = plt.gca().get_legend_handles_labels()
-        by_label = dict(zip(labels, handles))
+        by_label = {}
+        if name != '04_global' and not df_common.empty:
+            clusters_common = df_common['cluster'].value_counts().to_dict()
+            for cl, count in clusters_common.items():
+                by_label[f"Coincide con global [C:{count} en cluster {cl}]"] = plt.Line2D([0],[0], marker='X', color='black', markersize=6, linestyle='')
+
+        if not gen.empty:
+            by_label[f"Genuina [C:{len(gen)}]"] = plt.Line2D([0],[0], marker='o', color='red', markersize=6, linestyle='')
+        if not cont.empty:
+            by_label[f"Contaminada [C:{len(cont)}]"] = plt.Line2D([0],[0], marker='X', color='white', markeredgecolor='black', markersize=6, linestyle='')
+
+        for i, c in enumerate(unique_clusters):
+            cluster_df = plot_df[plot_df['cluster'] == c]
+            n_cont = (seq[seq['cluster']==c]['is_anomaly'] == 1).sum()
+            n_det  = (seq[seq['cluster']==c]['sequence'] > 0).sum()
+            n_gen  = (seq[seq['cluster']==c]['genuine_anomaly'] == 1).sum()
+            by_label[f"{c} (C:{n_cont} D:{n_det} G:{n_gen})"] = plt.Line2D([0],[0], marker='o', color=palette[i], markersize=6, linestyle='')
+
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
         plt.legend(by_label.values(), by_label.keys(), title="Cluster / Anomalía", bbox_to_anchor=(1.05,1), loc='upper left')
 
         plt.title(f"Secuencias por Cluster - {name}")
@@ -439,79 +518,129 @@ if PLOT_3_ENABLED:
             new_handles.append(plt.Line2D([0],[0], marker='o', color='red', markersize=6, linestyle=''))
             new_labels.append('Genuina')
 
+        plt.axhline(0, color='black', linewidth=2, linestyle='--', alpha=0.7)
         plt.title(f"Scores Temporales - {name}")
         plt.xlabel("Datetime"); plt.ylabel("Score"); plt.xticks(rotation=45)
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
         plt.legend(new_handles, new_labels, title='Cluster / Anomalía', bbox_to_anchor=(1.05,1), loc='upper left')
         plt.tight_layout()
         if SAVE_FIGURES: 
             plt.savefig(os.path.join(ANOMALIES_IF_HORIZONTAL, f"{name}.png"), dpi=DPI, bbox_inches='tight')
         plt.close()
         print(f" [ GRÁFICO 3 ] {name}.png")
-
-
-if PLOT_03_ENABLED: 
+if PLOT_03_ENABLED:
     for file in all_files:
         df = pd.read_csv(file)
         name = 'global' if file == GLOBAL_CSV else os.path.splitext(os.path.basename(file))[0]
+
+        # Copia para leyenda
+        df_full = df.copy()
+
         if len(df) == len(df_if):
             df['cluster'] = df_if['cluster'].values
-            if 'genuine_anomaly' in df_if.columns: df['genuine_anomaly'] = df_if['genuine_anomaly'].values
-            if 'genuine_sequence' in df_if.columns: df['genuine_sequence'] = df_if['genuine_sequence'].values
+            df_full['cluster'] = df_if['cluster'].values
+            if 'genuine_anomaly' in df_if.columns:
+                df['genuine_anomaly'] = df_if['genuine_anomaly'].values
+                df_full['genuine_anomaly'] = df_if['genuine_anomaly'].values
+            if 'genuine_sequence' in df_if.columns:
+                df['genuine_sequence'] = df_if['genuine_sequence'].values
+                df_full['genuine_sequence'] = df_if['genuine_sequence'].values
         else:
             df['cluster'] = name; df['genuine_anomaly'] = 0; df['genuine_sequence'] = 0
+            df_full['cluster'] = name; df_full['genuine_anomaly'] = 0; df_full['genuine_sequence'] = 0
+
         df['sequence'] = df.get('sequence', 0); df['anomaly_score'] = df.get('anomaly_score', 0)
+        df_full['sequence'] = df_full.get('sequence', 0); df_full['anomaly_score'] = df_full.get('anomaly_score', 0)
 
         plt.figure(figsize=LARGE_FIGURE_SIZE)
 
-        # PLOT PRINCIPAL POR CLUSTER (SIN LEYENDA AUTOMÁTICA)
-        palette = sns.color_palette('tab10', n_colors=df['cluster'].nunique())
-        for i, c in enumerate(sorted(df['cluster'].unique())):
-            sub = df[df['cluster']==c]
-            plt.scatter(sub['datetime'], sub['anomaly_score'], color=palette[i], alpha=0.6, s=20, label=str(c))
+        # --- Fondo: todos los puntos por cluster ---
+        palette = sns.color_palette('tab10', n_colors=df_full['cluster'].nunique())
+        for i, c in enumerate(sorted(df_full['cluster'].unique())):
+            sub = df_full[df_full['cluster'] == c]
+            plt.scatter(sub['datetime'], sub['anomaly_score'], color=palette[i], alpha=0.3, s=20, label=str(c))
 
+        # --- Resaltar anomalías ---
+        # 1. Coinciden con global
+        if 'anomaly' in df.columns and 'anomaly' in df_if.columns and name != 'global':
+            common_mask = (df['anomaly'] == 1) & (df_if['anomaly'] == 1)
+            df_common = df[common_mask]
+        else:
+            df_common = df[df['is_anomaly'] == 1].copy() if 'is_anomaly' in df.columns else pd.DataFrame()
 
-        anomaly_mask = (df['anomaly'].values == 1) & (df_if['anomaly'].values == 1)
-        df = df[anomaly_mask]
+        # 2. Todas las anomalías del cluster que no coinciden con el global
+        df_cluster_anom = df[(df['is_anomaly'] == 1) & (~df.index.isin(df_common.index))] if not df_common.empty else df[df['is_anomaly'] == 1]
 
+        # Plot: anomalías comunes con marker distinto
+        if not df_common.empty:
+            plt.scatter(df_common['datetime'], df_common['anomaly_score'],
+                        facecolor='black', edgecolor='black', marker='X', s=30,
+                        linewidth=0.8, alpha=1.0, zorder=12, label='Coincide con global')
 
-        # ANOMALÍAS CONTAMINADAS
-        cont = df[df['is_anomaly']==1]
-        if not cont.empty:
-            plt.scatter(cont['datetime'], cont['anomaly_score'], facecolor='white', edgecolor='black', marker='X', s=20, linewidth=0.5, alpha=1.0, zorder=12, label='Contaminada')
+        # Plot: otras anomalías del cluster
+        if not df_cluster_anom.empty:
+            plt.scatter(df_cluster_anom['datetime'], df_cluster_anom['anomaly_score'],
+                        facecolor='yellow', edgecolor='black', marker='o', s=30,
+                        linewidth=0.5, alpha=0.7, zorder=11, label='Solo cluster')
 
-        # ANOMALÍAS GENUINAS
-        gen = df[df['genuine_anomaly']==1]
+        # --- Anomalías genuinas ---
+        gen = df[df['genuine_anomaly'] == 1]
         if not gen.empty:
-            sizes = np.interp(gen['genuine_sequence'], (gen['genuine_sequence'].min(), gen['genuine_sequence'].max()), (50,300))
-            plt.scatter(gen['datetime'], gen['anomaly_score'], color='red', s=sizes, alpha=0.2, edgecolor='black', linewidth=0.5, zorder=13, label='Genuina')
+            sizes = np.interp(gen['genuine_sequence'],
+                              (gen['genuine_sequence'].min(), gen['genuine_sequence'].max()),
+                              (50, 300))
+            plt.scatter(gen['datetime'], gen['anomaly_score'],
+                        color='red', s=sizes, alpha=0.2, edgecolor='black', linewidth=0.5,
+                        zorder=13, label='Genuina')
 
-        # LEYENDA MANUAL CON CONTEOS POR CLUSTER
+        # --- Leyenda ---
         new_handles = []
         new_labels = []
-        for i, c in enumerate(sorted(df['cluster'].unique())):
-            sub = df[df['cluster']==c]
-            cont_count = (sub['is_anomaly']==1).sum()
-            det_count = (sub['anomaly']==1).sum() if 'anomaly' in sub.columns else 0
-            gen_count = (sub['genuine_anomaly']==1).sum()
-            new_handles.append(plt.Line2D([0],[0], marker='o', color=palette[i], label=c, markersize=6, linestyle=''))
+
+        # Leyenda por cluster con conteos
+        for i, c in enumerate(sorted(df_full['cluster'].unique())):
+            sub = df_full[df_full['cluster'] == c]
+            cont_count = (sub['is_anomaly'] == 1).sum() if 'is_anomaly' in sub.columns else 0
+            det_count = (sub['anomaly'] == 1).sum() if 'anomaly' in sub.columns else 0
+            gen_count = (sub['genuine_anomaly'] == 1).sum()
+            new_handles.append(plt.Line2D([0], [0], marker='o', color=palette[i],
+                                          label=c, markersize=6, linestyle=''))
             new_labels.append(f"{c} [C:{cont_count} D:{det_count} G:{gen_count}]")
 
-        # Añadir leyenda de clusters + anomalías
-        if not cont.empty:
-            new_handles.append(plt.Line2D([0],[0], marker='X', color='white', markeredgecolor='black', markersize=6, linestyle=''))
-            new_labels.append('Contaminada')
-        if not gen.empty:
-            new_handles.append(plt.Line2D([0],[0], marker='o', color='red', markersize=6, linestyle=''))
-            new_labels.append('Genuina')
+        # Leyenda anomalías coincidentes con el global por cluster
+        if not df_common.empty:
+            clusters_common = df_common['cluster'].value_counts().to_dict()
+            for cl, count in clusters_common.items():
+                new_handles.append(plt.Line2D([0], [0], marker='X', color='black',
+                                              markeredgecolor='black', markersize=6, linestyle=''))
+                new_labels.append(f"Coincide con global [C:{count} en cluster {cl}]")
 
+        # Leyenda anomalías solo cluster
+        if not df_cluster_anom.empty:
+            new_handles.append(plt.Line2D([0], [0], marker='o', color='yellow',
+                                          markeredgecolor='black', markersize=6, linestyle=''))
+            new_labels.append(f"Solo cluster [C:{len(df_cluster_anom)}]")
+
+        # Leyenda anomalías genuinas
+        if not gen.empty:
+            new_handles.append(plt.Line2D([0], [0], marker='o', color='red',
+                                          markersize=6, linestyle=''))
+            new_labels.append(f"Genuina [C:{len(gen)}]")
+
+        plt.axhline(0, color='black', linewidth=2, linestyle='--', alpha=0.7)
         plt.title(f"Scores Temporales - {name}")
-        plt.xlabel("Datetime"); plt.ylabel("Score"); plt.xticks(rotation=45)
-        plt.legend(new_handles, new_labels, title='Cluster / Anomalía', bbox_to_anchor=(1.05,1), loc='upper left')
+        plt.xlabel("Datetime"); plt.ylabel("Score")
+        plt.xticks(rotation=45)
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
+        plt.legend(new_handles, new_labels, title='Cluster / Anomalía',
+                   bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
-        if SAVE_FIGURES: 
+
+        if SAVE_FIGURES:
             plt.savefig(os.path.join(ANOMALIES_IF_HORIZONTAL_2, f"{name}.png"), dpi=DPI, bbox_inches='tight')
         plt.close()
         print(f" [ GRÁFICO 03 ] {name}.png")
+
 
 
 # PLOT 4: TYPE_HORIZONTAL_GROUPS, df_if= todo
@@ -623,10 +752,12 @@ if PLOT_4_ENABLED:
             labels.append('Genuina')
 
         # AJUSTES DE LA FIGURA
+        plt.axhline(0, color='black', linewidth=2, linestyle='--', alpha=0.7)
         plt.title(f"Distribución temporal de scores - {name}")
         plt.xlabel("Datetime")
         plt.ylabel("Score de Anomalía")
         plt.xticks(rotation=45)
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
         plt.legend(handles, labels, title='Cluster / Anomalía', bbox_to_anchor=(1.05,1), loc='upper left')
         plt.tight_layout()
 
@@ -636,7 +767,6 @@ if PLOT_4_ENABLED:
         plt.close()
 
         print(f" [ GRÁFICO 4 ] {name}.png")
-
 
 
 # PLOT 5: NEW_REGISTERS... todo
@@ -667,9 +797,11 @@ if PLOT_5_ENABLED:
         cont = df[df['is_anomaly'] == 1]
         if not cont.empty:
             plt.scatter(cont['datetime'], cont['anomaly_score'], facecolor='white', edgecolor='black', marker='X', s=20, linewidth=0.5, alpha=1.0, zorder=12, label='Contaminada')
-
+        
+        plt.axhline(0, color='black', linewidth=2, linestyle='--', alpha=0.7)
         plt.title(f"Scores Predictivos - {name}"); plt.xlabel("Datetime"); plt.ylabel("Score"); plt.xticks(rotation=45)
         handles, labels = plt.gca().get_legend_handles_labels(); by_label = dict(zip(labels, handles))
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
         plt.legend(by_label.values(), by_label.keys(), title='Cluster / Tipo', bbox_to_anchor=(1.05,1), loc='upper left'); plt.tight_layout()
         if SAVE_FIGURES: plt.savefig(os.path.join(NEW_REGISTERS, f"{name}_predictive.png"), dpi=DPI, bbox_inches='tight')
         plt.close()
@@ -742,10 +874,12 @@ if PLOT_6_ENABLED:
         inter = f"Inter: D&C={counts['det_cont']}"
 
         # CONFIGURACIÓN GRÁFICA
+        plt.axhline(0, color='black', linewidth=2, linestyle='--', alpha=0.7)
         plt.title(f"Anomalías: {f.upper()}")
         plt.xlabel("Datetime")
         plt.ylabel(f.upper())
         plt.xticks(rotation=45)
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
         plt.legend(title='Leyenda', loc='upper right', fontsize=8)
         plt.annotate(inter, xy=(0.01,-0.15), xycoords='axes fraction', fontsize=10)
         plt.annotate("Tamaño = longitud secuencia", xy=(0.01,-0.20),
@@ -756,12 +890,10 @@ if PLOT_6_ENABLED:
             filename_only = os.path.basename(file).replace('.csv', '.png')
             plt.savefig(f"{CONTAMINATION_CLUSTER_HORIZONTAL}/{filename_only}", dpi=DPI, bbox_inches='tight')
         plt.close()
-        print(f" [ GRÁFICO 7 ] {filename_only}")
+        print(f" [ GRÁFICO 6 ] {filename_only}")
 
 
-
-
-# PLOT 10: CANTIDAD DE ANOMALÍAS Y GENUINAS POR CLUSTER (mejorado)
+# PLOT 10: CANTIDAD DE ANOMALÍAS Y GENUINAS POR CLUSTER (mejorado con doble_anomaly)
 if PLOT_10_ENABLED:
     try:
         df_global = pd.read_csv(GLOBAL_CSV)
@@ -770,6 +902,7 @@ if PLOT_10_ENABLED:
         # Preparar dataframes
         count_anomaly = pd.DataFrame()
         count_genuine = pd.DataFrame()
+        count_double = pd.DataFrame()
         files = [GLOBAL_CSV] + cluster_files
         
         for f in files:
@@ -788,19 +921,25 @@ if PLOT_10_ENABLED:
             # Cantidades absolutas
             count_anomaly = pd.concat([count_anomaly, df.groupby('cluster')['anomaly'].sum().rename(name)], axis=1)
             count_genuine = pd.concat([count_genuine, df.groupby('cluster')['genuine_anomaly'].sum().rename(name)], axis=1)
+            
+            # Conteo de "doble_anomaly": anomaly=1 en el archivo y también en el cluster global
+            double_anomaly = np.where((df['anomaly'] == 1) & (df_global['anomaly'] == 1), 1, 0)
+            count_double = pd.concat([count_double, pd.Series(double_anomaly, index=df.index).groupby(df['cluster']).sum().rename(name)], axis=1)
         
-        if count_anomaly.empty and count_genuine.empty:
+        if count_anomaly.empty and count_genuine.empty and count_double.empty:
             print(" [ GRÁFICO 10 ] Sin datos")
         else:
             df_count_anomaly = count_anomaly.T.fillna(0)
             df_count_genuine = count_genuine.T.fillna(0)
+            df_count_double = count_double.T.fillna(0)
             
             # Colores consistentes para los clusters
             colors = plt.cm.tab10.colors[:len(df_count_anomaly.columns)]
             
-            fig, axs = plt.subplots(2, 1, figsize=(max(12, len(files)*2),16), constrained_layout=True)  # Dos subplots apilados
+            # Crear figura con tres subplots
+            fig, axs = plt.subplots(3, 1, figsize=(max(12, len(files)*2), 20), constrained_layout=True)
             
-            # Arriba: genuine anomalies
+            # 1. Genuine anomalies
             bars_genuine = df_count_genuine.plot(kind='bar', color=colors, ax=axs[0])
             axs[0].set_title("Cantidad de Anomalías Genuinas por Cluster")
             axs[0].set_xlabel("Archivo")
@@ -808,12 +947,10 @@ if PLOT_10_ENABLED:
             axs[0].legend(title='Cluster', bbox_to_anchor=(1.05,1), loc='upper left', fontsize=10)
             axs[0].tick_params(axis='x', rotation=45)
             axs[0].grid(axis='y', linestyle='--', alpha=0.7)
-            
-            # Añadir número exacto sobre cada barra
             for i, container in enumerate(bars_genuine.containers):
                 axs[0].bar_label(container, labels=[str(int(v)) for v in df_count_genuine.iloc[:, i]], label_type='edge', fontsize=9)
             
-            # Abajo: detected anomalies
+            # 2. Detected anomalies
             bars_anomaly = df_count_anomaly.plot(kind='bar', color=colors, ax=axs[1])
             axs[1].set_title("Cantidad de Anomalías Detectadas por Cluster")
             axs[1].set_xlabel("Archivo")
@@ -821,13 +958,21 @@ if PLOT_10_ENABLED:
             axs[1].legend(title='Cluster', bbox_to_anchor=(1.05,1), loc='upper left', fontsize=10)
             axs[1].tick_params(axis='x', rotation=45)
             axs[1].grid(axis='y', linestyle='--', alpha=0.7)
-            
-            # Añadir número exacto sobre cada barra
             for i, container in enumerate(bars_anomaly.containers):
                 axs[1].bar_label(container, labels=[str(int(v)) for v in df_count_anomaly.iloc[:, i]], label_type='edge', fontsize=9)
             
-            plt.tight_layout()
+            # 3. Doble anomalies (archivo y cluster global = 1)
+            bars_double = df_count_double.plot(kind='bar', color=colors, ax=axs[2])
+            axs[2].set_title("Cantidad de Doble Anomalías por Cluster")
+            axs[2].set_xlabel("Archivo")
+            axs[2].set_ylabel("Cantidad de Doble Anomalías")
+            axs[2].legend(title='Cluster', bbox_to_anchor=(1.05,1), loc='upper left', fontsize=10)
+            axs[2].tick_params(axis='x', rotation=45)
+            axs[2].grid(axis='y', linestyle='--', alpha=0.7)
+            for i, container in enumerate(bars_double.containers):
+                axs[2].bar_label(container, labels=[str(int(v)) for v in df_count_double.iloc[:, i]], label_type='edge', fontsize=9)
             
+            # Guardar figura
             if SAVE_FIGURES:
                 plt.savefig(os.path.join(RESULTS_FOLDER, "10_anomalias_cluster.png"), dpi=DPI, bbox_inches='tight')
             plt.close()
@@ -835,7 +980,6 @@ if PLOT_10_ENABLED:
             
     except Exception as e:
         print(f" [ GRÁFICO 10 ] Error: {e}")
-
 
 
 # PLOT 11-13: MÉTRICAS COMBINADAS
@@ -855,12 +999,14 @@ if any([PLOT_11_ENABLED, PLOT_12_ENABLED, PLOT_13_ENABLED]):
     plt.close()
     print(" [ GRÁFICO 11 ] 11_metrics.png")
 
+
 # PLOT 14: MATRIZ DE CORRELACIÓN
 if PLOT_14_ENABLED:
     cols = df_if.select_dtypes(include=['float64','int64']).columns  # COLUMNAS NUMÉRICAS
     plt.figure(figsize=HEATMAP_SIZE)
     sns.heatmap(df_if[cols].corr(), annot=True, fmt=".2f", cmap='coolwarm', cbar=True, annot_kws={"size":3}, linewidths=0.3, linecolor='white')  # HEATMAP CORRELACIÓN
-    plt.title("Matriz de Correlación", fontsize=14); plt.xticks(rotation=45, ha='right', fontsize=4); plt.yticks(rotation=0, fontsize=4)
+    plt.title("Matriz de Correlación", fontsize=14); plt.xticks(rotation=45, ha='right', fontsize=4); 
+    plt.yticks(rotation=0, fontsize=4)
     if SAVE_FIGURES: plt.savefig(f"{RESULTS_FOLDER}/14_correlation_matrix.png", dpi=DPI, bbox_inches='tight')
     plt.close()
     print(" [ GRÁFICO 14 ] 14_correlation_matrix.png")

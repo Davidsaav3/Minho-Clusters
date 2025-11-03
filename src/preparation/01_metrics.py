@@ -2,7 +2,7 @@ import pandas as pd  # MANEJO DE DATAFRAMES
 import os            # MANEJO DE RUTAS Y DIRECTORIOS
 
 # PARÁMETROS 
-INPUT_FILE = '../../data/dataset.csv'                # RUTA DEL DATASET DE ENTRADA
+INPUT_FILE = '../../data/dataset3_recortado_2.csv'                # RUTA DEL DATASET DE ENTRADA
 OUTPUT_FILE = '../../results/preparation/01_metrics.csv'  # RUTA DEL CSV DE SALIDA
 INCLUDE_DESCRIBE = 'all'                             # TIPO DE COLUMNAS PARA DESCRIBE: 'all', 'number', 'object'
 SHOW_INFO = True                                     # TRUE = MOSTRAR MENSAJES EN PANTALLA

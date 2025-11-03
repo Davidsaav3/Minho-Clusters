@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 # ================= CONFIGURACIÓN =================
-INPUT_CSV = '../../results/preparation/05_variance_recortado.csv'
+INPUT_CSV = '../../results/preparation/05_variance.csv'
 OUTPUT_FOLDER = '../../results/execution/'
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 

@@ -14,7 +14,7 @@ CONTAMINATION_PATTERN = 'contamination_*.csv'  # Patrón de archivos contaminado
 INPUT_CSV = '../../results/execution/03_global.csv'  # ARCHIVO GLOBAL DE ENTRADA
 OUTPUT_CSV = os.path.join(EXECUTION_FOLDER, '04_global.csv')  # SALIDA IF GLOBAL
 OUTPUT_IF_CSV = os.path.join(EXECUTION_FOLDER, '04_global_if.csv')  # SALIDA IF GLOBAL SOLO ANOMALÍAS
-INPUT_UNCONTAMINATED_CSV = '../../results/preparation/05_variance_recortado.csv'  # NUEVO ARCHIVO IF SIN CONTAMINACIÓN
+INPUT_UNCONTAMINATED_CSV = '../../results/preparation/05_variance.csv'  # NUEVO ARCHIVO IF SIN CONTAMINACIÓN
 OUTPUT_UNCONTAMINATED_IF_CSV = os.path.join(EXECUTION_FOLDER, '04_global_if_uncontaminated.csv')  # SALIDA IF SIN CONTAMINACIÓN
 
 SAVE_ANOMALY_CSV = True  # Guardar solo anomalías detectadas
@@ -300,40 +300,56 @@ for file_path in predictive_files:
     if SHOW_INFO:
         print(f"[ GUARDADO ] RESULTADOS IF COMPLETOS EN {file_path}")
 
-
-
 # -----------------------------
-# AÑADIR COLUMNA 'doble_anomaly' A LOS ARCHIVOS CLUSTER_*
+# AÑADIR COLUMNAS 'doble_anomaly', 'genuine_anomaly' Y 'genuine_anomaly_score' A LOS CLUSTERS
 # -----------------------------
 global_csv_path = os.path.join(EXECUTION_FOLDER, '04_global.csv')
+uncont_if_csv = os.path.join(EXECUTION_FOLDER, '04_global_if_uncontaminated.csv')
 
 if os.path.exists(global_csv_path):
     df_global = pd.read_csv(global_csv_path, skip_blank_lines=True)
+    if os.path.exists(uncont_if_csv):
+        df_uncont = pd.read_csv(uncont_if_csv, skip_blank_lines=True)
+    else:
+        df_uncont = None
+
     if 'anomaly' in df_global.columns:
         cluster_files = [f for f in glob.glob(os.path.join(EXECUTION_FOLDER, 'cluster_*.csv')) if not f.endswith('_if.csv')]
         if SHOW_INFO:
-            print(f"[ INFO ] AÑADIENDO 'doble_anomaly' A {len(cluster_files)} ARCHIVOS DE CLUSTER...")
+            print(f"[ INFO ] Añadiendo columnas a {len(cluster_files)} archivos de cluster...")
 
         for cluster_file in cluster_files:
             try:
                 df_cluster = pd.read_csv(cluster_file, skip_blank_lines=True)
 
-                # Alinear por índice (posición), ignorando posibles diferencias menores
+                # Alinear por índice (posición), usando longitud mínima
                 min_len = min(len(df_cluster), len(df_global))
                 df_cluster = df_cluster.iloc[:min_len].copy()
                 df_global_part = df_global.iloc[:min_len]
 
+                # doble_anomaly
                 df_cluster['doble_anomaly'] = np.where(
                     (df_cluster['anomaly'] == 1) & (df_global_part['anomaly'] == 1), 1, 0
                 )
 
+                # genuine_anomaly y genuine_anomaly_score (solo si df_uncont existe)
+                if df_uncont is not None and len(df_uncont) >= min_len:
+                    df_uncont_part = df_uncont.iloc[:min_len]
+                    df_cluster['genuine_anomaly'] = df_uncont_part['anomaly'].values
+                    df_cluster['genuine_anomaly_score'] = df_uncont_part['anomaly_score'].values
+                else:
+                    # Si no hay referencia sin contaminación, rellenar con ceros
+                    df_cluster['genuine_anomaly'] = 0
+                    df_cluster['genuine_anomaly_score'] = 0.0
+
+                # Guardar CSV actualizado
                 df_cluster.to_csv(cluster_file, index=False)
                 if SHOW_INFO:
-                    print(f"[ OK ] Añadida columna 'doble_anomaly' en {os.path.basename(cluster_file)} (filas={len(df_cluster)})")
+                    print(f"[ OK ] Columnas añadidas en {os.path.basename(cluster_file)} (filas={len(df_cluster)})")
 
             except Exception as e:
                 print(f"[ ERROR ] No se pudo procesar {cluster_file}: {e}")
     else:
-        print("[ WARNING ] El archivo global no contiene columna 'anomaly'. No se añade 'doble_anomaly'.")
+        print("[ WARNING ] El archivo global no contiene columna 'anomaly'. No se añaden nuevas columnas a clusters.")
 else:
-    print(f"[ WARNING ] No se encontró el archivo global en '{global_csv_path}'. No se añade 'doble_anomaly'.")
+    print(f"[ WARNING ] No se encontró el archivo global en '{global_csv_path}'. No se añaden columnas a clusters.")

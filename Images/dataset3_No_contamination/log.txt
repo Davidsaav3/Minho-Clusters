@@ -1,0 +1,904 @@
+[ INICIO ]
+
+[ EJECUTANDO ] 01_contaminate.py
+
+[ INFO ] DATASET CARGADO: 2976 FILAS, 144 COLUMNAS
+[ INFO ] COLUMNAS A CONTAMINAR: 107
+[ INFO ] COLUMNAS NO CONTAMINADAS
+[ INFO ] FILAS A CONTAMINAR: 0
+[ INFO ] CONTAMINACIÓN APLICADA CON OPERACIÓN 'SUMA'
+[ INFO ] COLUMNA 'IS_ANOMALY' AÑADIDA
+[ GUARDADO ] DATASET CONTAMINADO EN '../../results/execution/01_contaminated.csv'
+
+[ EJECUTANDO ] 01_contaminate_research.py
+
+[ INFO ] DATASET CARGADO: 2976 filas, 144 columnas
+[ GUARDADO ] contaminated_cr0.01_ni3.0.csv -> Filas contaminadas: 29, Noise: 3.0
+[ GUARDADO ] contaminated_cr0.01_ni2.0.csv -> Filas contaminadas: 29, Noise: 2.0
+[ GUARDADO ] contaminated_cr0.01_ni1.0.csv -> Filas contaminadas: 29, Noise: 1.0
+[ GUARDADO ] contaminated_cr0.01_ni0.0.csv -> Filas contaminadas: 29, Noise: 0.0
+[ GUARDADO ] contaminated_cr0.005_ni3.0.csv -> Filas contaminadas: 14, Noise: 3.0
+[ GUARDADO ] contaminated_cr0.005_ni2.0.csv -> Filas contaminadas: 14, Noise: 2.0
+[ GUARDADO ] contaminated_cr0.005_ni1.0.csv -> Filas contaminadas: 14, Noise: 1.0
+[ GUARDADO ] contaminated_cr0.005_ni0.0.csv -> Filas contaminadas: 14, Noise: 0.0
+[ GUARDADO ] contaminated_cr0.001_ni3.0.csv -> Filas contaminadas: 2, Noise: 3.0
+[ GUARDADO ] contaminated_cr0.001_ni2.0.csv -> Filas contaminadas: 2, Noise: 2.0
+[ GUARDADO ] contaminated_cr0.001_ni1.0.csv -> Filas contaminadas: 2, Noise: 1.0
+[ GUARDADO ] contaminated_cr0.001_ni0.0.csv -> Filas contaminadas: 2, Noise: 0.0
+[ GUARDADO ] contaminated_cr0.0_ni3.0.csv -> Filas contaminadas: 0, Noise: 3.0
+[ GUARDADO ] contaminated_cr0.0_ni2.0.csv -> Filas contaminadas: 0, Noise: 2.0
+[ GUARDADO ] contaminated_cr0.0_ni1.0.csv -> Filas contaminadas: 0, Noise: 1.0
+[ GUARDADO ] contaminated_cr0.0_ni0.0.csv -> Filas contaminadas: 0, Noise: 0.0
+
+[ EJECUTANDO ] 02_clustering_vertical.py
+
+[ INFO ] DATASET CARGADO DESDE '../../results/execution/01_contaminated.csv'
+[ INFO ] CLUSTERS CARGADOS DESDE 'clusters.json'
+[ GUARDADO ] ../../results\execution\cluster_ubicacion_Pozo.csv
+[ GUARDADO ] ../../results\execution\cluster_ubicacion_Falconera.csv
+[ GUARDADO ] ../../results\execution\cluster_ubicacion_Ull_Pueblo.csv
+[ GUARDADO ] ../../results\execution\cluster_ubicacion_Ull_Playas.csv
+[ GUARDADO ] ../../results\execution\cluster_ubicacion_Playa.csv
+[ GUARDADO ] ../../results\execution\cluster_ubicacion_Beniopa.csv
+[ GUARDADO ] ../../results\execution\cluster_ubicacion_Llombart.csv
+[ GUARDADO ] ../../results\execution\cluster_ubicacion_Sanjuan.csv
+[ GUARDADO ] ../../results\execution\cluster_medida_Calidad_Agua.csv
+[ GUARDADO ] ../../results\execution\cluster_medida_Hidraulica.csv
+[ GUARDADO ] ../../results\execution\cluster_medida_Operacional.csv
+[ GUARDADO ] ../../results\execution\cluster_ambientales_Climatologia.csv
+[ GUARDADO ] ../../results\execution\cluster_ambientales_Season_and_Calendar.csv
+[ GUARDADO ] ../../results\execution\cluster_ambientales_Hidraulica.csv
+[ GUARDADO ] ../../results\execution\cluster_eficiencia_Consumo_Electrico.csv
+[ GUARDADO ] ../../results\execution\cluster_eficiencia_Funcionamiento_y_Rendimiento.csv
+[ GUARDADO ] ../../results\execution\cluster_eficiencia_Estado_del_Pozo.csv
+[ GUARDADO ] ../../results\execution\cluster_combinado_Temporal_y_Flujo.csv
+[ GUARDADO ] ../../results\execution\cluster_combinado_Calidad_y_Ubicacion.csv
+[ GUARDADO ] ../../results\execution\cluster_combinado_Operacional_y_Clima.csv
+
+[ EJECUTANDO ] 03_clustering_horizontal.py
+
+[ INFO ] ARCHIVOS ENCONTRADOS PARA CLUSTERING: 36
+[ INFO ] PROCESANDO ../../results\execution\cluster_ambientales_Climatologia.csv, DIMENSIONES: (2976, 27)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 27
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ambientales_Climatologia.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ambientales_Hidraulica.csv, DIMENSIONES: (2976, 19)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 19
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ambientales_Hidraulica.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ambientales_Season_and_Calendar.csv, DIMENSIONES: (2976, 5)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 5
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ambientales_Season_and_Calendar.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_combinado_Calidad_y_Ubicacion.csv, DIMENSIONES: (2976, 7)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 7
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_combinado_Calidad_y_Ubicacion.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_combinado_Operacional_y_Clima.csv, DIMENSIONES: (2976, 6)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 6
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_combinado_Operacional_y_Clima.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_combinado_Temporal_y_Flujo.csv, DIMENSIONES: (2976, 8)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 8
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_combinado_Temporal_y_Flujo.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_eficiencia_Consumo_Electrico.csv, DIMENSIONES: (2976, 11)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 11
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_eficiencia_Consumo_Electrico.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_eficiencia_Estado_del_Pozo.csv, DIMENSIONES: (2976, 5)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 5
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_eficiencia_Estado_del_Pozo.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_eficiencia_Funcionamiento_y_Rendimiento.csv, DIMENSIONES: (2976, 5)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 5
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_eficiencia_Funcionamiento_y_Rendimiento.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_medida_Calidad_Agua.csv, DIMENSIONES: (2976, 14)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 14
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_medida_Calidad_Agua.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_medida_Hidraulica.csv, DIMENSIONES: (2976, 19)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 19
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_medida_Hidraulica.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_medida_Operacional.csv, DIMENSIONES: (2976, 13)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 13
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_medida_Operacional.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Beniopa.csv, DIMENSIONES: (2976, 18)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 18
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ubicacion_Beniopa.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Falconera.csv, DIMENSIONES: (2976, 20)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 20
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ubicacion_Falconera.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Llombart.csv, DIMENSIONES: (2976, 18)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 18
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ubicacion_Llombart.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Playa.csv, DIMENSIONES: (2976, 21)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 21
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ubicacion_Playa.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Pozo.csv, DIMENSIONES: (2976, 5)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 5
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ubicacion_Pozo.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Sanjuan.csv, DIMENSIONES: (2976, 10)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 10
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ubicacion_Sanjuan.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Ull_Playas.csv, DIMENSIONES: (2976, 4)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 4
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ubicacion_Ull_Playas.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Ull_Pueblo.csv, DIMENSIONES: (2976, 9)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 9
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\cluster_ubicacion_Ull_Pueblo.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.001_ni0.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.001_ni0.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.001_ni1.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.001_ni1.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.001_ni2.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.001_ni2.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.001_ni3.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.001_ni3.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.005_ni0.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.005_ni0.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.005_ni1.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.005_ni1.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.005_ni2.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.005_ni2.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.005_ni3.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.005_ni3.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.01_ni0.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.01_ni0.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.01_ni1.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.01_ni1.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.01_ni2.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.01_ni2.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.01_ni3.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.01_ni3.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.0_ni0.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.0_ni0.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.0_ni1.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.0_ni1.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.0_ni2.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.0_ni2.0.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.0_ni3.0.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] CLUSTERING APLICADO EN ../../results\execution\contaminated_cr0.0_ni3.0.csv
+[ INFO ] PROCESANDO ARCHIVO GLOBAL: ../../results\execution\01_contaminated.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] ARCHIVO GLOBAL CON CLUSTERS GUARDADO EN: ../../results\execution\03_global.csv
+
+[ EJECUTANDO ] 03_clustering_horizontal_research.py
+
+[ INFO ] PROCESANDO ARCHIVO GLOBAL: ../../results\execution\01_contaminated.csv, DIMENSIONES: (2976, 145)
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 4
+[ GUARDADO ] ARCHIVO GLOBAL BASE CON CLUSTERS GUARDADO EN: ../../results\execution\03_global.csv
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] VARIACIÓN 03_global_kmeans_n2_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1524, Calinski: 450.6203, Davies: 2.2845
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] VARIACIÓN 03_global_kmeans_n2_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1524, Calinski: 450.6203, Davies: 2.2845
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 3
+[ GUARDADO ] VARIACIÓN 03_global_kmeans_n3_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1379, Calinski: 324.4568, Davies: 2.9337
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 3
+[ GUARDADO ] VARIACIÓN 03_global_kmeans_n3_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1379, Calinski: 324.4568, Davies: 2.9337
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 4
+[ GUARDADO ] VARIACIÓN 03_global_kmeans_n4_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1524, Calinski: 336.6124, Davies: 2.1630
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 4
+[ GUARDADO ] VARIACIÓN 03_global_kmeans_n4_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1524, Calinski: 336.6124, Davies: 2.1630
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] VARIACIÓN 03_global_minibatch_n2_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1489, Calinski: 448.9259, Davies: 2.3236
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] VARIACIÓN 03_global_minibatch_n2_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1489, Calinski: 448.9259, Davies: 2.3236
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 3
+[ GUARDADO ] VARIACIÓN 03_global_minibatch_n3_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1710, Calinski: 405.5879, Davies: 1.9617
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 3
+[ GUARDADO ] VARIACIÓN 03_global_minibatch_n3_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1710, Calinski: 405.5879, Davies: 1.9617
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 4
+[ GUARDADO ] VARIACIÓN 03_global_minibatch_n4_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1403, Calinski: 354.2252, Davies: 2.3853
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 4
+[ GUARDADO ] VARIACIÓN 03_global_minibatch_n4_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1403, Calinski: 354.2252, Davies: 2.3853
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] VARIACIÓN 03_global_birch_n2_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1354, Calinski: 417.7237, Davies: 2.1786
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 2
+[ GUARDADO ] VARIACIÓN 03_global_birch_n2_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1354, Calinski: 417.7237, Davies: 2.1786
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 3
+[ GUARDADO ] VARIACIÓN 03_global_birch_n3_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1625, Calinski: 390.2695, Davies: 1.8940
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 3
+[ GUARDADO ] VARIACIÓN 03_global_birch_n3_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1625, Calinski: 390.2695, Davies: 1.8940
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 4
+[ GUARDADO ] VARIACIÓN 03_global_birch_n4_batch5000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1661, Calinski: 351.1132, Davies: 1.4646
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 4
+[ GUARDADO ] VARIACIÓN 03_global_birch_n4_batch10000.csv GUARDADA
+[ SCORE ] Silhouette: 0.1661, Calinski: 351.1132, Davies: 1.4646
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps5.0_min30.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps5.0_min50.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps5.0_min75.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps5.0_min100.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps5.0_min150.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 7
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps6.0_min30.csv GUARDADA
+[ SCORE ] Silhouette: -0.1734, Calinski: 29.1671, Davies: 1.6743
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps6.0_min50.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps6.0_min75.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps6.0_min100.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps6.0_min150.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 15
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps7.0_min30.csv GUARDADA
+[ SCORE ] Silhouette: -0.0358, Calinski: 63.6757, Davies: 2.0527
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 8
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps7.0_min50.csv GUARDADA
+[ SCORE ] Silhouette: -0.1594, Calinski: 38.1838, Davies: 2.0743
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps7.0_min75.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps7.0_min100.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+[ INFO ] COLUMNAS NUMÉRICAS DISPONIBLES: 145
+[ INFO ] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[ RESULTADO ] CLUSTERS ENCONTRADOS: 0
+[ GUARDADO ] VARIACIÓN 03_global_dbscan_eps7.0_min150.csv GUARDADA
+[ SCORE ] Silhouette: -1.0000, Calinski: -1.0000, Davies: inf
+
+[ MEJOR CONFIGURACIÓN SEGÚN SILHOUETTE SCORE ]
+MÉTODO: minibatch
+PARÁMETROS: n3_batch5000
+SILHOUETTE SCORE: 0.1710
+CALINSKI-HARABASZ: 405.5879
+DAVIES-BOULDIN: 1.9617
+
+[ EJECUTANDO ] 03_clustering_horizontal_predictive.py
+
+[INFO] ARCHIVO CARGADO: ../../results\execution\01_contaminated.csv (2976 FILAS)
+[INFO] DIVISIÓN 50/50 ORDENADA -> ENTRENAMIENTO: 1488 | FLUJO: 1488
+[INFO] USANDO TODAS LAS COLUMNAS NUMÉRICAS SIN PCA
+[RESULTADO] CLUSTERS ENCONTRADOS: 4
+[INFO] CLUSTERS CON ANOMALÍAS RELEVANTES: [0, 1]
+[FLUJO] BLOQUE 1 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_1.csv | Predictive: 0-1
+[FLUJO] BLOQUE 2 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_2.csv | Predictive: 0-1
+[FLUJO] BLOQUE 3 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_3.csv | Predictive: 0-1
+[FLUJO] BLOQUE 4 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_4.csv | Predictive: 0-1
+[FLUJO] BLOQUE 5 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_5.csv | Predictive: 0-1
+[FLUJO] BLOQUE 6 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_6.csv | Predictive: 0-1
+[FLUJO] BLOQUE 7 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_7.csv | Predictive: 0-1
+[FLUJO] BLOQUE 8 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_8.csv | Predictive: 0-1
+[FLUJO] BLOQUE 9 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_9.csv | Predictive: 0-1
+[FLUJO] BLOQUE 10 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_10.csv | Predictive: 0-1
+[FLUJO] BLOQUE 11 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_11.csv | Predictive: 0-1
+[FLUJO] BLOQUE 12 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_12.csv | Predictive: 0-1
+[FLUJO] BLOQUE 13 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_13.csv | Predictive: 0-1
+[FLUJO] BLOQUE 14 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_14.csv | Predictive: 0-1
+[FLUJO] BLOQUE 15 CLUSTERS CON ANOMALÍAS RELEVANTES [0, 1] -> ../../results\execution\03_global_predictive_15.csv | Predictive: 0-1
+[INFO] LÍMITE DE 15 BLOQUES ALCANZADO, DETENIENDO FLUJO
+
+[ EJECUTANDO ] 04_if.py
+
+[ INFO ] DATASET GLOBAL CARGADO: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES (GLOBAL): 2976
+[ INFO ] ANOMALÍAS DETECTADAS (GLOBAL): 30
+[ INFO ] REGISTROS NORMALES (GLOBAL): 2946
+[ INFO ] PORCENTAJE ANOMALÍAS (GLOBAL): 1.01%
+[ GUARDADO ] CSV COMPLETO CON ANOMALÍAS EN '../../results\execution\04_global.csv'
+[ GUARDADO ] CSV ANOMALÍAS ORDENADAS EN '../../results\execution\04_global_if.csv'
+[ INFO ] DATASET NO CONTAMINADO CARGADO: 2976 FILAS, 144 COLUMNAS
+[ INFO ] REGISTROS TOTALES (UNCONTAMINATED): 2976
+[ INFO ] ANOMALÍAS DETECTADAS (UNCONTAMINATED): 30
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF SIN CONTAMINACIÓN EN '../../results\execution\04_global_if_uncontaminated.csv'
+[ INFO ] Columnas 'genuine_anomaly' y 'genuine_anomaly_score' añadidas a '../../results\execution\04_global.csv'
+[ INFO ] ARCHIVOS ENCONTRADOS PARA IF POR CLUSTER/CONTAMINADOS: 36
+[ INFO ] PROCESANDO ../../results\execution\cluster_ambientales_Climatologia.csv: 2976 FILAS, 28 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 28
+[ INFO ] REGISTROS NORMALES: 2948
+[ INFO ] PORCENTAJE ANOMALÍAS: 0.94%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ambientales_Climatologia.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ambientales_Climatologia_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ambientales_Hidraulica.csv: 2976 FILAS, 20 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ambientales_Hidraulica.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ambientales_Hidraulica_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ambientales_Season_and_Calendar.csv: 2976 FILAS, 6 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ambientales_Season_and_Calendar.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ambientales_Season_and_Calendar_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_combinado_Calidad_y_Ubicacion.csv: 2976 FILAS, 8 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_combinado_Calidad_y_Ubicacion.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_combinado_Calidad_y_Ubicacion_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_combinado_Operacional_y_Clima.csv: 2976 FILAS, 7 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_combinado_Operacional_y_Clima.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_combinado_Operacional_y_Clima_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_combinado_Temporal_y_Flujo.csv: 2976 FILAS, 9 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_combinado_Temporal_y_Flujo.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_combinado_Temporal_y_Flujo_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_eficiencia_Consumo_Electrico.csv: 2976 FILAS, 12 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_eficiencia_Consumo_Electrico.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_eficiencia_Consumo_Electrico_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_eficiencia_Estado_del_Pozo.csv: 2976 FILAS, 6 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_eficiencia_Estado_del_Pozo.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_eficiencia_Estado_del_Pozo_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_eficiencia_Funcionamiento_y_Rendimiento.csv: 2976 FILAS, 6 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_eficiencia_Funcionamiento_y_Rendimiento.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_eficiencia_Funcionamiento_y_Rendimiento_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_medida_Calidad_Agua.csv: 2976 FILAS, 15 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_medida_Calidad_Agua.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_medida_Calidad_Agua_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_medida_Hidraulica.csv: 2976 FILAS, 20 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_medida_Hidraulica.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_medida_Hidraulica_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_medida_Operacional.csv: 2976 FILAS, 14 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_medida_Operacional.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_medida_Operacional_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Beniopa.csv: 2976 FILAS, 19 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ubicacion_Beniopa.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ubicacion_Beniopa_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Falconera.csv: 2976 FILAS, 21 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ubicacion_Falconera.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ubicacion_Falconera_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Llombart.csv: 2976 FILAS, 19 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ubicacion_Llombart.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ubicacion_Llombart_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Playa.csv: 2976 FILAS, 22 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ubicacion_Playa.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ubicacion_Playa_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Pozo.csv: 2976 FILAS, 6 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ubicacion_Pozo.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ubicacion_Pozo_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Sanjuan.csv: 2976 FILAS, 11 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ubicacion_Sanjuan.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ubicacion_Sanjuan_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Ull_Playas.csv: 2976 FILAS, 5 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ubicacion_Ull_Playas.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ubicacion_Ull_Playas_if.csv
+[ INFO ] PROCESANDO ../../results\execution\cluster_ubicacion_Ull_Pueblo.csv: 2976 FILAS, 10 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\cluster_ubicacion_Ull_Pueblo.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\cluster_ubicacion_Ull_Pueblo_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.001_ni0.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.001_ni0.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.001_ni0.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.001_ni1.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.001_ni1.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.001_ni1.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.001_ni2.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.001_ni2.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.001_ni2.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.001_ni3.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.001_ni3.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.001_ni3.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.005_ni0.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.005_ni0.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.005_ni0.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.005_ni1.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.005_ni1.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.005_ni1.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.005_ni2.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.005_ni2.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.005_ni2.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.005_ni3.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.005_ni3.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.005_ni3.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.01_ni0.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.01_ni0.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.01_ni0.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.01_ni1.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.01_ni1.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.01_ni1.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.01_ni2.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.01_ni2.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.01_ni2.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.01_ni3.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.01_ni3.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.01_ni3.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.0_ni0.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.0_ni0.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.0_ni0.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.0_ni1.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.0_ni1.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.0_ni1.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.0_ni2.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.0_ni2.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.0_ni2.0_if.csv
+[ INFO ] PROCESANDO ../../results\execution\contaminated_cr0.0_ni3.0.csv: 2976 FILAS, 146 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 2976
+[ INFO ] ANOMALÍAS DETECTADAS: 30
+[ INFO ] REGISTROS NORMALES: 2946
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\contaminated_cr0.0_ni3.0.csv
+[ GUARDADO ] CSV DE ANOMALÍAS ORDENADAS EN ../../results\execution\contaminated_cr0.0_ni3.0_if.csv
+[ INFO ] ARCHIVOS ENCONTRADOS PARA IF PREDICTIVE: 15
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_1.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_1.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_10.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_10.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_11.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_11.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_12.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_12.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_13.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_13.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_14.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_14.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_15.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_15.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_2.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_2.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_3.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_3.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_4.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_4.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_5.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_5.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_6.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_6.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_7.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_7.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_8.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_8.csv
+[ INFO ] PROCESANDO ../../results\execution\03_global_predictive_9.csv: 1488 FILAS, 147 COLUMNAS
+[ INFO ] REGISTROS TOTALES: 1488
+[ INFO ] ANOMALÍAS DETECTADAS: 15
+[ INFO ] REGISTROS NORMALES: 1473
+[ INFO ] PORCENTAJE ANOMALÍAS: 1.01%
+[ GUARDADO ] RESULTADOS IF COMPLETOS EN ../../results\execution\03_global_predictive_9.csv
+[ INFO ] Añadiendo columnas a 20 archivos de cluster...
+[ OK ] Columnas añadidas en cluster_ambientales_Climatologia.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ambientales_Hidraulica.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ambientales_Season_and_Calendar.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_combinado_Calidad_y_Ubicacion.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_combinado_Operacional_y_Clima.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_combinado_Temporal_y_Flujo.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_eficiencia_Consumo_Electrico.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_eficiencia_Estado_del_Pozo.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_eficiencia_Funcionamiento_y_Rendimiento.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_medida_Calidad_Agua.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_medida_Hidraulica.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_medida_Operacional.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ubicacion_Beniopa.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ubicacion_Falconera.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ubicacion_Llombart.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ubicacion_Playa.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ubicacion_Pozo.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ubicacion_Sanjuan.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ubicacion_Ull_Playas.csv (filas=2976)
+[ OK ] Columnas añadidas en cluster_ubicacion_Ull_Pueblo.csv (filas=2976)
+
+[ EJECUTANDO ] 05_temporal_continuity.py
+
+[ OK ] 04_global.csv: 12 secuencias reales detectadas (longitud máx = 10)
+[ OK ] 04_global.csv: 12 secuencias genuinas detectadas (longitud máx = 10)
+[ GUARDADO ] 04_global.csv actualizado correctamente.
+
+[ OK ] cluster_ambientales_Climatologia.csv: 5 secuencias reales detectadas (longitud máx = 12)
+[ GUARDADO ] cluster_ambientales_Climatologia.csv actualizado correctamente.
+
+[ OK ] cluster_ambientales_Hidraulica.csv: 25 secuencias reales detectadas (longitud máx = 4)
+[ GUARDADO ] cluster_ambientales_Hidraulica.csv actualizado correctamente.
+
+[ OK ] cluster_ambientales_Season_and_Calendar.csv: 3 secuencias reales detectadas (longitud máx = 13)
+[ GUARDADO ] cluster_ambientales_Season_and_Calendar.csv actualizado correctamente.
+
+[ OK ] cluster_combinado_Calidad_y_Ubicacion.csv: 12 secuencias reales detectadas (longitud máx = 7)
+[ GUARDADO ] cluster_combinado_Calidad_y_Ubicacion.csv actualizado correctamente.
+
+[ OK ] cluster_combinado_Operacional_y_Clima.csv: 6 secuencias reales detectadas (longitud máx = 18)
+[ GUARDADO ] cluster_combinado_Operacional_y_Clima.csv actualizado correctamente.
+
+[ OK ] cluster_combinado_Temporal_y_Flujo.csv: 16 secuencias reales detectadas (longitud máx = 3)
+[ GUARDADO ] cluster_combinado_Temporal_y_Flujo.csv actualizado correctamente.
+
+[ OK ] cluster_eficiencia_Consumo_Electrico.csv: 6 secuencias reales detectadas (longitud máx = 18)
+[ GUARDADO ] cluster_eficiencia_Consumo_Electrico.csv actualizado correctamente.
+
+[ OK ] cluster_eficiencia_Estado_del_Pozo.csv: 30 secuencias reales detectadas (longitud máx = 1)
+[ GUARDADO ] cluster_eficiencia_Estado_del_Pozo.csv actualizado correctamente.
+
+[ OK ] cluster_eficiencia_Funcionamiento_y_Rendimiento.csv: 13 secuencias reales detectadas (longitud máx = 5)
+[ GUARDADO ] cluster_eficiencia_Funcionamiento_y_Rendimiento.csv actualizado correctamente.
+
+[ OK ] cluster_medida_Calidad_Agua.csv: 3 secuencias reales detectadas (longitud máx = 27)
+[ GUARDADO ] cluster_medida_Calidad_Agua.csv actualizado correctamente.
+
+[ OK ] cluster_medida_Hidraulica.csv: 25 secuencias reales detectadas (longitud máx = 4)
+[ GUARDADO ] cluster_medida_Hidraulica.csv actualizado correctamente.
+
+[ OK ] cluster_medida_Operacional.csv: 6 secuencias reales detectadas (longitud máx = 18)
+[ GUARDADO ] cluster_medida_Operacional.csv actualizado correctamente.
+
+[ OK ] cluster_ubicacion_Beniopa.csv: 28 secuencias reales detectadas (longitud máx = 3)
+[ GUARDADO ] cluster_ubicacion_Beniopa.csv actualizado correctamente.
+
+[ OK ] cluster_ubicacion_Falconera.csv: 10 secuencias reales detectadas (longitud máx = 18)
+[ GUARDADO ] cluster_ubicacion_Falconera.csv actualizado correctamente.
+
+[ OK ] cluster_ubicacion_Llombart.csv: 15 secuencias reales detectadas (longitud máx = 13)
+[ GUARDADO ] cluster_ubicacion_Llombart.csv actualizado correctamente.
+
+[ OK ] cluster_ubicacion_Playa.csv: 17 secuencias reales detectadas (longitud máx = 5)
+[ GUARDADO ] cluster_ubicacion_Playa.csv actualizado correctamente.
+
+[ OK ] cluster_ubicacion_Pozo.csv: 30 secuencias reales detectadas (longitud máx = 1)
+[ GUARDADO ] cluster_ubicacion_Pozo.csv actualizado correctamente.
+
+[ OK ] cluster_ubicacion_Sanjuan.csv: 15 secuencias reales detectadas (longitud máx = 7)
+[ GUARDADO ] cluster_ubicacion_Sanjuan.csv actualizado correctamente.
+
+[ OK ] cluster_ubicacion_Ull_Playas.csv: 5 secuencias reales detectadas (longitud máx = 17)
+[ GUARDADO ] cluster_ubicacion_Ull_Playas.csv actualizado correctamente.
+
+[ OK ] cluster_ubicacion_Ull_Pueblo.csv: 6 secuencias reales detectadas (longitud máx = 24)
+[ GUARDADO ] cluster_ubicacion_Ull_Pueblo.csv actualizado correctamente.
+
+
+[ EJECUTANDO ] 06_metrics.py
+
+[ INFO ] Clusters cargados desde 'clusters.json'
+[ GUARDADO ] CSV resumen de métricas en '../../results/execution\06_results.csv'
+
+[ FIN ]
