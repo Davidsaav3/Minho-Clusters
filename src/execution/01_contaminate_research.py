@@ -23,8 +23,8 @@ RANDOM_STATE = 42
 SHOW_INFO = True
 
 # ================= PARÁMETROS VARIADOS =================
-contamination_rates = [0.01, 0.005, 0.001, 0.0]  # del 1% hasta 0%
-noise_intensities = [3.0, 2.0, 1.0, 0.0]       # desde el valor actual hasta 0
+contamination_rates = [0.01]  
+noise_intensities = [1.5, 1.25, 1.0, 0.75 , 0.5, 0.25]   
 
 # ================= CARGA DEL DATASET =================
 df = pd.read_csv(INPUT_CSV)

@@ -21,33 +21,33 @@ ANOMALIES_IF_HORIZONTAL_2 = '../../results/execution/plots/03_anomalies_if_horiz
 TYPE_HORIZONTAL_GROUPS = '../../results/execution/plots/4_type_horizontal_grups'
 NEW_REGISTERS = '../../results/execution/plots/5_new_registers'
 CONTAMINATION_CLUSTER_HORIZONTAL = '../../results/execution/plots/6_contamination_cluster_horizontal'
-HORIZONTAL_CLUSTER = '../../results/execution/plots/7_horizontal_cluster'
+IR_II = '../../results/execution/plots'
 
 SAVE_FIGURES = True
 SHOW_FIGURES = False
 STYLE = 'whitegrid'
 FIGURE_SIZE = (12, 6)
 LARGE_FIGURE_SIZE = (18, 6)
-EXTRA_LARGE_FIGURE_SIZE = (24, 6)
+EXTRA_LARGE_FIGURE_SIZE = (20, 10)
 HEATMAP_SIZE = (30, 18)
 DPI = 300
 
 # ACTIVACIÓN DE GRÁFICOS
-PLOT_0_ENABLED = True
-PLOT_1_ENABLED = True
-PLOT_2_ENABLED = True
-PLOT_02_ENABLED = True
+PLOT_0_ENABLED = False
+PLOT_1_ENABLED = False
+PLOT_2_ENABLED = False
+PLOT_02_ENABLED = False
 PLOT_3_ENABLED = True
-PLOT_03_ENABLED = True
-PLOT_4_ENABLED = True
-PLOT_5_ENABLED = True
-PLOT_6_ENABLED = True
-PLOT_7_ENABLED = True
-PLOT_10_ENABLED = True
-PLOT_11_ENABLED = True
-PLOT_12_ENABLED = True
-PLOT_13_ENABLED = True
-PLOT_14_ENABLED = True
+PLOT_03_ENABLED = False
+PLOT_4_ENABLED = False
+PLOT_5_ENABLED = False
+PLOT_6_ENABLED = False
+PLOT_7_ENABLED = False
+PLOT_10_ENABLED = False
+PLOT_11_ENABLED = False
+PLOT_12_ENABLED = False
+PLOT_13_ENABLED = False
+PLOT_14_ENABLED = False
 
 
 # CONFIGURAR ESTILO Y CREAR CARPETAS
@@ -55,7 +55,8 @@ sns.set_style(STYLE)
 plt.rcParams['figure.figsize'] = FIGURE_SIZE
 for folder in [SUBFOLDER_FREQUENCY, ANOMALIES_DATASET_GLOBAL, ANOMALIES_DATASET_SEQUENCE,
                ANOMALIES_DATASET_SEQUENCE_2, ANOMALIES_IF_HORIZONTAL, ANOMALIES_IF_HORIZONTAL_2,
-               TYPE_HORIZONTAL_GROUPS, NEW_REGISTERS, CONTAMINATION_CLUSTER_HORIZONTAL]:
+               TYPE_HORIZONTAL_GROUPS, NEW_REGISTERS, CONTAMINATION_CLUSTER_HORIZONTAL,
+               IR_II]:
     os.makedirs(folder, exist_ok=True)
 
 
@@ -468,66 +469,99 @@ if PLOT_02_ENABLED:
 
 # PLOT 3: ANOMALIES_IF_HORIZONTAL, df_if= cluster, genuine_anomaly, genuine_sequence
 # Analizar relación entre Isolation Forest global y agrupaciones horizontales.
+# PLOT 3: ANOMALIES_IF_HORIZONTAL, df_if = cluster, genuine_anomaly, genuine_sequence
+# Analizar relación entre Isolation Forest global y agrupaciones horizontales.
 if PLOT_3_ENABLED: 
     for file in all_files:
         df = pd.read_csv(file)
         name = 'global' if file == GLOBAL_CSV else os.path.splitext(os.path.basename(file))[0]
+
+        # Sincronizar columnas con df_if
         if len(df) == len(df_if):
             df['cluster'] = df_if['cluster'].values
-            if 'genuine_anomaly' in df_if.columns: df['genuine_anomaly'] = df_if['genuine_anomaly'].values
-            if 'genuine_sequence' in df_if.columns: df['genuine_sequence'] = df_if['genuine_sequence'].values
+            if 'genuine_anomaly' in df_if.columns: 
+                df['genuine_anomaly'] = df_if['genuine_anomaly'].values
+            if 'genuine_sequence' in df_if.columns: 
+                df['genuine_sequence'] = df_if['genuine_sequence'].values
         else:
-            df['cluster'] = name; df['genuine_anomaly'] = 0; df['genuine_sequence'] = 0
-        df['sequence'] = df.get('sequence', 0); df['anomaly_score'] = df.get('anomaly_score', 0)
+            df['cluster'] = name
+            df['genuine_anomaly'] = 0
+            df['genuine_sequence'] = 0
+
+        # Asegurar columnas necesarias
+        df['sequence'] = df.get('sequence', 0)
+        df['anomaly_score'] = df.get('anomaly_score', 0)
+
+        # Determinar eje Y dinámicamente
+        y_col = 'nivel_plaxiquet' if 'nivel_plaxiquet' in df.columns and not df['nivel_plaxiquet'].isnull().all() else 'anomaly_score'
 
         plt.figure(figsize=LARGE_FIGURE_SIZE)
 
-        # PLOT PRINCIPAL POR CLUSTER (SIN LEYENDA AUTOMÁTICA)
+        # PLOT PRINCIPAL POR CLUSTER
         palette = sns.color_palette('tab10', n_colors=df['cluster'].nunique())
         for i, c in enumerate(sorted(df['cluster'].unique())):
-            sub = df[df['cluster']==c]
-            plt.scatter(sub['datetime'], sub['anomaly_score'], color=palette[i], alpha=0.6, s=20, label=str(c))
+            sub = df[df['cluster'] == c]
+            plt.scatter(sub['datetime'], sub[y_col],
+                        color=palette[i], alpha=0.6, s=20, label=str(c))
 
         # ANOMALÍAS CONTAMINADAS
-        cont = df[df['is_anomaly']==1]
+        cont = df[df['is_anomaly'] == 1]
         if not cont.empty:
-            plt.scatter(cont['datetime'], cont['anomaly_score'], facecolor='white', edgecolor='black', marker='X', s=20, linewidth=0.5, alpha=1.0, zorder=12, label='Contaminada')
+            plt.scatter(cont['datetime'], cont[y_col],
+                        facecolor='white', edgecolor='black', marker='X',
+                        s=20, linewidth=0.5, alpha=1.0, zorder=12, label='Contaminada')
 
         # ANOMALÍAS GENUINAS
-        gen = df[df['genuine_anomaly']==1]
+        gen = df[df['genuine_anomaly'] == 1]
         if not gen.empty:
-            sizes = np.interp(gen['genuine_sequence'], (gen['genuine_sequence'].min(), gen['genuine_sequence'].max()), (50,300))
-            plt.scatter(gen['datetime'], gen['anomaly_score'], color='red', s=sizes, alpha=0.2, edgecolor='black', linewidth=0.5, zorder=13, label='Genuina')
+            sizes = np.interp(gen['genuine_sequence'],
+                              (gen['genuine_sequence'].min(), gen['genuine_sequence'].max()),
+                              (50, 300))
+            plt.scatter(gen['datetime'], gen[y_col],
+                        color='red', s=sizes, alpha=0.2,
+                        edgecolor='black', linewidth=0.5, zorder=13, label='Genuina')
 
         # LEYENDA MANUAL CON CONTEOS POR CLUSTER
         new_handles = []
         new_labels = []
         for i, c in enumerate(sorted(df['cluster'].unique())):
-            sub = df[df['cluster']==c]
-            cont_count = (sub['is_anomaly']==1).sum()
-            det_count = (sub['anomaly']==1).sum() if 'anomaly' in sub.columns else 0
-            gen_count = (sub['genuine_anomaly']==1).sum()
-            new_handles.append(plt.Line2D([0],[0], marker='o', color=palette[i], label=c, markersize=6, linestyle=''))
+            sub = df[df['cluster'] == c]
+            cont_count = (sub['is_anomaly'] == 1).sum()
+            det_count = (sub['anomaly'] == 1).sum() if 'anomaly' in sub.columns else 0
+            gen_count = (sub['genuine_anomaly'] == 1).sum()
+            new_handles.append(plt.Line2D([0], [0], marker='o', color=palette[i],
+                                          label=c, markersize=6, linestyle=''))
             new_labels.append(f"{c} [C:{cont_count} D:{det_count} G:{gen_count}]")
 
         # Añadir leyenda de clusters + anomalías
         if not cont.empty:
-            new_handles.append(plt.Line2D([0],[0], marker='X', color='white', markeredgecolor='black', markersize=6, linestyle=''))
+            new_handles.append(plt.Line2D([0], [0], marker='X', color='white',
+                                          markeredgecolor='black', markersize=6, linestyle=''))
             new_labels.append('Contaminada')
         if not gen.empty:
-            new_handles.append(plt.Line2D([0],[0], marker='o', color='red', markersize=6, linestyle=''))
+            new_handles.append(plt.Line2D([0], [0], marker='o', color='red',
+                                          markersize=6, linestyle=''))
             new_labels.append('Genuina')
 
         plt.axhline(0, color='black', linewidth=2, linestyle='--', alpha=0.7)
-        plt.title(f"Scores Temporales - {name}")
-        plt.xlabel("Datetime"); plt.ylabel("Score"); plt.xticks(rotation=45)
+        plt.title(f"{y_col.replace('_', ' ').title()} - {name}")
+        plt.xlabel("Datetime")
+        plt.ylabel(y_col.replace('_', ' ').title())
+        plt.xticks(rotation=45)
         plt.gca().xaxis.set_major_locator(plt.MaxNLocator(31))
-        plt.legend(new_handles, new_labels, title='Cluster / Anomalía', bbox_to_anchor=(1.05,1), loc='upper left')
+        plt.legend(new_handles, new_labels, title='Cluster / Anomalía',
+                   bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
+
+        # Guardar figura
         if SAVE_FIGURES: 
-            plt.savefig(os.path.join(ANOMALIES_IF_HORIZONTAL, f"{name}.png"), dpi=DPI, bbox_inches='tight')
+            plt.savefig(os.path.join(ANOMALIES_IF_HORIZONTAL, f"{name}.png"),
+                        dpi=DPI, bbox_inches='tight')
         plt.close()
-        print(f" [ GRÁFICO 3 ] {name}.png")
+        print(f"[ GRÁFICO 3 ] {name}.png")
+
+
+
 if PLOT_03_ENABLED:
     for file in all_files:
         df = pd.read_csv(file)
@@ -674,7 +708,7 @@ if PLOT_4_ENABLED:
         df_plot['sequence'] = df_plot.get('sequence', 0)
         df_plot['anomaly_score'] = df_plot.get('anomaly_score', 0)
 
-        plt.figure(figsize=LARGE_FIGURE_SIZE)
+        plt.figure(figsize=EXTRA_LARGE_FIGURE_SIZE)
         unique_clusters = df_plot['cluster'].unique()
         colors = sns.color_palette("tab10", len(unique_clusters))
 
@@ -891,6 +925,64 @@ if PLOT_6_ENABLED:
             plt.savefig(f"{CONTAMINATION_CLUSTER_HORIZONTAL}/{filename_only}", dpi=DPI, bbox_inches='tight')
         plt.close()
         print(f" [ GRÁFICO 6 ] {filename_only}")
+
+
+# PLOT 7: RI vs II - Relación entre número de detecciones y suma de scores
+if PLOT_7_ENABLED:
+    # CARGAR ARCHIVO DE INTERMEDIOS CON RI E II
+    intermediates_csv = '../../results/execution/06_results_ri_ii.csv'
+    if not os.path.exists(intermediates_csv):
+        print(f"[ GRÁFICO 7 ] No encontrado: {intermediates_csv}")
+    else:
+        df_ri_ii = pd.read_csv(intermediates_csv)
+        
+        # Asegurar columnas necesarias
+        if 'ri' not in df_ri_ii.columns or 'ii' not in df_ri_ii.columns:
+            print(f"[ GRÁFICO 7 ] Faltan columnas 'ri' o 'ii' en {intermediates_csv}")
+        else:
+            # Ordenar por II descendente
+            df_plot = df_ri_ii.sort_values('ii', ascending=False).copy()
+            
+            # Crear figura
+            plt.figure(figsize=LARGE_FIGURE_SIZE)
+            
+            # Scatter: tamaño proporcional a RI, color por II
+            sizes = np.interp(df_plot['ri'], (df_plot['ri'].min(), df_plot['ri'].max()), (50, 400))
+            sc = plt.scatter(df_plot['ii'], df_plot['ri'], 
+                            c=df_plot['ii'], cmap='plasma', s=sizes, alpha=0.7, edgecolors='black', linewidth=0.5)
+            
+            # Barra de color
+            cbar = plt.colorbar(sc)
+            cbar.set_label('II (Suma de anomaly_score)', rotation=270, labelpad=15)
+            
+            # Etiquetas de puntos con mayor II
+            top_n = 10
+            for _, row in df_plot.head(top_n).iterrows():
+                plt.annotate(f"{int(row['global_index'])}", 
+                            (row['ii'], row['ri']),
+                            xytext=(5, 5), textcoords='offset points',
+                            fontsize=8, color='darkred', weight='bold')
+            
+            # Líneas de referencia
+            plt.axhline(df_plot['ri'].median(), color='gray', linestyle='--', alpha=0.6, label=f"Mediana RI = {df_plot['ri'].median():.1f}")
+            plt.axvline(df_plot['ii'].median(), color='gray', linestyle='--', alpha=0.6, label=f"Mediana II = {df_plot['ii'].median():.1f}")
+            
+            # Configuración
+            plt.title('RI vs II: Detecciones (RI) y Puntuación Acumulada (II) por Anomalía Global', fontsize=14, pad=20)
+            plt.xlabel('II (Suma de anomaly_score en particiones donde se detecta)')
+            plt.ylabel('RI (Número de particiones que detectan la anomalía)')
+            plt.grid(alpha=0.3)
+            plt.legend()
+            
+            # Ajustar layout
+            plt.tight_layout()
+            
+            # Guardar
+            if SAVE_FIGURES:
+                os.makedirs(IR_II, exist_ok=True)
+                plt.savefig(os.path.join(IR_II, '7_ri_vs_ii_scatter.png'), dpi=DPI, bbox_inches='tight')
+            plt.close()
+            print(f" [ GRÁFICO 7 ] 7_ri_ii.png")
 
 
 # PLOT 10: CANTIDAD DE ANOMALÍAS Y GENUINAS POR CLUSTER (mejorado con doble_anomaly)
